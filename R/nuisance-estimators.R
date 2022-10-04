@@ -2,7 +2,7 @@
 #'
 #' @description \code{fit_prop_score()} estimates the propensity score over the
 #'   \code{train_data} dataset. The estimator used for this estimation is based
-#'   on the \code{learners} argument, and the confounders considered are
+#'   on the \code{learners} argument, and the covariates considered are
 #'   specified by the \code{confounders} argument.
 #'
 #' @param train_data A \code{data.table} containing the observed data.
@@ -76,8 +76,8 @@ fit_prop_score <- function(
 #' @description \code{fit_cond_outcome()} estimates the conditional outcome,
 #'   based on the exposure and confounders, over the \code{train_data} dataset.
 #'   The estimator used for this estimation is based on the \code{learners}
-#'   argument, and the confounders considered are specified by the
-#'   \code{confounders} argument.
+#'   argument, and the covariates considered are specified by the
+#'   \code{confounders} and \code{exposure} arguments.
 #'
 #' @param train_data A \code{data.table} containing the observed data.
 #'   \code{train_data} is formatted by \code{\link{unihtee}()}.
@@ -93,7 +93,7 @@ fit_prop_score <- function(
 #'   baseline covariates.
 #'
 #' @return A named \code{list} of two elements. (1) \code{"estimates"}, the
-#'   propensity score estimates for each observation in \code{valid_data}, if
+#'   expected conditional outcome for each observation in \code{valid_data}, if
 #'   specified, or \code{train_data} otherwise. (2) \code{"fit"}, the trained
 #'   \code{\link[sl3]{Stack}} or learner.
 #'
