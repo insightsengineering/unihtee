@@ -141,7 +141,8 @@ fit_cond_outcome <- function(
   }
 
   return(list(
-    "estimates" = cond_outcome_est
+    "estimates" = cond_outcome_est,
+    "fit" = cond_outcome_fit
   ))
 
 }

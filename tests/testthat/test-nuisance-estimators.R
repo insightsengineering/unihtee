@@ -114,3 +114,25 @@ test_that(
     # make sure that the MSE is approximately zero
     expect_equal(mean((fit$estimates - valid_dt$y)^2), 0, tolerance = 0.01)
 })
+
+test_that(
+  "fit_cond_outcome() outputs the sl3 lrnr object fit on the training data",
+{
+
+    library(sl3)
+
+    # generate data
+    set.seed(5123)
+    dt <- generate_test_data(n_obs = 200)
+
+    # fit the propensity score
+    fit <- fit_cond_outcome(train_data = dt,
+                            valid_data = NULL,
+                            learners = sl3::Lrnr_glm_fast$new(),
+                            exposure = "a",
+                            confounders = c("w_1", "w_2", "w_3"),
+                            outcome = "y")
+
+    expect_equal(class(fit$fit), c("Lrnr_glm_fast", "Lrnr_base", "R6"))
+
+})
