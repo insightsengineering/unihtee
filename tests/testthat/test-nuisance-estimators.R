@@ -48,7 +48,7 @@ test_that(
 test_that(
   paste("fit_prop_score() outputs a vector of estimates that is similar to",
         "ground truth when a validation set is provided"),
-{
+  {
 
     library(sl3)
 
@@ -68,4 +68,49 @@ test_that(
     expect_equal(mean((fit$estimates - valid_dt$prop_score)^2), 0,
                  tolerance = 0.01)
 
+})
+
+test_that(
+  paste("fit_cond_est() returns a vector of estimates that is similar to",
+        "ground truth when no validation set is provided"),
+  {
+    library(sl3)
+
+    # generate data
+    set.seed(12312)
+    dt <- generate_test_data(n_obs = 200)
+
+    # fit the propensity score
+    fit <- fit_cond_outcome(train_data = dt,
+                          valid_data = NULL,
+                          learners = sl3::Lrnr_glm_fast$new(),
+                          exposure = "a",
+                          confounders = c("w_1", "w_2", "w_3"),
+                          outcome = "y")
+
+    # make sure that the MSE is approximately zero
+    expect_equal(mean((fit$estimates - dt$y)^2), 0, tolerance = 0.01)
+})
+
+test_that(
+  paste("fit_cond_est() returns a vector of estimates that is similar to",
+        "ground truth when a validation set is provided"),
+  {
+    library(sl3)
+
+    # generate data
+    set.seed(62412)
+    train_dt <- generate_test_data(n_obs = 400)
+    valid_dt <- generate_test_data(n_obs = 200)
+
+    # fit the propensity score
+    fit <- fit_cond_outcome(train_data = train_dt,
+                          valid_data = valid_dt,
+                          learners = sl3::Lrnr_glm_fast$new(),
+                          exposure = "a",
+                          confounders = c("w_1", "w_2", "w_3"),
+                          outcome = "y")
+
+    # make sure that the MSE is approximately zero
+    expect_equal(mean((fit$estimates - valid_dt$y)^2), 0, tolerance = 0.01)
 })
