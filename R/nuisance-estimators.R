@@ -50,7 +50,8 @@ fit_prop_score <- function(
   prop_score_est <- prop_score_fit$predict()
 
   return(list(
-    "estimates" = prop_score_est
+    "estimates" = prop_score_est,
+    "fit" = prop_score_fit
   ))
 
 }
