@@ -44,3 +44,28 @@ test_that(
     expect_equal(class(fit$fit), c("Lrnr_glm_fast", "Lrnr_base", "R6"))
 
 })
+
+test_that(
+  paste("fit_prop_score() outputs a vector of estimates that is similar to",
+        "ground truth when a validation set is provided"),
+{
+
+    library(sl3)
+
+    # generate data
+    set.seed(5123)
+    train_dt <- generate_test_data(n_obs = 400)
+    valid_dt <- generate_test_data(n_obs = 200)
+
+    # fit the propensity score
+    fit <- fit_prop_score(train_data = train_dt,
+                          valid_data = valid_dt,
+                          learners = sl3::Lrnr_glm_fast$new(),
+                          exposure = "a",
+                          confounders = c("w_1", "w_2", "w_3"))
+
+    # make sure that the MSE is approximately zero
+    expect_equal(mean((fit$estimates - valid_dt$prop_score)^2), 0,
+                 tolerance = 0.01)
+
+})

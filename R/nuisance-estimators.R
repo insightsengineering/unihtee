@@ -46,8 +46,25 @@ fit_prop_score <- function(
   # estimate the propensity score
   prop_score_fit <- learners$train(train_data_task)
 
-  # extract the propensity score predictions for the training data
-  prop_score_est <- prop_score_fit$predict()
+  if (is.null(valid_data)) {
+
+    # extract the propensity score predictions for the training data
+    prop_score_est <- prop_score_fit$predict()
+
+  } else {
+
+    # construct trask for validation dataset prediction
+    valid_data_task <- sl3::sl3_Task$new(
+      data = valid_data,
+      covariates = confounders,
+      outcome = exposure,
+      outcome_type = "binomial"
+    )
+
+    # compute the propensity score estimates on the validation dataset
+    prop_score_est <- prop_score_fit$predict(valid_data_task)
+
+  }
 
   return(list(
     "estimates" = prop_score_est,
