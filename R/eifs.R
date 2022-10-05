@@ -1,18 +1,36 @@
 utils::globalVariables(names = c("a", ".SD"))
-#' .. content for \description{} (no empty lines) ..
+#' @title Uncentered Efficient Influence Function Computer
 #'
-#' .. content for \details{} ..
-#' @title
-#' @param data
-#' @param confounders
-#' @param exposure
-#' @param outcome
-#' @param modifiers
-#' @param prop_score_fit
-#' @param cond_outcome_fit
-#' @return
+#' @description \code{uncentered_eif()} computes thei efficient influence
+#'   function for the chosen parameter using the already estimated nuisance
+#'   parameters. If certain nuisance parameters are known, such as propensity
+#'   scores in a randomized control trial, then they may be input directly into
+#'   this function.
+#'
+#' @param data A \code{data.table} containing the observed data.
+#'   \code{train_data} is formatted by \code{\link{unihtee}()}.
+#' @param confounders A \code{character} vector of column names corresponding to
+#'   baseline covariates.
+#' @param exposure A \code{character} corresponding to the exposure variable.
+#' @param outcome A \code{character} corresponding to the outcome variable.
+#' @param modifiers A \code{character} vector of columns names corresponding to
+#'   the suspected effect modifiers. This vector must be a subset of
+#'   \code{confounders}.
+#' @param prop_score_fit A \code{list} output by the
+#'   \code{\link{fit_prop_score}()} function.
+#' @param prop_score_values A \code{numeric} vector corresponding to the (known)
+#'   propensity score values for each observation in \code{data}.
+#' @param cond_outcome_fit A \code{list} output by the
+#'   \code{\link{fit_cond_outcome}()} function.
+#'
+#' @return A \code{data.table} whose columns are the uncentered efficient
+#'   influence functions of each variable in \code{modifiers}. The rows
+#'   correspond to the observations of \code{data}.
+#'
 #' @importFrom data.table copy as.data.table
-#' @author boileap2
+#'
+#' @keywords internal
+
 uncentered_eif <- function(
   data,
   confounders,
@@ -24,6 +42,7 @@ uncentered_eif <- function(
   cond_outcome_fit
 ) {
 
+  # specify the covariates used to predict the potential outcomes
   covariates <- c(confounders, exposure)
 
   # create dataset where all observations are exposed
@@ -58,7 +77,7 @@ uncentered_eif <- function(
   cond_outcome_resid <- data[[outcome]] - cond_outcome_fit$estimates
 
   # compute the inverse probability weights
-  prop_scores <- ifelse(is.null(prop_score_fit),
+  prop_scores <- ifelse(!is.null(prop_score_values),
                         prop_score_values, prop_score_fit$estimates)
   ipws <- (2 * data[[exposure]] - 1) /
     (data[[exposure]] * prop_scores +
