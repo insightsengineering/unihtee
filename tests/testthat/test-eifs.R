@@ -36,16 +36,15 @@ test_that(
       confounders = c("w_1", "w_2", "w_3"),
       exposure = "a",
       outcome = "y",
-      modifiers = "w_3",
+      modifiers = c("w_1", "w_3"),
       prop_score_fit = prop_score_fit,
       prop_score_values = NULL,
       cond_outcome_fit = cond_outcome_fit
     )
 
-    # note that the true parameter value is equal to 1
-    param <- 1
-
-  expect_equal(mean(eif$w_3 - param), 0, tolerance = 0.005)
+    # note that the true parameter values are equal to 0,1 for W_1, W_3
+    expect_equal(eif[, sapply(.SD, mean)], c("w_1" = 0, "w_3" = 1),
+                 tolerance = 0.005)
 })
 
 test_that(
@@ -74,14 +73,13 @@ test_that(
       confounders = c("w_1", "w_2", "w_3"),
       exposure = "a",
       outcome = "y",
-      modifiers = "w_3",
+      modifiers = c("w_1", "w_3"),
       prop_score_fit = NULL,
       cond_outcome_fit = cond_outcome_fit,
       prop_score_values = dt$prop_score
     )
 
-    # note that the true parameter value is equal to 1
-    param <- 1
-
-  expect_equal(mean(eif$w_3 - param), 0, tolerance = 0.005)
+    # note that the true parameter values are equal to 0,1 for W_1, W_3
+    expect_equal(eif[, sapply(.SD, mean)], c("w_1" = 0, "w_3" = 1),
+                 tolerance = 0.005)
 })
