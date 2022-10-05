@@ -20,6 +20,7 @@ uncentered_eif <- function(
   outcome,
   modifiers,
   prop_score_fit,
+  prop_score_values,
   cond_outcome_fit
 ) {
 
@@ -29,45 +30,47 @@ uncentered_eif <- function(
   exp_data <- data.table::copy(data)
   exp_data[[exposure]] <- 1
 
-  ## # create sl3 task for exposed dataset
+  # create sl3 task for exposed dataset
   exp_task <- sl3::sl3_Task$new(
     data = exp_data,
     covariates = covariates,
     outcome = outcome
   )
 
-  ## # predict outcomes of exposed dataset
+  # predict outcomes of exposed dataset
   exp_outcome <- cond_outcome_fit$fit$predict(exp_task)
 
-  ## # create dataset where all observations are non-exposed
+  # create dataset where all observations are non-exposed
   noexp_data <- data.table::copy(data)
   noexp_data[[exposure]] <- 0
 
-  ## # create sl3 task for non-exposed dataset
+  # create sl3 task for non-exposed dataset
   noexp_task <- sl3::sl3_Task$new(
     data = noexp_data,
     covariates = covariates,
     outcome = outcome
   )
 
-  ## # predict outcomes of non-exposed dataset
+  # predict outcomes of non-exposed dataset
   noexp_outcome <- cond_outcome_fit$fit$predict(noexp_task)
 
-  ## # compute conditional outcome residuals
+  # compute conditional outcome residuals
   cond_outcome_resid <- data[[outcome]] - cond_outcome_fit$estimates
 
-  ## # compute the inverse probability weights
+  # compute the inverse probability weights
+  prop_scores <- ifelse(is.null(prop_score_fit),
+                        prop_score_values, prop_score_fit$estimates)
   ipws <- (2 * data[[exposure]] - 1) /
-    (data[[exposure]] * prop_score_fit$estimates +
-      (1 - data[[exposure]]) * (1 - prop_score_fit$estimates))
+    (data[[exposure]] * prop_scores +
+      (1 - data[[exposure]]) * (1 - prop_scores))
 
-  ## # compute augmented inverse probability weights outcomes
+  # compute augmented inverse probability weights outcomes
   aipws <- ipws * cond_outcome_resid + exp_outcome - noexp_outcome
 
-  ## # compute that variance of the effect modifiers
+  # compute that variance of the effect modifiers
   modifier_vars <- sapply(modifiers, function(modifier) var(data[[modifier]]))
 
-  ## # vectorized uncentered eifs
+  # vectorized uncentered eifs
   modifiers_dt <- lapply(
     modifiers,
     function(modifier) {
