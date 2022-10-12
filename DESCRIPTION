@@ -1,0 +1,26 @@
+Package: unihtee
+Title: Univariate Heterogeneous Treatment Effect Estimation
+Version: 0.0.0.9000
+Authors@R:
+    person("Philippe", "Boileau", , "philippe_boileau@berkeley.edu",
+    role = c("aut", "cre"), comment = c(ORCID = "0000-0002-4850-2507"))
+Description: unihtee implements nonparametreic inference procedures for
+  treatment effect modifition variable importance parameters. These variable
+  importance parameters reflect individual confounders\' capacity for treatment
+  effect modification and are suited for high-dimensional data with potentially
+  complex correlation structures.
+License: Apache License (>= 2)
+Encoding: UTF-8
+Imports:
+    data.table,
+    sl3
+Suggests:
+    here,
+    speedglm,
+    ranger,
+    testthat (>= 3.0.0)
+Remotes:
+    github::tlverse/sl3
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.1
+Config/testthat/edition: 3
