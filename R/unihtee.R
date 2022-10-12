@@ -1,22 +1,38 @@
 utils::globalVariables(c("..to_keep", ".SD", "p_value"))
 #' @title Univariate Heterogeneous Treatment Effect Modifier Estimator
 #'
-#' @description
+#' @description \code{unihtee()} estimates treatment effect modifiers variable
+#'   importance parameters (TEM VIPs). These TEM VIPs are defined on the risk
+#'   difference or relative risk scales and can be estimated using one step or
+#'   targeted maximum likelihood estimators.
 #'
-#' @details
+#' @param data A \code{data.table} containing the observed data.
+#' @param confounders A \code{character} vector of column names corresponding to
+#'   baseline covariates.
+#' @param modifiers A \code{character} vector of columns names corresponding to
+#'   the suspected effect modifiers. This vector must be a subset of
+#'   \code{confounders}.
+#' @param exposure A \code{character} corresponding to the exposure variable.
+#' @param outcome A \code{character} corresponding to the outcome variable.
+#' @param cond_outcome_estimator A \code{\link[sl3]{Stack}}, or other learner
+#'   class (inheriting from \code{\link[sl3]{Lrnr_base}}), containing a set of
+#'   learners from \pkg{sl3} to estimate the propensity score model. Defaults to
+#'   a generalized linear model with one- and two- way interactions among all
+#'   \code{confounders} and \code{exposure} variables.
+#' @param prop_score_estimator A \code{\link[sl3]{Stack}}, or other learner
+#'   class (inheriting from \code{\link[sl3]{Lrnr_base}}), containing a set of
+#'   learners from \pkg{sl3} to estimate the propensity score model. Defaults to
+#'   a generalized linear model with one- and two- way interactions among all
+#'   \code{confounders} variables.
+#' @param prop_score_values A \code{numeric} vector corresponding to the (known)
+#'   propensity score values for each observation in \code{data}.
 #'
-#' @param data
-#' @param confounders
-#' @param modifiers
-#' @param exposure
-#' @param outcome
-#' @param cond_outcome_estimator
-#' @param prop_score_estimator
-#' @param prop_score_values
-#'
-#' @return
+#' @return A \code{data.table} containing the effect estimates and (adjusted)
+#'   p-values of the \code{modifiers}. The suspected treatment effect modifiers
+#'   ordered according to ascending p-values.
 #'
 #' @importFrom data.table as.data.table ".."
+
 unihtee <- function(data,
                     confounders,
                     modifiers,
