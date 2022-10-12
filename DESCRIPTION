@@ -9,15 +9,15 @@ Description: unihtee implements nonparametreic inference procedures for
   importance parameters reflect individual confounders\' capacity for treatment
   effect modification and are suited for high-dimensional data with potentially
   complex correlation structures.
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+License: Apache License (>= 2)
 Encoding: UTF-8
 Imports:
     data.table,
-    sl3,
-    speedglm
+    sl3
 Suggests:
     here,
+    speedglm,
+    ranger,
     testthat (>= 3.0.0)
 Remotes:
     github::tlverse/sl3

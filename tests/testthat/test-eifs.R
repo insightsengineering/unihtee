@@ -1,5 +1,4 @@
-library(here)
-source(here("tests", "testthat", "testing-utils.R"))
+source("testing-utils.R")
 
 test_that(
   paste("uncentered_eif() minus true risk diff parameter value has a mean",

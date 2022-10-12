@@ -1,5 +1,4 @@
-library(here)
-source(here("tests", "testthat", "testing-utils.R"))
+source("testing-utils.R")
 
 test_that(
   "test_hypotheses() outputs a data.table with one row per modifier", {

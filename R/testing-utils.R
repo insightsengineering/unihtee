@@ -16,6 +16,7 @@ utils::globalVariables(c("modifier", "estimate", "var", "se",
 #' @return A \code{data.table} containing the hypothesis testing results.
 #'
 #' @importFrom data.table melt ":="
+#' @importFrom stats pnorm p.adjust
 #'
 #' @keywords internal
 
@@ -42,10 +43,11 @@ test_hypotheses <- function(n_obs, estimates, var_estimates) {
   # compute the standard errors, Z-score, p values and adjusted p values
   test_dt[, se := sqrt(var / n_obs), by = modifier]
   test_dt[, z := estimate / se, by = modifier]
-  test_dt[, p_value := (2 * min(pnorm(z), 1 - pnorm(z))), by = modifier]
+  test_dt[, p_value := (2 * min(stats::pnorm(z), 1 - stats::pnorm(z))),
+          by = modifier]
   test_dt[, ci_lower := estimate - 1.96 * se, by = modifier]
   test_dt[, ci_upper := estimate + 1.96 * se, by = modifier]
-  test_dt[, p_value_fdr := p.adjust(p_value, method = "BH")]
+  test_dt[, p_value_fdr := stats::p.adjust(p_value, method = "BH")]
   test_dt[, var := NULL]
 
   return(test_dt)

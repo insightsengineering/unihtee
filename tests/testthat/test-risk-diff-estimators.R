@@ -1,5 +1,4 @@
-library(here)
-source(here("tests", "testthat", "testing-utils.R"))
+source("testing-utils.R")
 
 test_that(
   "one_step_estimator() produces accurate estimates without cross-fitting", {

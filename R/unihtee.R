@@ -31,7 +31,7 @@ utils::globalVariables(c("..to_keep", ".SD", "p_value"))
 #'   p-values of the \code{modifiers}. The suspected treatment effect modifiers
 #'   ordered according to ascending p-values.
 #'
-#' @importFrom data.table as.data.table ".."
+#' @importFrom data.table as.data.table
 
 unihtee <- function(data,
                     confounders,

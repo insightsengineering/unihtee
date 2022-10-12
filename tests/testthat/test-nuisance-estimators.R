@@ -1,5 +1,4 @@
-library(here)
-source(here("tests", "testthat", "testing-utils.R"))
+source("testing-utils.R")
 
 test_that(
   paste("fit_prop_score() outputs a vector of estimates that is similar to",
