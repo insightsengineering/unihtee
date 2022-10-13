@@ -15,6 +15,30 @@ uncentered_eif(
   cond_outcome_fit
 )
 }
+\arguments{
+\item{data}{A \code{data.table} containing the observed data.
+\code{train_data} is formatted by \code{\link{unihtee}()}.}
+
+\item{confounders}{A \code{character} vector of column names corresponding to
+baseline covariates.}
+
+\item{exposure}{A \code{character} corresponding to the exposure variable.}
+
+\item{outcome}{A \code{character} corresponding to the outcome variable.}
+
+\item{modifiers}{A \code{character} vector of columns names corresponding to
+the suspected effect modifiers. This vector must be a subset of
+\code{confounders}.}
+
+\item{prop_score_fit}{A \code{list} output by the
+\code{\link{fit_prop_score}()} function.}
+
+\item{prop_score_values}{A \code{numeric} vector corresponding to the (known)
+propensity score values for each observation in \code{data}.}
+
+\item{cond_outcome_fit}{A \code{list} output by the
+\code{\link{fit_cond_outcome}()} function.'}
+}
 \value{
 A \code{data.table} whose columns are the uncentered efficient
 influence functions of each variable in \code{modifiers}. The rows
