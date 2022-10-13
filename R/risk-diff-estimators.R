@@ -58,55 +58,12 @@ tml_estimator <- function(
   cond_outcome_fit
 ) {
 
-  # specify the covariates used to predict the potential outcomes
-  covariates <- c(confounders, exposure)
-
-  # create dataset where all observations are exposed
-  exp_data <- data.table::copy(data)
-  exp_data[[exposure]] <- 1
-
-  # create sl3 tasks for exposed dataset
-  exp_co_task <- sl3::sl3_Task$new(
-    data = exp_data,
-    covariates = covariates,
-    outcome = outcome
-  )
-  exp_ps_task <- sl3::sl3_Task$new(
-    data = exp_data,
-    covariates = confounders,
-    outcome = exposure
-  )
-
-  # predict outcomes and ps scores of exposed dataset
-  exp_outcome <- cond_outcome_fit$fit$predict(exp_co_task)
-  exp_ps <- prop_score_fit$fit$predict(exp_ps_task)
-
-  # create dataset where all observations are non-exposed
-  noexp_data <- data.table::copy(data)
-  noexp_data[[exposure]] <- 0
-
-  # create sl3 tasks for non-exposed dataset
-  noexp_co_task <- sl3::sl3_Task$new(
-    data = noexp_data,
-    covariates = covariates,
-    outcome = outcome
-  )
-  noexp_ps_task <- sl3::sl3_Task$new(
-    data = noexp_data,
-    covariates = confounders,
-    outcome = exposure
-  )
-
-  # predict outcomes of non-exposed dataset
-  noexp_outcome <- cond_outcome_fit$fit$predict(noexp_co_task)
-  noexp_ps <- prop_score_fit$fit$predict(noexp_ps_task)
-
   # compute that partial clever covariate
   h_partial <- (2 * data[[exposure]] - 1) /
     (data[[exposure]] * prop_score_fit$estimates +
      (1 - data[[exposure]]) * (1 - prop_score_fit$estimates))
-  h_partial_1 <- 1 / exp_ps
-  h_partial_0 <- -1 / noexp_ps
+  h_partial_1 <- 1 / prop_score_fit$estimates
+  h_partial_0 <- -1 / (1 - prop_score_fit$estimates)
 
   # compute TML estimate
   estimates <- lapply(
@@ -123,9 +80,11 @@ tml_estimator <- function(
               offset = stats::qlogis(cond_outcome_fit$estimates),
             family = "quasibinomial")
       )
-      q_1_star <- stats::plogis(stats::qlogis(exp_outcome) + epsilon * mod_h_1)
+      q_1_star <- stats::plogis(
+        stats::qlogis(cond_outcome_fit$exp_estimates) + epsilon * mod_h_1
+      )
       q_0_star <- stats::plogis(
-        stats::qlogis(noexp_outcome) + epsilon * mod_h_0
+        stats::qlogis(cond_outcome_fit$noexp_estimates) + epsilon * mod_h_0
       )
 
       # compute the plugin estimate with the update cond outcome estimates

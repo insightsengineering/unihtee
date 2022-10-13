@@ -92,12 +92,18 @@ fit_prop_score <- function(
 #' @param confounders A \code{character} vector of column names corresponding to
 #'   baseline covariates.
 #'
-#' @return A named \code{list} of two elements. (1) \code{"estimates"}, the
+#' @return A named \code{list} of four elements. (1) \code{"estimates"}, the
 #'   expected conditional outcome for each observation in \code{valid_data}, if
 #'   specified, or \code{train_data} otherwise. (2) \code{"fit"}, the trained
-#'   \code{\link[sl3]{Stack}} or learner.
+#'   \code{\link[sl3]{Stack}} or learner. (3) \code{"exp_estimates"}, the
+#'   expected conditional outcome for each observation in \code{valid_data}, if
+#'   specified, or \code{train_data} otherwise, had these observations been
+#'   exposed. (4) \code{"noexp_estimates"}, the expected conditional outcome for
+#'   each observation in \code{valid_data}, if specified, or \code{train_data}
+#'   otherwise, had these observations been exposed.
 #'
 #' @importFrom sl3 sl3_Task
+#' @importFrom data.table copy
 #'
 #' @keywords internal
 fit_cond_outcome <- function(
@@ -124,8 +130,12 @@ fit_cond_outcome <- function(
 
   if (is.null(valid_data)) {
 
-    # extract the propensity score predictions for the training data
+    # extract the cond outcome predictions for the training data
     cond_outcome_est <- cond_outcome_fit$predict()
+
+    # copy the train data to the potential outcome datasets
+    exp_data <- data.table::copy(train_data)
+    noexp_data <- data.table::copy(train_data)
 
   } else {
 
@@ -136,13 +146,36 @@ fit_cond_outcome <- function(
       outcome = outcome
     )
 
-   # extract the propensity score predictions for the valid data
+   # extract the cond outcome predictions for the valid data
     cond_outcome_est <- cond_outcome_fit$predict(valid_data_task)
+
+    # copy the train data to the potential outcome datasets
+    exp_data <- data.table::copy(valid_data)
+    noexp_data <- data.table::copy(valid_data)
   }
+
+  # estimate the potential outcomes
+  exp_data[[exposure]] <- 1
+  exp_data_task <- sl3::sl3_Task$new(
+      data = exp_data,
+      covariates = covariates,
+      outcome = outcome
+  )
+  exp_cond_outcome_est <- cond_outcome_fit$predict(exp_data_task)
+  noexp_data[[exposure]] <- 0
+  noexp_data_task <- sl3::sl3_Task$new(
+      data = noexp_data,
+      covariates = covariates,
+      outcome = outcome
+  )
+  noexp_cond_outcome_est <- cond_outcome_fit$predict(noexp_data_task)
+
 
   return(list(
     "estimates" = cond_outcome_est,
-    "fit" = cond_outcome_fit
+    "fit" = cond_outcome_fit,
+    "exp_estimates" = exp_cond_outcome_est,
+    "noexp_estimates" = noexp_cond_outcome_est
   ))
 
 }

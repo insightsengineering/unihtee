@@ -7,6 +7,21 @@ utils::globalVariables(names = c("a", ".SD"))
 #'   scores in a randomized control trial, then they may be input directly into
 #'   this function.
 #'
+#' @param data A \code{data.table} containing the observed data.
+#'   \code{train_data} is formatted by \code{\link{unihtee}()}.
+#' @param confounders A \code{character} vector of column names corresponding to
+#'   baseline covariates.
+#' @param exposure A \code{character} corresponding to the exposure variable.
+#' @param outcome A \code{character} corresponding to the outcome variable.
+#' @param modifiers A \code{character} vector of columns names corresponding to
+#'   the suspected effect modifiers. This vector must be a subset of
+#'   \code{confounders}.
+#' @param prop_score_fit A \code{list} output by the
+#'   \code{\link{fit_prop_score}()} function.
+#' @param prop_score_values A \code{numeric} vector corresponding to the (known)
+#'   propensity score values for each observation in \code{data}.
+#' @param cond_outcome_fit A \code{list} output by the
+#'   \code{\link{fit_cond_outcome}()} function.'
 #'
 #' @return A \code{data.table} whose columns are the uncentered efficient
 #'   influence functions of each variable in \code{modifiers}. The rows
@@ -27,37 +42,6 @@ uncentered_eif <- function(
   cond_outcome_fit
 ) {
 
-  # specify the covariates used to predict the potential outcomes
-  covariates <- c(confounders, exposure)
-
-  # create dataset where all observations are exposed
-  exp_data <- data.table::copy(data)
-  exp_data[[exposure]] <- 1
-
-  # create sl3 task for exposed dataset
-  exp_task <- sl3::sl3_Task$new(
-    data = exp_data,
-    covariates = covariates,
-    outcome = outcome
-  )
-
-  # predict outcomes of exposed dataset
-  exp_outcome <- cond_outcome_fit$fit$predict(exp_task)
-
-  # create dataset where all observations are non-exposed
-  noexp_data <- data.table::copy(data)
-  noexp_data[[exposure]] <- 0
-
-  # create sl3 task for non-exposed dataset
-  noexp_task <- sl3::sl3_Task$new(
-    data = noexp_data,
-    covariates = covariates,
-    outcome = outcome
-  )
-
-  # predict outcomes of non-exposed dataset
-  noexp_outcome <- cond_outcome_fit$fit$predict(noexp_task)
-
   # compute conditional outcome residuals
   cond_outcome_resid <- data[[outcome]] - cond_outcome_fit$estimates
 
@@ -69,7 +53,8 @@ uncentered_eif <- function(
       (1 - data[[exposure]]) * (1 - prop_scores))
 
   # compute augmented inverse probability weights outcomes
-  aipws <- ipws * cond_outcome_resid + exp_outcome - noexp_outcome
+  aipws <- ipws * cond_outcome_resid + cond_outcome_fit$exp_estimates -
+    cond_outcome_fit$noexp_estimates
 
   # compute that variance of the effect modifiers
   modifier_vars <- sapply(modifiers, function(modifier) var(data[[modifier]]))
