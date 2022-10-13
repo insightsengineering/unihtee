@@ -2,7 +2,7 @@
 library(data.table)
 
 # randomly generates a basic dataset for testing
-generate_test_data <- function(n_obs = 200) {
+generate_test_data <- function(n_obs = 200, outcome_type = "continuous") {
 
   # confounders
   w_1 <- rnorm(n = n_obs)
@@ -13,9 +13,18 @@ generate_test_data <- function(n_obs = 200) {
   prop_score <- plogis(w_1 + w_2)
   a <- rbinom(n = n_obs, size = 1, prob = prop_score)
 
-  # (potential) outcomes
-  y_1 <- rnorm(n = n_obs, mean = w_1 + w_2 + w_3 + 1, sd = 0.1)
-  y_0 <- rnorm(n = n_obs, mean = w_1 + w_2, sd = 0.1)
+  if (outcome_type == "continuous") {
+    # (potential) outcomes
+    y_1 <- rnorm(n = n_obs, mean = w_1 + w_2 + w_3 + 1, sd = 0.1)
+    y_0 <- rnorm(n = n_obs, mean = w_1 + w_2, sd = 0.1)
+  } else if (outcome_type == "binary") {
+    resp_prob_1 <- plogis(2 + 10 * w_3)
+    resp_prob_0 <- plogis(1)
+    y_1 <- sapply(resp_prob_1, function(x) rbinom(1, 1, x))
+    y_0 <- sapply(resp_prob_0, function(x) rbinom(1, 1, x))
+  }
+
+  # outcome
   y <- a * y_1 + (1 - a) * y_0
 
   # assemble the data.table
