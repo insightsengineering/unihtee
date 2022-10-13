@@ -50,8 +50,12 @@ uncentered_eif <- function(
   cond_outcome_resid <- data[[outcome]] - cond_outcome_fit$estimates
 
   # compute the inverse probability weights
-  prop_scores <- ifelse(!is.null(prop_score_values),
-                        prop_score_values, prop_score_fit$estimates)
+  # NOTE: Fix this!!
+  if (!is.null(prop_score_values)) {
+    prop_scores <- prop_score_values
+  } else {
+    prop_scores <- prop_score_fit$estimates
+  }
   ipws <- (2 * data[[exposure]] - 1) /
     (data[[exposure]] * prop_scores +
       (1 - data[[exposure]]) * (1 - prop_scores))
@@ -61,9 +65,16 @@ uncentered_eif <- function(
     aipws <- ipws * cond_outcome_resid + cond_outcome_fit$exp_estimates -
       cond_outcome_fit$noexp_estimates
   } else if (type == "relative risk") {
-    aipws <- ipws * cond_outcome_resid / cond_outcome_fit$estimates +
-      log(cond_outcome_fit$exp_estimates) -
-      log(cond_outcome_fit$noexp_estimates)
+    # NOTE: Make sure not to divide by zero... or take log of zero
+    eps <- 1e-10
+    estimates <- cond_outcome_fit$estimates
+    estimates[estimates < eps] <- eps
+    exp_estimates <- cond_outcome_fit$exp_estimates
+    exp_estimates[exp_estimates < eps] <- eps
+    noexp_estimates <- cond_outcome_fit$noexp_estimates
+    noexp_estimates[noexp_estimates < eps] <- eps
+    aipws <- ipws * cond_outcome_resid / estimates +
+      log(exp_estimates) - log(noexp_estimates)
   }
 
   # compute that variance of the effect modifiers

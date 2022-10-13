@@ -82,7 +82,7 @@ test_that(
 
     # note that the true parameter values are equal to 0,1 for W_1, W_3
     expect_equal(eif[, sapply(.SD, mean)], c("w_1" = 0, "w_3" = 1),
-                 tolerance = 0.005)
+                 tolerance = 0.01)
 })
 
 test_that(
