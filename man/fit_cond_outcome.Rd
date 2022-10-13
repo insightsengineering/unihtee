@@ -33,10 +33,15 @@ learners from \pkg{sl3} to estimate the propensity score model.}
 baseline covariates.}
 }
 \value{
-A named \code{list} of two elements. (1) \code{"estimates"}, the
+A named \code{list} of four elements. (1) \code{"estimates"}, the
 expected conditional outcome for each observation in \code{valid_data}, if
 specified, or \code{train_data} otherwise. (2) \code{"fit"}, the trained
-\code{\link[sl3]{Stack}} or learner.
+\code{\link[sl3]{Stack}} or learner. (3) \code{"exp_estimates"}, the
+expected conditional outcome for each observation in \code{valid_data}, if
+specified, or \code{train_data} otherwise, had these observations been
+exposed. (4) \code{"noexp_estimates"}, the expected conditional outcome for
+each observation in \code{valid_data}, if specified, or \code{train_data}
+otherwise, had these observations been exposed.
 }
 \description{
 \code{fit_cond_outcome()} estimates the conditional outcome,
