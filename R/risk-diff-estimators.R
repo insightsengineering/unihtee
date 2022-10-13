@@ -62,6 +62,17 @@ tml_estimator <- function(
   cond_outcome_fit
 ) {
 
+  # truncate estimates if necessary
+  eps <- 1e-10
+  estimates <- cond_outcome_fit$estimates
+  exp_estimates <- cond_outcome_fit$exp_estimates
+  noexp_estimates <- cond_outcome_fit$noexp_estimates
+  if (type == "relative risk") {
+    estimates[estimates < eps] <- eps
+    exp_estimates[exp_estimates < eps] <- eps
+    noexp_estimates[noexp_estimates < eps] <- eps
+  }
+
   # compute that partial clever covariate
   if (type == "risk difference") {
     h_partial <- (2 * data[[exposure]] - 1) /
@@ -71,13 +82,6 @@ tml_estimator <- function(
     h_partial_0 <- -1 / (1 - prop_score_fit$estimates)
   } else if (type == "relative risk") {
     # NOTE: Make sure not to divide by zero... or take log of zero
-    eps <- 1e-10
-    estimates <- cond_outcome_fit$estimates
-    estimates[estimates < eps] <- eps
-    exp_estimates <- cond_outcome_fit$exp_estimates
-    exp_estimates[exp_estimates < eps] <- eps
-    noexp_estimates <- cond_outcome_fit$noexp_estimates
-    noexp_estimates[noexp_estimates < eps] <- eps
     h_partial <- (2 * data[[exposure]] - 1) /
       ((data[[exposure]] * prop_score_fit$estimates +
        (1 - data[[exposure]]) * (1 - prop_score_fit$estimates)) * estimates)
@@ -97,14 +101,14 @@ tml_estimator <- function(
       mod_h_0 <- data[[mod]] * h_partial_0 / mod_var
       epsilon <- stats::coef(
         stats::glm(data[[outcome]] ~ -1 + mod_h,
-              offset = stats::qlogis(cond_outcome_fit$estimates),
+              offset = stats::qlogis(estimates),
             family = "quasibinomial")
       )
       q_1_star <- stats::plogis(
-        stats::qlogis(cond_outcome_fit$exp_estimates) + epsilon * mod_h_1
+        stats::qlogis(exp_estimates) + epsilon * mod_h_1
       )
       q_0_star <- stats::plogis(
-        stats::qlogis(cond_outcome_fit$noexp_estimates) + epsilon * mod_h_0
+        stats::qlogis(noexp_estimates) + epsilon * mod_h_0
       )
 
       # compute the plugin estimate with the update cond outcome estimates
