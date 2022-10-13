@@ -6,6 +6,7 @@
 \usage{
 uncentered_eif(
   data,
+  type,
   confounders,
   exposure,
   outcome,
@@ -18,6 +19,10 @@ uncentered_eif(
 \arguments{
 \item{data}{A \code{data.table} containing the observed data.
 \code{train_data} is formatted by \code{\link{unihtee}()}.}
+
+\item{type}{A \code{character} indicating the type of treatment effect
+modifier variable importance parameter. Currently supports
+\code{"risk difference"} and \code{"relative risk"}.}
 
 \item{confounders}{A \code{character} vector of column names corresponding to
 baseline covariates.}

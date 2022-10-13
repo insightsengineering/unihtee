@@ -9,6 +9,9 @@ utils::globalVariables(names = c("a", ".SD"))
 #'
 #' @param data A \code{data.table} containing the observed data.
 #'   \code{train_data} is formatted by \code{\link{unihtee}()}.
+#' @param type A \code{character} indicating the type of treatment effect
+#'   modifier variable importance parameter. Currently supports
+#'   \code{"risk difference"} and \code{"relative risk"}.
 #' @param confounders A \code{character} vector of column names corresponding to
 #'   baseline covariates.
 #' @param exposure A \code{character} corresponding to the exposure variable.
@@ -33,6 +36,7 @@ utils::globalVariables(names = c("a", ".SD"))
 
 uncentered_eif <- function(
   data,
+  type,
   confounders,
   exposure,
   outcome,
@@ -53,8 +57,14 @@ uncentered_eif <- function(
       (1 - data[[exposure]]) * (1 - prop_scores))
 
   # compute augmented inverse probability weights outcomes
-  aipws <- ipws * cond_outcome_resid + cond_outcome_fit$exp_estimates -
-    cond_outcome_fit$noexp_estimates
+  if (type == "risk difference") {
+    aipws <- ipws * cond_outcome_resid + cond_outcome_fit$exp_estimates -
+      cond_outcome_fit$noexp_estimates
+  } else if (type == "relative risk") {
+    aipws <- ipws * cond_outcome_resid / cond_outcome_fit$estimates +
+      log(cond_outcome_fit$exp_estimates) -
+      log(cond_outcome_fit$noexp_estimates)
+  }
 
   # compute that variance of the effect modifiers
   modifier_vars <- sapply(modifiers, function(modifier) var(data[[modifier]]))
