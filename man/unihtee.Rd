@@ -10,6 +10,7 @@ unihtee(
   modifiers,
   exposure,
   outcome,
+  estimator = c("tmle", "onestep"),
   cond_outcome_estimator = sl3::Lrnr_glm_fast$new(),
   prop_score_estimator = sl3::Lrnr_glm_fast$new(),
   prop_score_values = NULL
@@ -28,6 +29,11 @@ the suspected effect modifiers. This vector must be a subset of
 \item{exposure}{A \code{character} corresponding to the exposure variable.}
 
 \item{outcome}{A \code{character} corresponding to the outcome variable.}
+
+\item{estimator}{A \code{character} set to either \code{"tmle"} or
+\code{"onestep"}. The former results in \code{unihtee()} to use a targeted
+maximum likelihood estimators to estimate the deisred TEM VIP, while the
+latter uses a one step estimator.}
 
 \item{cond_outcome_estimator}{A \code{\link[sl3]{Stack}}, or other learner
 class (inheriting from \code{\link[sl3]{Lrnr_base}}), containing a set of

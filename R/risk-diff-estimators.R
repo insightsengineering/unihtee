@@ -44,7 +44,7 @@ one_step_estimator <- function(uncentered_eif_data) {
 #'   likelihood estimates for each potential modifier.
 #'
 #' @importFrom data.table as.data.table
-#' @importFrom stats glm qlogis plogis coef
+#' @importFrom stats glm qlogis plogis coef cov
 #'
 #' @keywords internal
 tml_estimator <- function(
@@ -129,7 +129,7 @@ tml_estimator <- function(
       )
 
       # compute the plugin estimate with the update cond outcome estimates
-      cov(data[[mod]], q_1_star - q_0_star) / mod_var
+      stats::cov(data[[mod]], q_1_star - q_0_star) / mod_var
 
     })
 

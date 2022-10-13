@@ -14,6 +14,10 @@ utils::globalVariables(c("..to_keep", ".SD", "p_value"))
 #'   \code{confounders}.
 #' @param exposure A \code{character} corresponding to the exposure variable.
 #' @param outcome A \code{character} corresponding to the outcome variable.
+#' @param estimator A \code{character} set to either \code{"tmle"} or
+#'   \code{"onestep"}. The former results in \code{unihtee()} to use a targeted
+#'   maximum likelihood estimators to estimate the deisred TEM VIP, while the
+#'   latter uses a one step estimator.
 #' @param cond_outcome_estimator A \code{\link[sl3]{Stack}}, or other learner
 #'   class (inheriting from \code{\link[sl3]{Lrnr_base}}), containing a set of
 #'   learners from \pkg{sl3} to estimate the propensity score model. Defaults to
@@ -38,15 +42,24 @@ unihtee <- function(data,
                     modifiers,
                     exposure,
                     outcome,
+                    estimator = c("tmle", "onestep"),
                     cond_outcome_estimator = sl3::Lrnr_glm_fast$new(),
                     prop_score_estimator = sl3::Lrnr_glm_fast$new(),
                     prop_score_values = NULL
                     ) {
 
+  # set the esimtator
+  estimator <- match.arg(estimator)
+
   # transform data into data.table object with required columns
   data <- data.table::as.data.table(data)
   to_keep <- unique(c(confounders, modifiers, exposure, outcome))
   data <- data[, ..to_keep]
+
+  # scale the outcome to be between 0 and 1
+  min_out <- min(data[[outcome]])
+  max_out <- max(data[[outcome]])
+  data[[outcome]] <- (data[[outcome]] - min_out) / (max_out - min_out)
 
   # estimate nuisance parameters
   prop_score_fit <- fit_prop_score(
@@ -80,14 +93,27 @@ unihtee <- function(data,
   )
 
   # estimate the estimands
-  one_step_fit <- one_step_estimator(uncentered_eif_data = ueif_dt)
+  if (estimator == "onestep") {
+    tem_vip_fit <- one_step_estimator(uncentered_eif_data = ueif_dt)
+  } else {
+    tem_vip_fit <- tml_estimator(
+      data = data,
+      confounders = confounders,
+      modifiers = modifiers,
+      exposure = exposure,
+      outcome = outcome,
+      prop_score_fit = prop_score_fit,
+      cond_outcome_fit = cond_outcome_fit
+    )
+  }
 
   # compute the confidence intervals
   eif_vars <- ueif_dt[, lapply(.SD, var)]
   test_dt <- test_hypotheses(
     n_obs = nrow(data),
-    estimates = one_step_fit,
-    var_estimates = eif_vars
+    estimates = tem_vip_fit,
+    var_estimates = eif_vars,
+    rescale_factor = max_out - min_out
   )
 
   # organize table in decreasing order of p value
