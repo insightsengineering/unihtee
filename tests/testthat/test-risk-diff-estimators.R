@@ -94,3 +94,115 @@ test_that(
                  c(0, 0),
                  tolerance = 1e-10)
 })
+
+test_that(
+  "tml_estimator() produces accurate estimates without cross-fitting", {
+
+    library(sl3)
+
+    # generate data
+    set.seed(84891)
+    dt <- generate_test_data(n_obs = 5000)
+
+    # rescale the outcome to be between 0 and 1
+    min_y <- min(dt$y)
+    max_y <- max(dt$y)
+    dt$y <- (dt$y - min_y) / (max_y - min_y)
+
+    # fit the propensity score
+    prop_score_fit <- fit_prop_score(
+      train_data = dt,
+      valid_data = NULL,
+      learners = sl3::Lrnr_glm_fast$new(),
+      exposure = "a",
+      confounders = c("w_1", "w_2", "w_3")
+    )
+
+    # fit the expected cond outcome
+    cond_outcome_fit <- fit_cond_outcome(
+      train_data = dt,
+      valid_data = NULL,
+      learners = sl3::Lrnr_ranger$new(),
+      exposure = "a",
+      confounders = c("w_1", "w_2", "w_3"),
+      outcome = "y"
+    )
+
+    # compute the TML estimate
+    tmle_fit <- tml_estimator(
+      data = dt,
+      confounders = c("w_1", "w_2", "w_3"),
+      exposure = "a",
+      outcome = "y",
+      modifiers = c("w_1", "w_3"),
+      prop_score_fit = prop_score_fit,
+      cond_outcome_fit = cond_outcome_fit
+    )
+    tmle_fit <- tmle_fit * (max_y - min_y)
+
+    # note that the true parameter values for w_1, w_3 are 0, 1
+    expect_equal(as.numeric(tmle_fit), c(0, 1), tolerance = 0.1)
+})
+
+test_that(
+  "tml_estimator() solves the efficient influence function", {
+
+    library(sl3)
+
+    # generate data
+    set.seed(84891)
+    dt <- generate_test_data(n_obs = 5000)
+
+    # rescale the outcome to be between 0 and 1
+    min_y <- min(dt$y)
+    max_y <- max(dt$y)
+    dt$y <- (dt$y - min_y) / (max_y - min_y)
+
+    # fit the propensity score
+    prop_score_fit <- fit_prop_score(
+      train_data = dt,
+      valid_data = NULL,
+      learners = sl3::Lrnr_glm_fast$new(),
+      exposure = "a",
+      confounders = c("w_1", "w_2", "w_3")
+    )
+
+    # fit the expected cond outcome
+    cond_outcome_fit <- fit_cond_outcome(
+      train_data = dt,
+      valid_data = NULL,
+      learners = sl3::Lrnr_ranger$new(),
+      exposure = "a",
+      confounders = c("w_1", "w_2", "w_3"),
+      outcome = "y"
+    )
+
+    # compute the uncentered eif
+    ueif_dt <- uncentered_eif(
+      data = dt,
+      confounders = c("w_1", "w_2", "w_3"),
+      exposure = "a",
+      outcome = "y",
+      modifiers = c("w_1", "w_3"),
+      prop_score_fit = prop_score_fit,
+      prop_score_values = NULL,
+      cond_outcome_fit = cond_outcome_fit
+    )
+
+    # compute the TML estimate
+    tmle_fit <- tml_estimator(
+      data = dt,
+      confounders = c("w_1", "w_2", "w_3"),
+      exposure = "a",
+      outcome = "y",
+      modifiers = c("w_1", "w_3"),
+      prop_score_fit = prop_score_fit,
+      cond_outcome_fit = cond_outcome_fit
+    )
+
+    # note that the true parameter values for w_1, w_3 are 0, 1
+    expect_equal(c(mean(ueif_dt$w_1 - tmle_fit$w_1),
+                   mean(ueif_dt$w_3 - tmle_fit$w_3)),
+                 c(0, 0),
+                 tolerance = 1e-2)
+})

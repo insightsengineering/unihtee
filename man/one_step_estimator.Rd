@@ -13,7 +13,7 @@ applied to some dataset.}
 }
 \value{
 A one-row \code{data.table} containing the one-step estimates for
-each modifier.
+each potential modifier.
 }
 \description{
 \code{one_step_estimator()} computes the one-step estimates of

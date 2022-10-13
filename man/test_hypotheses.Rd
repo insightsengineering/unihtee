@@ -4,7 +4,7 @@
 \alias{test_hypotheses}
 \title{Test Hypotheses}
 \usage{
-test_hypotheses(n_obs, estimates, var_estimates)
+test_hypotheses(n_obs, estimates, var_estimates, rescale_factor)
 }
 \arguments{
 \item{n_obs}{A \code{numeric} representing the number of observations in the
@@ -15,6 +15,10 @@ treatment effect modifier.}
 
 \item{var_estimates}{A one-row \code{data.table} of estimator variances for
 each potential treatment effect modifier.}
+
+\item{rescale_factor}{A \code{numeric} factor by which to re-scale the
+estimates and efficient influence functions. Used when the outcome
+variable is continuous but not bounded between 0 and 1.}
 }
 \value{
 A \code{data.table} containing the hypothesis testing results.

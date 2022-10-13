@@ -7,21 +7,6 @@ utils::globalVariables(names = c("a", ".SD"))
 #'   scores in a randomized control trial, then they may be input directly into
 #'   this function.
 #'
-#' @param data A \code{data.table} containing the observed data.
-#'   \code{train_data} is formatted by \code{\link{unihtee}()}.
-#' @param confounders A \code{character} vector of column names corresponding to
-#'   baseline covariates.
-#' @param exposure A \code{character} corresponding to the exposure variable.
-#' @param outcome A \code{character} corresponding to the outcome variable.
-#' @param modifiers A \code{character} vector of columns names corresponding to
-#'   the suspected effect modifiers. This vector must be a subset of
-#'   \code{confounders}.
-#' @param prop_score_fit A \code{list} output by the
-#'   \code{\link{fit_prop_score}()} function.
-#' @param prop_score_values A \code{numeric} vector corresponding to the (known)
-#'   propensity score values for each observation in \code{data}.
-#' @param cond_outcome_fit A \code{list} output by the
-#'   \code{\link{fit_cond_outcome}()} function.
 #'
 #' @return A \code{data.table} whose columns are the uncentered efficient
 #'   influence functions of each variable in \code{modifiers}. The rows
