@@ -10,6 +10,7 @@ unihtee(
   modifiers,
   exposure,
   outcome,
+  outcome_type = c("continuous", "binary"),
   estimator = c("tmle", "onestep"),
   cond_outcome_estimator = sl3::Lrnr_glm_fast$new(),
   prop_score_estimator = sl3::Lrnr_glm_fast$new(),
@@ -29,6 +30,9 @@ the suspected effect modifiers. This vector must be a subset of
 \item{exposure}{A \code{character} corresponding to the exposure variable.}
 
 \item{outcome}{A \code{character} corresponding to the outcome variable.}
+
+\item{outcome_type}{A \code{character} indicating the outcome type.
+\code{"continuous"} and \code{"binary"} are currently supported.}
 
 \item{estimator}{A \code{character} set to either \code{"tmle"} or
 \code{"onestep"}. The former results in \code{unihtee()} to use a targeted

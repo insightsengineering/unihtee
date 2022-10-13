@@ -14,6 +14,8 @@ utils::globalVariables(c("..to_keep", ".SD", "p_value"))
 #'   \code{confounders}.
 #' @param exposure A \code{character} corresponding to the exposure variable.
 #' @param outcome A \code{character} corresponding to the outcome variable.
+#' @param outcome_type A \code{character} indicating the outcome type.
+#'   \code{"continuous"} and \code{"binary"} are currently supported.
 #' @param estimator A \code{character} set to either \code{"tmle"} or
 #'   \code{"onestep"}. The former results in \code{unihtee()} to use a targeted
 #'   maximum likelihood estimators to estimate the deisred TEM VIP, while the
@@ -36,19 +38,22 @@ utils::globalVariables(c("..to_keep", ".SD", "p_value"))
 #'   ordered according to ascending p-values.
 #'
 #' @importFrom data.table as.data.table
-
 unihtee <- function(data,
                     confounders,
                     modifiers,
                     exposure,
                     outcome,
+                    outcome_type = c("continuous", "binary"),
                     estimator = c("tmle", "onestep"),
                     cond_outcome_estimator = sl3::Lrnr_glm_fast$new(),
                     prop_score_estimator = sl3::Lrnr_glm_fast$new(),
                     prop_score_values = NULL
                     ) {
 
-  # set the esimtator
+  # specify the outcome type
+  outcome_type <- match.arg(outcome_type)
+
+  # set the estimator
   estimator <- match.arg(estimator)
 
   # transform data into data.table object with required columns
@@ -56,10 +61,15 @@ unihtee <- function(data,
   to_keep <- unique(c(confounders, modifiers, exposure, outcome))
   data <- data[, ..to_keep]
 
-  # scale the outcome to be between 0 and 1
-  min_out <- min(data[[outcome]])
-  max_out <- max(data[[outcome]])
-  data[[outcome]] <- (data[[outcome]] - min_out) / (max_out - min_out)
+  # scale the outcome to be between 0 and 1 if outcome is continuous
+  if (outcome_type == "continuous") {
+    min_out <- min(data[[outcome]])
+    max_out <- max(data[[outcome]])
+    rescale_factor <- max_out - min_out
+    data[[outcome]] <- (data[[outcome]] - min_out) / rescale_factor
+  } else {
+    rescale_factor <- 1
+  }
 
   # estimate nuisance parameters
   prop_score_fit <- fit_prop_score(
@@ -107,16 +117,16 @@ unihtee <- function(data,
     )
   }
 
-  # compute the confidence intervals
+  # compute the confidence intervals and rescale everything
   eif_vars <- ueif_dt[, lapply(.SD, var)]
   test_dt <- test_hypotheses(
     n_obs = nrow(data),
     estimates = tem_vip_fit,
     var_estimates = eif_vars,
-    rescale_factor = max_out - min_out
+    rescale_factor = rescale_factor
   )
 
-  # organize table in decreasing order of p value
+  # organize table in decreasing order of p-value
   test_dt <- test_dt[order(p_value), ]
 
   return(test_dt)
