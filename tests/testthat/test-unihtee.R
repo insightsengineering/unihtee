@@ -16,6 +16,7 @@ test_that(
     exposure = "a",
     outcome = "y",
     outcome_type = "continuous",
+    risk_type = "risk difference",
     estimator = "onestep"
   )
 
@@ -45,6 +46,7 @@ test_that(
     exposure = "a",
     outcome = "y",
     outcome_type = "continuous",
+    risk_type = "risk difference",
     estimator = "tmle",
     cond_outcome_estimator = sl3::Lrnr_ranger$new()
   )
@@ -75,6 +77,7 @@ test_that(
     exposure = "a",
     outcome = "y",
     outcome_type = "binary",
+    risk_type = "risk difference",
     estimator = "onestep"
   )
 
@@ -104,6 +107,7 @@ test_that(
     exposure = "a",
     outcome = "y",
     outcome_type = "binary",
+    risk_type = "risk difference",
     estimator = "tmle"
   )
 

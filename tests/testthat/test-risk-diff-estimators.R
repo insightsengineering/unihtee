@@ -31,6 +31,7 @@ test_that(
     # compute the uncentered eif
     ueif_dt <- uncentered_eif(
       data = dt,
+      type = "risk difference",
       confounders = c("w_1", "w_2", "w_3"),
       exposure = "a",
       outcome = "y",
@@ -77,6 +78,7 @@ test_that(
     # compute the uncentered eif
     ueif_dt <- uncentered_eif(
       data = dt,
+      type = "risk difference",
       confounders = c("w_1", "w_2", "w_3"),
       exposure = "a",
       outcome = "y",
@@ -180,6 +182,7 @@ test_that(
     # compute the uncentered eif
     ueif_dt <- uncentered_eif(
       data = dt,
+      type = "risk difference",
       confounders = c("w_1", "w_2", "w_3"),
       exposure = "a",
       outcome = "y",

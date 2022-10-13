@@ -16,6 +16,9 @@ utils::globalVariables(c("..to_keep", ".SD", "p_value"))
 #' @param outcome A \code{character} corresponding to the outcome variable.
 #' @param outcome_type A \code{character} indicating the outcome type.
 #'   \code{"continuous"} and \code{"binary"} are currently supported.
+#' @param risk_type A \code{character} indicating the type of treatment effect
+#'   modifier variable importance parameter. Currently supports
+#'   \code{"risk difference"} and \code{"relative risk"}.
 #' @param estimator A \code{character} set to either \code{"tmle"} or
 #'   \code{"onestep"}. The former results in \code{unihtee()} to use a targeted
 #'   maximum likelihood estimators to estimate the deisred TEM VIP, while the
@@ -44,11 +47,15 @@ unihtee <- function(data,
                     exposure,
                     outcome,
                     outcome_type = c("continuous", "binary"),
+                    risk_type = c("risk difference", "relative risk"),
                     estimator = c("tmle", "onestep"),
                     cond_outcome_estimator = sl3::Lrnr_glm_fast$new(),
                     prop_score_estimator = sl3::Lrnr_glm_fast$new(),
                     prop_score_values = NULL
                     ) {
+
+  # specify the TEM VIP type
+  risk_type <- match.arg(risk_type)
 
   # specify the outcome type
   outcome_type <- match.arg(outcome_type)
@@ -93,6 +100,7 @@ unihtee <- function(data,
   # compute the efficient influence function
   ueif_dt <- uncentered_eif(
     data = data,
+    type = risk_type,
     confounders = confounders,
     exposure = exposure,
     outcome = outcome,
