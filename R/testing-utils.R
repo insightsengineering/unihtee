@@ -12,6 +12,9 @@ utils::globalVariables(c("modifier", "estimate", "var", "se",
 #'   treatment effect modifier.
 #' @param var_estimates A one-row \code{data.table} of estimator variances for
 #'   each potential treatment effect modifier.
+#' @param rescale_factor A \code{numeric} factor by which to re-scale the
+#'   estimates and efficient influence functions. Used when the outcome
+#'   variable is continuous but not bounded between 0 and 1.
 #'
 #' @return A \code{data.table} containing the hypothesis testing results.
 #'
@@ -19,11 +22,11 @@ utils::globalVariables(c("modifier", "estimate", "var", "se",
 #' @importFrom stats pnorm p.adjust
 #'
 #' @keywords internal
-
-test_hypotheses <- function(n_obs, estimates, var_estimates) {
+test_hypotheses <- function(n_obs, estimates, var_estimates, rescale_factor) {
 
   # pivot estimates dt to long format
   # NOTE: How do I get rid of these annoying warnings?
+  estimates <- estimates * rescale_factor
   estimates_l <- suppressWarnings(data.table::melt(
     data = estimates,
     variable.name = "modifier",
@@ -31,6 +34,7 @@ test_hypotheses <- function(n_obs, estimates, var_estimates) {
   ))
 
   # pivot variance dt to long format
+  var_estimates <- var_estimates * rescale_factor^2
   var_estimates_l <- suppressWarnings(data.table::melt(
     data = var_estimates,
     variable.name = "modifier",
