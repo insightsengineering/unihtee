@@ -120,6 +120,7 @@ unihtee <- function(data,
       modifiers = modifiers,
       exposure = exposure,
       outcome = outcome,
+      type = risk_type,
       prop_score_fit = prop_score_fit,
       cond_outcome_fit = cond_outcome_fit
     )
