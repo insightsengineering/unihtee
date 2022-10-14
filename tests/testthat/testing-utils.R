@@ -11,7 +11,7 @@ generate_test_data <- function(n_obs = 200, outcome_type = "continuous") {
 
   # exposure
   prop_score <- plogis(w_1 + w_2)
-  a <- rbinom(n = n_obs, size = 1, prob = prop_score)
+  a <- sapply(prop_score, function (x) rbinom(1, 1, prob = x))
 
   if (outcome_type == "continuous") {
     # (potential) outcomes

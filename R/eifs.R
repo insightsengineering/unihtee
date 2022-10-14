@@ -9,6 +9,9 @@ utils::globalVariables(names = c("a", ".SD"))
 #'
 #' @param data A \code{data.table} containing the observed data.
 #'   \code{train_data} is formatted by \code{\link{unihtee}()}.
+#' @param type A \code{character} indicating the type of treatment effect
+#'   modifier variable importance parameter. Currently supports
+#'   \code{"risk difference"} and \code{"relative risk"}.
 #' @param confounders A \code{character} vector of column names corresponding to
 #'   baseline covariates.
 #' @param exposure A \code{character} corresponding to the exposure variable.
@@ -33,6 +36,7 @@ utils::globalVariables(names = c("a", ".SD"))
 
 uncentered_eif <- function(
   data,
+  type,
   confounders,
   exposure,
   outcome,
@@ -46,15 +50,32 @@ uncentered_eif <- function(
   cond_outcome_resid <- data[[outcome]] - cond_outcome_fit$estimates
 
   # compute the inverse probability weights
-  prop_scores <- ifelse(!is.null(prop_score_values),
-                        prop_score_values, prop_score_fit$estimates)
+  # NOTE: Fix this!!
+  if (!is.null(prop_score_values)) {
+    prop_scores <- prop_score_values
+  } else {
+    prop_scores <- prop_score_fit$estimates
+  }
   ipws <- (2 * data[[exposure]] - 1) /
     (data[[exposure]] * prop_scores +
       (1 - data[[exposure]]) * (1 - prop_scores))
 
   # compute augmented inverse probability weights outcomes
-  aipws <- ipws * cond_outcome_resid + cond_outcome_fit$exp_estimates -
-    cond_outcome_fit$noexp_estimates
+  if (type == "risk difference") {
+    aipws <- ipws * cond_outcome_resid + cond_outcome_fit$exp_estimates -
+      cond_outcome_fit$noexp_estimates
+  } else if (type == "relative risk") {
+    # NOTE: Make sure not to divide by zero... or take log of zero
+    eps <- 1e-10
+    estimates <- cond_outcome_fit$estimates
+    estimates[estimates < eps] <- eps
+    exp_estimates <- cond_outcome_fit$exp_estimates
+    exp_estimates[exp_estimates < eps] <- eps
+    noexp_estimates <- cond_outcome_fit$noexp_estimates
+    noexp_estimates[noexp_estimates < eps] <- eps
+    aipws <- ipws * cond_outcome_resid / estimates +
+      log(exp_estimates) - log(noexp_estimates)
+  }
 
   # compute that variance of the effect modifiers
   modifier_vars <- sapply(modifiers, function(modifier) var(data[[modifier]]))
