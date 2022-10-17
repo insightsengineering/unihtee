@@ -68,8 +68,22 @@ test_that(
 
     expect_equal(
       colnames(melted_dt),
-      c("id", "w_1", "w_2", "w_3", "a", "time", "censoring", "ps")
+      c("id", "w_1", "w_2", "w_3", "a", "time", "censoring", "ps", "failure")
     )
 
+    melted_dt <- tte_data_melt(
+      data = dt,
+      confounders = c("w_1", "w_2", "w_3"),
+      exposure = "a",
+      outcome = "time",
+      censoring = "censoring",
+      time_cutoff = time_cutoff,
+      prop_score_values = NULL
+    )
+
+    expect_equal(
+      colnames(melted_dt),
+      c("id", "w_1", "w_2", "w_3", "a", "time", "censoring", "failure")
+    )
   }
 )

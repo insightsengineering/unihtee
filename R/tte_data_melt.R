@@ -51,6 +51,9 @@ tte_data_melt <- function(data,
       censored <- obs_data[[censoring]]
       obs_data[[censoring]] <- 0
 
+      # set the failure indicator to 0
+      obs_data$failure <- 0
+
       # store event time for later
       event_time <- obs_data[[outcome]]
 
@@ -66,6 +69,11 @@ tte_data_melt <- function(data,
 
       # indicate if censored at the last measured timepoint
       if (censored && event_time <= time_cutoff) {
+        obs_data[num_reps, censoring] <- 1
+      }
+
+      # indicate failure at the last measured timepoint
+      if (censored == 0 && event_time <= time_cutoff) {
         obs_data[num_reps, censoring] <- 1
       }
 
