@@ -51,8 +51,7 @@ unihtee <- function(data,
                     estimator = c("tmle", "onestep"),
                     cond_outcome_estimator = sl3::Lrnr_glm_fast$new(),
                     prop_score_estimator = sl3::Lrnr_glm_fast$new(),
-                    prop_score_values = NULL
-                    ) {
+                    prop_score_values = NULL) {
 
   # specify the TEM VIP type
   risk_type <- match.arg(risk_type)
@@ -139,5 +138,4 @@ unihtee <- function(data,
   test_dt <- test_dt[order(p_value), ]
 
   return(test_dt)
-
 }

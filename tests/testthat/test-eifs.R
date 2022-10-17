@@ -1,9 +1,11 @@
 source("testing-utils.R")
 
 test_that(
-  paste("uncentered_eif() minus true risk diff parameter value has a mean",
-        "of zero when propensity scores aren't known"), {
-
+  paste(
+    "uncentered_eif() minus true risk diff parameter value has a mean",
+    "of zero when propensity scores aren't known"
+  ),
+  {
     library(sl3)
 
     # generate data
@@ -44,13 +46,17 @@ test_that(
 
     # note that the true parameter values are equal to 0,1 for W_1, W_3
     expect_equal(eif[, sapply(.SD, mean)], c("w_1" = 0, "w_3" = 1),
-                 tolerance = 0.005)
-})
+      tolerance = 0.005
+    )
+  }
+)
 
 test_that(
-  paste("uncentered_eif() minus true risk diff parameter value has a mean",
-        "of zero when propensity scores are known"), {
-
+  paste(
+    "uncentered_eif() minus true risk diff parameter value has a mean",
+    "of zero when propensity scores are known"
+  ),
+  {
     library(sl3)
 
     # generate data
@@ -82,13 +88,17 @@ test_that(
 
     # note that the true parameter values are equal to 0,1 for W_1, W_3
     expect_equal(eif[, sapply(.SD, mean)], c("w_1" = 0, "w_3" = 1),
-                 tolerance = 0.01)
-})
+      tolerance = 0.01
+    )
+  }
+)
 
 test_that(
-  paste("uncentered_eif() minus true risk diff parameter value has a mean",
-        "of zero when propensity scores aren't known"), {
-
+  paste(
+    "uncentered_eif() minus true risk diff parameter value has a mean",
+    "of zero when propensity scores aren't known"
+  ),
+  {
     library(sl3)
 
     # generate data
@@ -130,13 +140,17 @@ test_that(
     # note that the true parameter values are approx equal to 0, 4.22 for W_1,
     # W_3
     expect_equal(eif[, sapply(.SD, mean)], c("w_1" = 0, "w_3" = 4.2),
-                 tolerance = 0.1)
-})
+      tolerance = 0.1
+    )
+  }
+)
 
 test_that(
-  paste("uncentered_eif() minus true risk diff parameter value has a mean",
-        "of zero when propensity scores are known"), {
-
+  paste(
+    "uncentered_eif() minus true risk diff parameter value has a mean",
+    "of zero when propensity scores are known"
+  ),
+  {
     library(sl3)
 
     # generate data
@@ -169,5 +183,7 @@ test_that(
     # note that the true parameter values are equal approx to 0, 4.22 for W_1,
     # W_3
     expect_equal(eif[, sapply(.SD, mean)], c("w_1" = 0, "w_3" = 4.2),
-                 tolerance = 0.1)
-})
+      tolerance = 0.1
+    )
+  }
+)

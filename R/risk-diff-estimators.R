@@ -50,17 +50,15 @@ one_step_estimator <- function(uncentered_eif_data) {
 #' @importFrom stats glm qlogis plogis coef cov
 #'
 #' @keywords internal
-tml_estimator <- function(
-  data,
-  confounders,
-  modifiers,
-  exposure,
-  outcome,
-  type,
-  prop_score_fit,
-  prop_score_values = NULL,
-  cond_outcome_fit
-) {
+tml_estimator <- function(data,
+                          confounders,
+                          modifiers,
+                          exposure,
+                          outcome,
+                          type,
+                          prop_score_fit,
+                          prop_score_values = NULL,
+                          cond_outcome_fit) {
 
   # truncate estimates if necessary
   eps <- 1e-10
@@ -77,14 +75,14 @@ tml_estimator <- function(
   if (type == "risk difference") {
     h_partial <- (2 * data[[exposure]] - 1) /
       (data[[exposure]] * prop_score_fit$estimates +
-       (1 - data[[exposure]]) * (1 - prop_score_fit$estimates))
+        (1 - data[[exposure]]) * (1 - prop_score_fit$estimates))
     h_partial_1 <- 1 / prop_score_fit$estimates
     h_partial_0 <- -1 / (1 - prop_score_fit$estimates)
   } else if (type == "relative risk") {
     # NOTE: Make sure not to divide by zero... or take log of zero
     h_partial <- (2 * data[[exposure]] - 1) /
       ((data[[exposure]] * prop_score_fit$estimates +
-       (1 - data[[exposure]]) * (1 - prop_score_fit$estimates)) * estimates)
+        (1 - data[[exposure]]) * (1 - prop_score_fit$estimates)) * estimates)
     h_partial_1 <- 1 / (prop_score_fit$estimates * exp_estimates)
     h_partial_0 <- -1 / ((1 - prop_score_fit$estimates) * noexp_estimates)
   }
@@ -101,8 +99,9 @@ tml_estimator <- function(
       mod_h_0 <- data[[mod]] * h_partial_0 / mod_var
       epsilon <- stats::coef(
         stats::glm(data[[outcome]] ~ -1 + mod_h,
-              offset = stats::qlogis(estimates),
-            family = "quasibinomial")
+          offset = stats::qlogis(estimates),
+          family = "quasibinomial"
+        )
       )
       q_1_star <- stats::plogis(
         stats::qlogis(exp_estimates) + epsilon * mod_h_1
@@ -117,12 +116,11 @@ tml_estimator <- function(
       } else if (type == "relative risk") {
         stats::cov(data[[mod]], log(q_1_star) - log(q_0_star)) / mod_var
       }
-
-    })
+    }
+  )
 
   # assemble the estimates into a data.table
   names(estimates) <- modifiers
   tmle_dt <- data.table::as.data.table(estimates)
   return(tmle_dt)
-
 }

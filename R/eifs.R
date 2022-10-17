@@ -34,17 +34,15 @@ utils::globalVariables(names = c("a", ".SD"))
 #'
 #' @keywords internal
 
-uncentered_eif <- function(
-  data,
-  type,
-  confounders,
-  exposure,
-  outcome,
-  modifiers,
-  prop_score_fit,
-  prop_score_values,
-  cond_outcome_fit
-) {
+uncentered_eif <- function(data,
+                           type,
+                           confounders,
+                           exposure,
+                           outcome,
+                           modifiers,
+                           prop_score_fit,
+                           prop_score_values,
+                           cond_outcome_fit) {
 
   # compute conditional outcome residuals
   cond_outcome_resid <- data[[outcome]] - cond_outcome_fit$estimates
@@ -86,11 +84,11 @@ uncentered_eif <- function(
     function(modifier) {
       mod_vec <- data[[modifier]]
       mod_vec - mean(mod_vec)
-  })
+    }
+  )
   modifiers_dt <- data.table::as.data.table(modifiers_dt)
   colnames(modifiers_dt) <- modifiers
   eif_dt <- tcrossprod(aipws, 1 / modifier_vars) * modifiers_dt
 
   return(eif_dt)
-
 }

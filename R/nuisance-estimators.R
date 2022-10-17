@@ -25,13 +25,11 @@
 #' @importFrom sl3 sl3_Task
 #'
 #' @keywords internal
-fit_prop_score <- function(
-  train_data,
-  valid_data,
-  learners,
-  exposure,
-  confounders
-) {
+fit_prop_score <- function(train_data,
+                           valid_data,
+                           learners,
+                           exposure,
+                           confounders) {
 
   # construct the training task
   train_data_task <- sl3::sl3_Task$new(
@@ -48,7 +46,6 @@ fit_prop_score <- function(
 
     # extract the propensity score predictions for the training data
     prop_score_est <- prop_score_fit$predict()
-
   } else {
 
     # construct trask for validation dataset prediction
@@ -61,14 +58,12 @@ fit_prop_score <- function(
 
     # compute the propensity score estimates on the validation dataset
     prop_score_est <- prop_score_fit$predict(valid_data_task)
-
   }
 
   return(list(
     "estimates" = prop_score_est,
     "fit" = prop_score_fit
   ))
-
 }
 
 #' @title Conditional Outcome Estimator
@@ -106,14 +101,12 @@ fit_prop_score <- function(
 #' @importFrom data.table copy
 #'
 #' @keywords internal
-fit_cond_outcome <- function(
-  train_data,
-  valid_data,
-  learners,
-  outcome,
-  exposure,
-  confounders
-) {
+fit_cond_outcome <- function(train_data,
+                             valid_data,
+                             learners,
+                             outcome,
+                             exposure,
+                             confounders) {
 
   # define the covariates
   covariates <- c(exposure, confounders)
@@ -136,7 +129,6 @@ fit_cond_outcome <- function(
     # copy the train data to the potential outcome datasets
     exp_data <- data.table::copy(train_data)
     noexp_data <- data.table::copy(train_data)
-
   } else {
 
     # construct the validation data task
@@ -146,7 +138,7 @@ fit_cond_outcome <- function(
       outcome = outcome
     )
 
-   # extract the cond outcome predictions for the valid data
+    # extract the cond outcome predictions for the valid data
     cond_outcome_est <- cond_outcome_fit$predict(valid_data_task)
 
     # copy the train data to the potential outcome datasets
@@ -157,16 +149,16 @@ fit_cond_outcome <- function(
   # estimate the potential outcomes
   exp_data[[exposure]] <- 1
   exp_data_task <- sl3::sl3_Task$new(
-      data = exp_data,
-      covariates = covariates,
-      outcome = outcome
+    data = exp_data,
+    covariates = covariates,
+    outcome = outcome
   )
   exp_cond_outcome_est <- cond_outcome_fit$predict(exp_data_task)
   noexp_data[[exposure]] <- 0
   noexp_data_task <- sl3::sl3_Task$new(
-      data = noexp_data,
-      covariates = covariates,
-      outcome = outcome
+    data = noexp_data,
+    covariates = covariates,
+    outcome = outcome
   )
   noexp_cond_outcome_est <- cond_outcome_fit$predict(noexp_data_task)
 
@@ -177,5 +169,4 @@ fit_cond_outcome <- function(
     "exp_estimates" = exp_cond_outcome_est,
     "noexp_estimates" = noexp_cond_outcome_est
   ))
-
 }

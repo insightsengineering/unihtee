@@ -1,8 +1,8 @@
 source("testing-utils.R")
 
 test_that(
-  "one_step_estimator() produces accurate estimates without cross-fitting", {
-
+  "one_step_estimator() produces accurate estimates without cross-fitting",
+  {
     library(sl3)
 
     # generate data
@@ -45,11 +45,12 @@ test_that(
 
     # note that the true parameter values for w_1, w_3 are 0, 1
     expect_equal(as.numeric(one_step_fit), c(0, 4.2), tolerance = 0.1)
-})
+  }
+)
 
 test_that(
-  "one_step_estimator() solves the efficient influence function", {
-
+  "one_step_estimator() solves the efficient influence function",
+  {
     library(sl3)
 
     # generate data
@@ -91,15 +92,19 @@ test_that(
     one_step_fit <- one_step_estimator(uncentered_eif_data = ueif_dt)
 
     # note that the true parameter values for w_1, w_3 are 0, 1
-    expect_equal(c(mean(ueif_dt$w_1 - one_step_fit$w_1),
-                   mean(ueif_dt$w_3 - one_step_fit$w_3)),
-                 c(0, 0),
-                 tolerance = 1e-10)
-})
+    expect_equal(c(
+      mean(ueif_dt$w_1 - one_step_fit$w_1),
+      mean(ueif_dt$w_3 - one_step_fit$w_3)
+    ),
+    c(0, 0),
+    tolerance = 1e-10
+    )
+  }
+)
 
 test_that(
-  "tml_estimator() produces accurate estimates without cross-fitting", {
-
+  "tml_estimator() produces accurate estimates without cross-fitting",
+  {
     library(sl3)
 
     # generate data
@@ -139,4 +144,5 @@ test_that(
 
     # note that the true parameter values for w_1, w_3 are 0, 1
     expect_equal(as.numeric(tmle_fit), c(0, 4.2), tolerance = 0.1)
-})
+  }
+)

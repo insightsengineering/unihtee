@@ -1,5 +1,7 @@
-utils::globalVariables(c("modifier", "estimate", "var", "se",
-                         "z", "p_value", "ci_lower", "ci_upper", "p_value_fdr"))
+utils::globalVariables(c(
+  "modifier", "estimate", "var", "se",
+  "z", "p_value", "ci_lower", "ci_upper", "p_value_fdr"
+))
 
 #' @title Test Hypotheses
 #'
@@ -48,7 +50,8 @@ test_hypotheses <- function(n_obs, estimates, var_estimates, rescale_factor) {
   test_dt[, se := sqrt(var / n_obs), by = modifier]
   test_dt[, z := estimate / se, by = modifier]
   test_dt[, p_value := (2 * min(stats::pnorm(z), 1 - stats::pnorm(z))),
-          by = modifier]
+    by = modifier
+  ]
   test_dt[, ci_lower := estimate - 1.96 * se, by = modifier]
   test_dt[, ci_upper := estimate + 1.96 * se, by = modifier]
   test_dt[, p_value_fdr := stats::p.adjust(p_value, method = "BH")]
