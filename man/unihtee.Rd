@@ -56,8 +56,9 @@ learners from \pkg{sl3} to estimate the propensity score model. Defaults to
 a generalized linear model with one- and two- way interactions among all
 \code{confounders} variables.}
 
-\item{prop_score_values}{A \code{numeric} vector corresponding to the (known)
-propensity score values for each observation in \code{data}.}
+\item{prop_score_values}{An optional \code{character} corresponding to the
+(known) propensity score values for each observation in \code{data}.
+Defaults to \code{NULL}.}
 }
 \value{
 A \code{data.table} containing the effect estimates and (adjusted)

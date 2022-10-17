@@ -33,8 +33,9 @@ utils::globalVariables(c("..to_keep", ".SD", "p_value"))
 #'   learners from \pkg{sl3} to estimate the propensity score model. Defaults to
 #'   a generalized linear model with one- and two- way interactions among all
 #'   \code{confounders} variables.
-#' @param prop_score_values A \code{numeric} vector corresponding to the (known)
-#'   propensity score values for each observation in \code{data}.
+#' @param prop_score_values An optional \code{character} corresponding to the
+#'   (known) propensity score values for each observation in \code{data}.
+#'   Defaults to \code{NULL}.
 #'
 #' @return A \code{data.table} containing the effect estimates and (adjusted)
 #'   p-values of the \code{modifiers}. The suspected treatment effect modifiers
@@ -64,7 +65,9 @@ unihtee <- function(data,
 
   # transform data into data.table object with required columns
   data <- data.table::as.data.table(data)
-  to_keep <- unique(c(confounders, modifiers, exposure, outcome))
+  to_keep <- unique(c(
+    confounders, modifiers, exposure, outcome, prop_score_values
+  ))
   data <- data[, ..to_keep]
 
   # scale the outcome to be between 0 and 1 if outcome is continuous
@@ -78,13 +81,19 @@ unihtee <- function(data,
   }
 
   # estimate nuisance parameters
-  prop_score_fit <- fit_prop_score(
-    train_data = data,
-    valid_data = NULL,
-    learners = prop_score_estimator,
-    exposure = exposure,
-    confounders = confounders
-  )
+  if (is.null(prop_score_values)) {
+    prop_score_fit <- fit_prop_score(
+      train_data = data,
+      valid_data = NULL,
+      learners = prop_score_estimator,
+      exposure = exposure,
+      confounders = confounders
+    )
+  } else {
+    prop_score_fit <- list(
+      estimates = data[[prop_score_values]]
+    )
+  }
 
   # fit the expected cond outcome
   cond_outcome_fit <- fit_cond_outcome(

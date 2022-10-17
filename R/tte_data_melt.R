@@ -20,6 +20,8 @@ utils::globalVariables(c("..to_keep", ".N"))
 #'   object. That is, observations are repeated at all possible timepoints
 #'   between the earliest time in the data and the \code{time_cutoff} argument.
 #'
+#' @importFrom data.table .N
+#'
 #' @keywords internal
 #'
 tte_data_melt <- function(data,
