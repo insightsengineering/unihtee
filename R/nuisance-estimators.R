@@ -170,3 +170,16 @@ fit_cond_outcome <- function(train_data,
     "noexp_estimates" = noexp_cond_outcome_est
   ))
 }
+
+fit_failure_hazard <- function(train_data,
+                               valid_data,
+                               learners,
+                               confounders,
+                               exposure,
+                               censoring) {
+
+  return(list(
+    "exp_estimates" = 1,
+    "noexp_estimates" = 1
+  ))
+}

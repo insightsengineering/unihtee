@@ -45,8 +45,7 @@ generate_test_data <- function(n_obs = 200, outcome_type = "continuous") {
 
     # define hazard functions
     cond_surv_hazard <- function(time, exposure, w_1, w_2, w_3) {
-      (time < 9) / (1 + exp(2 + 3 * exposure * w_1)) +
-        (time == 9)
+      (time < 9) / (1 + exp(2 + 3 * exposure * w_1)) + (time == 9)
     }
     cond_cens_hazard <- function(time, exposure, w_1, w_2, w_3) 0.05
 

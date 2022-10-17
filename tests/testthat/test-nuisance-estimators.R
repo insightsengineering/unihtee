@@ -182,3 +182,58 @@ test_that(
     expect_equal(mean((fit$noexp_estimates - dt$y_0)^2), 0, tolerance = 0.1)
   }
 )
+
+test_that(
+  paste(
+    "fit_failure_hazard() returns a vector of potential outcome hazard",
+    "estmiates that are close to the ground truth"
+  ),
+  {
+    library(sl3)
+
+    # generate the data
+    set.seed(100)
+    dt <- generate_test_data(n_obs = 1000, outcome_type = "time-to-event")
+    long_dt <- tte_data_melt(
+      data = dt,
+      confounders = c("w_1", "w_2", "w_3"),
+      exposure = "a",
+      outcome = "time",
+      censoring = "censoring",
+      time_cutoff = 5,
+      prop_score_values = NULL
+    )
+
+    # fit the expected failure hazard
+    fit <- fit_failure_hazard(
+      train_data = dt,
+      valid_data = NULL,
+      learners = sl3::Lrnr_ranger$new(),
+      exposure = "a",
+      confounders = c("w_1", "w_2", "w_3"),
+      censoring = "censoring"
+    )
+
+    # compute the true hazards
+    cond_surv_hazard <- function(time, exposure, w_1, w_2, w_3) {
+      (time < 9) / (1 + exp(2 + 3 * exposure * w_1)) + (time == 9)
+    }
+    exp_truth <- sapply(
+      nrow(long_dt),
+      function(obs) {
+        cond_surv_hazard(long_dt$time, 1, long_dt$w_1, long_dt$w_2, long_dt$w_3)
+      }
+    )
+    noexp_truth <- sapply(
+      nrow(long_dt),
+      function(obs) {
+        cond_surv_hazard(long_dt$time, 0, long_dt$w_1, long_dt$w_2, long_dt$w_3)
+      }
+    )
+
+    expect_equal(mean((fit$exp_estimates - exp_truth)^2), 0, tolerance = 0.1)
+    expect_equal(
+      mean((fit$noexp_estimates - noexp_truth)^2), 0, tolerance = 0.1
+    )
+  }
+)
