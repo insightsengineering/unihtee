@@ -228,7 +228,7 @@ fit_failure_hazard <- function(train_data,
   # compute estimates
   if (is.null(valid_data)) {
 
-    # extract the cond outcome predictions for the training data
+    # extract the cond failure hazard predictions for the training data
     estimates <- failure_hazard_fit$predict()
 
     # copy the train data to the potential outcome datasets
@@ -244,7 +244,7 @@ fit_failure_hazard <- function(train_data,
       outcome = "failure"
     )
 
-    # extract the cond outcome predictions for the valid data
+    # extract the cond failure hazard predictions for the valid data
     estimates <- failure_hazard_fit$predict(valid_data_task)
 
     # copy the train data to the potential outcome datasets
@@ -268,6 +268,114 @@ fit_failure_hazard <- function(train_data,
     outcome = "failure"
   )
   noexp_estimates <- failure_hazard_fit$predict(noexp_data_task)
+
+
+  return(list(
+    "estimates" = estimates,
+    "exp_estimates" = exp_estimates,
+    "noexp_estimates" = noexp_estimates
+  ))
+}
+
+#' @title Conditional Censoring Hazard Estimator
+#'
+#' @description \code{fit_censoring_hazard()} estimates the conditional
+#'   censoring hazard nuisance parameter. The estimator used for this estimation
+#'   is based on the \code{learners} argument, and the covariates considered are
+#'   specified by the \code{confounders} and \code{exposure} arguments.
+#'
+#' @param train_data A long \code{data.table} containing the observed data.
+#'   \code{train_data} is formatted by \code{\link{unihtee}()} and
+#'   \code{\link{tte_data_melt}()}.
+#' @param valid_data An optional \code{data.table} representing a holdout
+#'   dataset of the observed data. It is only used for cross-fitting purposes.
+#'   Defaults to \code{NULL}.
+#' @param learners A \code{\link[sl3]{Stack}}, or other learner class
+#'   (inheriting from \code{\link[sl3]{Lrnr_base}}), containing a set of
+#'   learners from \pkg{sl3} to estimate the propensity score model.
+#' @param exposure A \code{character} corresponding to the exposure variable.
+#' @param confounders A \code{character} vector of column names corresponding to
+#'   baseline covariates.
+#' @param censoring A \code{character} indicating the censoring indicator.
+#'
+#' @return A named \code{list} of three elements. (1) \code{"estimates"}, the
+#'   expected censoring hazards for each observation at each timepoint in
+#'   \code{valid_data}, if specified, or \code{train_data} otherwise. (2)
+#'   \code{"exp_estimates"}, the expected conditional censoring hazards for each
+#'   observation at each timepoint in \code{valid_data}, if specified, or
+#'   \code{train_data} otherwise, had these observations been exposed. (3)
+#'   \code{"noexp_estimates"}, the expected conditional censoring hazards for
+#'   each observation at each timepoint in \code{valid_data}, if specified, or
+#'   \code{train_data} otherwise, had these observations not been exposed.
+#'
+#' @importFrom sl3 sl3_Task
+#' @importFrom data.table copy
+#'
+#' @keywords internal
+#'
+fit_censoring_hazard <- function(train_data,
+                                 valid_data,
+                                 learners,
+                                 confounders,
+                                 exposure,
+                                 censoring) {
+
+  # define the covariates
+  covariates <- c(exposure, confounders)
+
+  # construct the training task
+  censoring_hazard_task <- sl3::sl3_Task$new(
+    data = train_data,
+    outcome = censoring,
+    covariates = covariates
+  )
+
+  # estimate the conditional censoring hazard function
+  censoring_hazard_fit <- learners$train(censoring_hazard_task)
+
+  # compute estimates
+  if (is.null(valid_data)) {
+
+    # extract the cond censoring hazard predictions for the training data
+    estimates <- censoring_hazard_fit$predict()
+
+    # copy the train data to the potential outcome datasets
+    exp_data <- data.table::copy(train_data)
+    noexp_data <- data.table::copy(train_data)
+
+  } else {
+
+    # construct the validation data task
+    valid_data_task <- sl3::sl3_Task$new(
+      data = valid_data,
+      covariates = covariates,
+      outcome = censoring
+    )
+
+    # extract the cond censoring hazard predictions for the valid data
+    estimates <- censoring_hazard_fit$predict(valid_data_task)
+
+    # copy the train data to the potential outcome datasets
+    exp_data <- data.table::copy(valid_data)
+    noexp_data <- data.table::copy(valid_data)
+
+  }
+
+  # estimate the censoring hazards under each exposure level
+  exp_data[[exposure]] <- 1
+  exp_data_task <- sl3::sl3_Task$new(
+    data = exp_data,
+    covariates = covariates,
+    outcome = censoring
+  )
+  exp_estimates <- censoring_hazard_fit$predict(exp_data_task)
+  noexp_data[[exposure]] <- 0
+  noexp_data_task <- sl3::sl3_Task$new(
+    data = noexp_data,
+    covariates = covariates,
+    outcome = censoring
+  )
+  noexp_estimates <- censoring_hazard_fit$predict(noexp_data_task)
 
 
   return(list(

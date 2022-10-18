@@ -185,8 +185,8 @@ test_that(
 
 test_that(
   paste(
-    "fit_failure_hazard() returns a vector of potential outcome hazard",
-    "estmiates that are close to the ground truth"
+    "fit_failure_hazard() returns vectors of potential conditional failure",
+    "hazard estmiates that are close to the ground truth"
   ),
   {
     library(sl3)
@@ -230,9 +230,49 @@ test_that(
       }
     )
 
-    expect_equal(mean((fit$exp_estimates - exp_truth)^2), 0, tolerance = 0.1)
+    expect_equal(mean((fit$exp_estimates - exp_truth)^2), 0, tolerance = 0.05)
     expect_equal(
       mean((fit$noexp_estimates - noexp_truth)^2), 0, tolerance = 0.05
+    )
+  }
+)
+
+
+test_that(
+  paste(
+    "fit_censoring_hazard() returns vectors of potential conditional censoring",
+    "hazard estimates that are close to the ground truth"
+  ),
+  {
+    library(sl3)
+
+    # generate the data
+    set.seed(100)
+    dt <- generate_test_data(n_obs = 200, outcome_type = "time-to-event")
+    long_dt <- tte_data_melt(
+      data = dt,
+      confounders = c("w_1", "w_2", "w_3"),
+      exposure = "a",
+      outcome = "time",
+      censoring = "censoring",
+      time_cutoff = 5,
+      prop_score_values = NULL
+    )
+
+    # fit the expected failure hazard
+    fit <- fit_censoring_hazard(
+      train_data = long_dt,
+      valid_data = NULL,
+      learners = sl3:::Lrnr_glm_fast$new(),
+      exposure = "a",
+      confounders = c("w_1", "w_2", "w_3"),
+      censoring = "censoring"
+    )
+
+    # compute the true hazards
+    expect_equal(mean((fit$exp_estimates - 0.05)^2), 0, tolerance = 0.005)
+    expect_equal(
+      mean((fit$noexp_estimates - 0.05)^2), 0, tolerance = 0.005
     )
   }
 )
