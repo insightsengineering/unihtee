@@ -35,8 +35,8 @@ propensity score values for each observation in \code{data}.}
 }
 \value{
 A long, time-to-event version of the original \code{data.table}
-object. That is, observations are repeated at all possible timepoints
-between the earliest time in the data and the \code{time_cutoff} argument.
+object. That is, observations are repeated at timepoints between the
+earliest time in the data and the \code{time_cutoff} argument.
 }
 \description{
 \code{tte_data_melt()} turns wide-format \code{data.table}

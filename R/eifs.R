@@ -50,10 +50,10 @@ uncentered_eif <- function(data,
                            failure_hazard_fit,
                            censoring_hazard_fit) {
 
-  # compute conditional outcome residuals
+  ## compute conditional outcome residuals
   cond_outcome_resid <- data[[outcome]] - cond_outcome_fit$estimates
 
-  # compute the inverse probability weights
+  ## compute the inverse probability weights
   if (!is.null(prop_score_values)) {
     prop_scores <- prop_score_values
   } else {
@@ -63,16 +63,16 @@ uncentered_eif <- function(data,
     (data[[exposure]] * prop_scores +
       (1 - data[[exposure]]) * (1 - prop_scores))
 
-  # decide which EIFs to compute
-  # EIFs for continuous and binary outcomes with binary exposure
+  ## decide which EIFs to compute
+  ## EIFs for continuous and binary outcomes with binary exposure
   if (is.null(failure_hazard_fit) && is.null(censoring_hazard_fit)) {
 
-    # compute augmented inverse probability weights outcomes
+    ## compute augmented inverse probability weights outcomes
     if (type == "risk difference") {
       aipws <- ipws * cond_outcome_resid + cond_outcome_fit$exp_estimates -
         cond_outcome_fit$noexp_estimates
     } else if (type == "relative risk") {
-      # NOTE: Make sure not to divide by zero or compute log of zero
+      ## NOTE: Make sure not to divide by zero or compute log of zero
       eps <- 1e-10
       estimates <- cond_outcome_fit$estimates
       estimates[estimates < eps] <- eps
@@ -84,15 +84,16 @@ uncentered_eif <- function(data,
         log(exp_estimates) - log(noexp_estimates)
     }
 
-  # EIFs for time-to-event outcomes
+    ## EIFs for time-to-event outcomes
   } else if (is.null(cond_outcome_fit)) {
+    ## compute the survival probabilities
     TRUE
   }
 
-  # compute that variance of the effect modifiers
+  ## compute that variance of the effect modifiers
   modifier_vars <- sapply(modifiers, function(modifier) var(data[[modifier]]))
 
-  # vectorized uncentered eifs
+  ## vectorized uncentered eifs
   modifiers_dt <- lapply(
     modifiers,
     function(modifier) {

@@ -33,8 +33,8 @@ test_that(
     )
     total_reps <- sum(reps_per_obs)
 
-    # assessment
-    expect_equal(nrow(melted_dt), total_reps)
+    expect_equal(sum(melted_dt$keep), total_reps)
+    expect_equal(nrow(melted_dt), length(unique_times) * n_obs)
 
   }
 )
@@ -68,7 +68,8 @@ test_that(
 
     expect_equal(
       colnames(melted_dt),
-      c("id", "w_1", "w_2", "w_3", "a", "time", "censoring", "ps", "failure")
+      c("id", "w_1", "w_2", "w_3", "a", "time", "censoring", "ps", "failure",
+        "keep")
     )
 
     melted_dt <- tte_data_melt(
@@ -83,7 +84,7 @@ test_that(
 
     expect_equal(
       colnames(melted_dt),
-      c("id", "w_1", "w_2", "w_3", "a", "time", "censoring", "failure")
+      c("id", "w_1", "w_2", "w_3", "a", "time", "censoring", "failure", "keep")
     )
   }
 )

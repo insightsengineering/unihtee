@@ -96,7 +96,8 @@ test_that(
       censoring_hazard_fit = NULL
     )
 
-    eif_vars <- ueif_dt[, lapply(.SD, var)]
+    eif_vars <-
+      ueif_dt[, lapply(.SD, var)]
 
     test_dt <- test_hypotheses(
       n_obs = nrow(dt),

@@ -203,6 +203,7 @@ test_that(
       time_cutoff = 5,
       prop_score_values = NULL
     )
+    long_dt <- long_dt[keep == 1, ]
 
     # fit the expected failure hazard
     fit <- fit_failure_hazard(
@@ -258,6 +259,7 @@ test_that(
       time_cutoff = 5,
       prop_score_values = NULL
     )
+    long_dt <- long_dt[keep == 1, ]
 
     # fit the expected failure hazard
     fit <- fit_censoring_hazard(
