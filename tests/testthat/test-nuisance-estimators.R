@@ -193,7 +193,7 @@ test_that(
 
     # generate the data
     set.seed(100)
-    dt <- generate_test_data(n_obs = 1000, outcome_type = "time-to-event")
+    dt <- generate_test_data(n_obs = 200, outcome_type = "time-to-event")
     long_dt <- tte_data_melt(
       data = dt,
       confounders = c("w_1", "w_2", "w_3"),
@@ -206,12 +206,11 @@ test_that(
 
     # fit the expected failure hazard
     fit <- fit_failure_hazard(
-      train_data = dt,
+      train_data = long_dt,
       valid_data = NULL,
-      learners = sl3::Lrnr_ranger$new(),
+      learners = sl3:::Lrnr_ranger$new(),
       exposure = "a",
-      confounders = c("w_1", "w_2", "w_3"),
-      censoring = "censoring"
+      confounders = c("w_1", "w_2", "w_3")
     )
 
     # compute the true hazards

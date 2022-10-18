@@ -171,15 +171,81 @@ fit_cond_outcome <- function(train_data,
   ))
 }
 
+#' @title
+#' @param train_data
+#' @param valid_data
+#' @param learners
+#' @param confounders
+#' @param exposure
+#' @return
+#'
 fit_failure_hazard <- function(train_data,
                                valid_data,
                                learners,
                                confounders,
-                               exposure,
-                               censoring) {
+                               exposure) {
+
+  # define the covariates
+  covariates <- c(exposure, confounders)
+
+  # construct the training task
+  failure_hazard_task <- sl3::sl3_Task$new(
+    data = train_data,
+    outcome = "failure",
+    covariates = covariates
+  )
+
+  # estimate the conditional failure hazard function
+  failure_hazard_fit <- learners$train(failure_hazard_task)
+
+  # compute estimates
+  if (is.null(valid_data)) {
+
+    # extract the cond outcome predictions for the training data
+    estimates <- failure_hazard_fit$predict()
+
+    # copy the train data to the potential outcome datasets
+    exp_data <- data.table::copy(train_data)
+    noexp_data <- data.table::copy(train_data)
+
+  } else {
+
+    # construct the validation data task
+    valid_data_task <- sl3::sl3_Task$new(
+      data = valid_data,
+      covariates = covariates,
+      outcome = "failure"
+    )
+
+    # extract the cond outcome predictions for the valid data
+    estimates <- failure_hazard_fit$predict(valid_data_task)
+
+    # copy the train data to the potential outcome datasets
+    exp_data <- data.table::copy(valid_data)
+    noexp_data <- data.table::copy(valid_data)
+
+  }
+
+  # estimate the failure hazards under each exposure level
+  exp_data[[exposure]] <- 1
+  exp_data_task <- sl3::sl3_Task$new(
+    data = exp_data,
+    covariates = covariates,
+    outcome = "failure"
+  )
+  exp_estimates <- failure_hazard_fit$predict(exp_data_task)
+  noexp_data[[exposure]] <- 0
+  noexp_data_task <- sl3::sl3_Task$new(
+    data = noexp_data,
+    covariates = covariates,
+    outcome = "failure"
+  )
+  noexp_estimates <- failure_hazard_fit$predict(noexp_data_task)
+
 
   return(list(
-    "exp_estimates" = 1,
-    "noexp_estimates" = 1
+    "estimates" = estimates,
+    "exp_estimates" = exp_estimates,
+    "noexp_estimates" = noexp_estimates
   ))
 }
