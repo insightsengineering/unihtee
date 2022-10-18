@@ -216,8 +216,9 @@ fit_failure_hazard <- function(train_data,
   covariates <- c(exposure, confounders)
 
   # construct the training task
+  keep_var <- "keep"
   failure_hazard_task <- sl3::sl3_Task$new(
-    data = train_data,
+    data = train_data[get(keep_var) == 1, ],
     outcome = "failure",
     covariates = covariates
   )
@@ -229,7 +230,12 @@ fit_failure_hazard <- function(train_data,
   if (is.null(valid_data)) {
 
     # extract the cond failure hazard predictions for the training data
-    estimates <- failure_hazard_fit$predict()
+    train_failure_hazard_task <- sl3::sl3_Task$new(
+      data = train_data,
+      outcome = "failure",
+      covariates = covariates
+    )
+    estimates <- failure_hazard_fit$predict(train_failure_hazard_task)
 
     # copy the train data to the potential outcome datasets
     exp_data <- data.table::copy(train_data)
@@ -324,8 +330,9 @@ fit_censoring_hazard <- function(train_data,
   covariates <- c(exposure, confounders)
 
   # construct the training task
+  keep_var <- "keep"
   censoring_hazard_task <- sl3::sl3_Task$new(
-    data = train_data,
+    data = train_data[get(keep_var) == 1],
     outcome = censoring,
     covariates = covariates
   )
@@ -337,7 +344,12 @@ fit_censoring_hazard <- function(train_data,
   if (is.null(valid_data)) {
 
     # extract the cond censoring hazard predictions for the training data
-    estimates <- censoring_hazard_fit$predict()
+    full_censoring_hazard_task <- sl3::sl3_Task$new(
+      data = train_data,
+      outcome = censoring,
+      covariates = covariates
+    )
+    estimates <- censoring_hazard_fit$predict(full_censoring_hazard_task)
 
     # copy the train data to the potential outcome datasets
     exp_data <- data.table::copy(train_data)

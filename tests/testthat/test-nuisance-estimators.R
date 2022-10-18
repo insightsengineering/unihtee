@@ -193,7 +193,7 @@ test_that(
 
     # generate the data
     set.seed(100)
-    dt <- generate_test_data(n_obs = 200, outcome_type = "time-to-event")
+    dt <- generate_test_data(n_obs = 300, outcome_type = "time-to-event")
     long_dt <- tte_data_melt(
       data = dt,
       confounders = c("w_1", "w_2", "w_3"),
@@ -203,7 +203,6 @@ test_that(
       time_cutoff = 5,
       prop_score_values = NULL
     )
-    long_dt <- long_dt[keep == 1, ]
 
     # fit the expected failure hazard
     fit <- fit_failure_hazard(
@@ -249,7 +248,7 @@ test_that(
 
     # generate the data
     set.seed(100)
-    dt <- generate_test_data(n_obs = 200, outcome_type = "time-to-event")
+    dt <- generate_test_data(n_obs = 300, outcome_type = "time-to-event")
     long_dt <- tte_data_melt(
       data = dt,
       confounders = c("w_1", "w_2", "w_3"),
@@ -259,7 +258,6 @@ test_that(
       time_cutoff = 5,
       prop_score_values = NULL
     )
-    long_dt <- long_dt[keep == 1, ]
 
     # fit the expected failure hazard
     fit <- fit_censoring_hazard(

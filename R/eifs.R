@@ -87,6 +87,12 @@ uncentered_eif <- function(data,
     ## EIFs for time-to-event outcomes
   } else if (is.null(cond_outcome_fit)) {
     ## compute the survival probabilities
+    ## compute the censoring probabilities
+    ## add survival probability at time_cutoff to each row
+    ## get the lagged censoring probability in each row
+    ## compute the integrand of the EIF for each row
+    ## compute the integral for each observation
+    ## compute the AIPWs for each observation
     TRUE
   }
 

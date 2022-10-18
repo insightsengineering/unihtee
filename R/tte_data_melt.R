@@ -20,7 +20,7 @@
 #'   object. That is, observations are repeated at timepoints between the
 #'   earliest time in the data and the \code{time_cutoff} argument.
 #'
-#' @importFrom data.table .N
+#' @importFrom data.table .N rbindlist
 #'
 #' @keywords internal
 #'
@@ -80,11 +80,12 @@ tte_data_melt <- function(data,
         obs_data[num_reps, failure] <- 1
       }
 
-      ## should the repeated measure be kept when estimating nuisance parameters?
+      ## should the repeated measure be kept when estimating nuisance
+      ## parameters?
       obs_data$keep <- 1
 
-      ## if observation does not make it to designated timepoint, add dummy observations
-      ## used for computing at that timepoint anyways
+      ## if observation does not make it to designated timepoint, add dummy
+      ## observations used for computing at that timepoint anyways
       ## NOTE: these repeated measures are dropped during nuisance parameter
       ## estimation, but used for EIF calculation
       if (num_reps < length(unique_times)) {
