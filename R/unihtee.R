@@ -115,7 +115,9 @@ unihtee <- function(data,
     modifiers = modifiers,
     prop_score_fit = prop_score_fit,
     prop_score_values = prop_score_values,
-    cond_outcome_fit = cond_outcome_fit
+    cond_outcome_fit = cond_outcome_fit,
+    failure_hazard_fit = NULL,
+    censoring_hazard_fit = NULL
   )
 
   # estimate the estimands

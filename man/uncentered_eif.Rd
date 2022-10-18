@@ -13,7 +13,9 @@ uncentered_eif(
   modifiers,
   prop_score_fit,
   prop_score_values,
-  cond_outcome_fit
+  cond_outcome_fit,
+  failure_hazard_fit,
+  censoring_hazard_fit
 )
 }
 \arguments{
@@ -42,7 +44,13 @@ the suspected effect modifiers. This vector must be a subset of
 propensity score values for each observation in \code{data}.}
 
 \item{cond_outcome_fit}{A \code{list} output by the
+\code{\link{fit_failure_hazard}()} function.'}
+
+\item{failure_hazard_fit}{A \code{list} output by the
 \code{\link{fit_cond_outcome}()} function.'}
+
+\item{censoring_hazard_fit}{A \code{list} output by the
+\code{\link{fit_censoring_hazard}()} function.'}
 }
 \value{
 A \code{data.table} whose columns are the uncentered efficient

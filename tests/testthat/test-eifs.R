@@ -41,7 +41,9 @@ test_that(
       modifiers = c("w_1", "w_3"),
       prop_score_fit = prop_score_fit,
       prop_score_values = NULL,
-      cond_outcome_fit = cond_outcome_fit
+      cond_outcome_fit = cond_outcome_fit,
+      failure_hazard_fit = NULL,
+      censoring_hazard_fit = NULL
     )
 
     # note that the true parameter values are equal to 0,1 for W_1, W_3
@@ -83,7 +85,9 @@ test_that(
       modifiers = c("w_1", "w_3"),
       prop_score_fit = NULL,
       cond_outcome_fit = cond_outcome_fit,
-      prop_score_values = dt$prop_score
+      prop_score_values = dt$prop_score,
+      failure_hazard_fit = NULL,
+      censoring_hazard_fit = NULL
     )
 
     # note that the true parameter values are equal to 0,1 for W_1, W_3
@@ -134,7 +138,9 @@ test_that(
       modifiers = c("w_1", "w_3"),
       prop_score_fit = prop_score_fit,
       prop_score_values = NULL,
-      cond_outcome_fit = cond_outcome_fit
+      cond_outcome_fit = cond_outcome_fit,
+      failure_hazard_fit = NULL,
+      censoring_hazard_fit = NULL
     )
 
     # note that the true parameter values are approx equal to 0, 4.22 for W_1,
@@ -177,7 +183,9 @@ test_that(
       modifiers = c("w_1", "w_3"),
       prop_score_fit = NULL,
       cond_outcome_fit = cond_outcome_fit,
-      prop_score_values = dt$prop_score
+      prop_score_values = dt$prop_score,
+      failure_hazard_fit = NULL,
+      censoring_hazard_fit = NULL
     )
 
     # note that the true parameter values are equal approx to 0, 4.22 for W_1,

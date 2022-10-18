@@ -38,7 +38,9 @@ test_that(
       modifiers = c("w_1", "w_3"),
       prop_score_fit = prop_score_fit,
       prop_score_values = NULL,
-      cond_outcome_fit = cond_outcome_fit
+      cond_outcome_fit = cond_outcome_fit,
+      failure_hazard_fit = NULL,
+      censoring_hazard_fit = NULL
     )
 
     one_step_fit <- one_step_estimator(uncentered_eif_data = ueif_dt)
@@ -86,7 +88,10 @@ test_that(
       modifiers = c("w_1", "w_3"),
       prop_score_fit = prop_score_fit,
       prop_score_values = NULL,
-      cond_outcome_fit = cond_outcome_fit
+      cond_outcome_fit = cond_outcome_fit,
+      failure_hazard_fit = NULL,
+      censoring_hazard_fit = NULL
+
     )
 
     one_step_fit <- one_step_estimator(uncentered_eif_data = ueif_dt)

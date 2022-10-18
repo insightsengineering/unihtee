@@ -35,7 +35,9 @@ test_that(
       modifiers = c("w_1", "w_3"),
       prop_score_fit = prop_score_fit,
       prop_score_values = NULL,
-      cond_outcome_fit = cond_outcome_fit
+      cond_outcome_fit = cond_outcome_fit,
+      failure_hazard_fit = NULL,
+      censoring_hazard_fit = NULL
     )
 
     eif_vars <- ueif_dt[, lapply(.SD, var)]
@@ -89,7 +91,9 @@ test_that(
       modifiers = c("w_1", "w_3"),
       prop_score_fit = prop_score_fit,
       prop_score_values = NULL,
-      cond_outcome_fit = cond_outcome_fit
+      cond_outcome_fit = cond_outcome_fit,
+      failure_hazard_fit = NULL,
+      censoring_hazard_fit = NULL
     )
 
     eif_vars <- ueif_dt[, lapply(.SD, var)]
@@ -151,7 +155,9 @@ test_that(
       modifiers = c("w_1", "w_3"),
       prop_score_fit = prop_score_fit,
       prop_score_values = NULL,
-      cond_outcome_fit = cond_outcome_fit
+      cond_outcome_fit = cond_outcome_fit,
+      failure_hazard_fit = NULL,
+      censoring_hazard_fit = NULL
     )
 
     eif_vars <- ueif_dt[, lapply(.SD, var)]
@@ -208,7 +214,9 @@ test_that(
       modifiers = c("w_1", "w_3"),
       prop_score_fit = prop_score_fit,
       prop_score_values = NULL,
-      cond_outcome_fit = cond_outcome_fit
+      cond_outcome_fit = cond_outcome_fit,
+      failure_hazard_fit = NULL,
+      censoring_hazard_fit = NULL
     )
 
     eif_vars <- ueif_dt[, lapply(.SD, var)]
@@ -250,7 +258,9 @@ test_that(
       modifiers = c("w_1", "w_3"),
       prop_score_fit = prop_score_fit,
       prop_score_values = NULL,
-      cond_outcome_fit = cond_outcome_fit
+      cond_outcome_fit = cond_outcome_fit,
+      failure_hazard_fit = NULL,
+      censoring_hazard_fit = NULL
     )
 
     eif_vars <- ueif_dt[, lapply(.SD, var)]
