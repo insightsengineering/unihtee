@@ -95,7 +95,7 @@ fit_prop_score <- function(train_data,
 #'   specified, or \code{train_data} otherwise, had these observations been
 #'   exposed. (4) \code{"noexp_estimates"}, the expected conditional outcome for
 #'   each observation in \code{valid_data}, if specified, or \code{train_data}
-#'   otherwise, had these observations been exposed.
+#'   otherwise, had these observations not been exposed.
 #'
 #' @importFrom sl3 sl3_Task
 #' @importFrom data.table copy
@@ -171,13 +171,40 @@ fit_cond_outcome <- function(train_data,
   ))
 }
 
-#' @title
-#' @param train_data
-#' @param valid_data
-#' @param learners
-#' @param confounders
-#' @param exposure
-#' @return
+#' @title Conditional Failure Hazard Estimator
+#'
+#' @description \code{fit_failure_hazard()} estimates the conditional failure
+#'   hazard nuisance parameter. The estimator used for this estimation is based
+#'   on the \code{learners} argument, and the covariates considered are
+#'   specified by the \code{confounders} and \code{exposure} arguments.
+#'
+#' @param train_data A long \code{data.table} containing the observed data.
+#'   \code{train_data} is formatted by \code{\link{unihtee}()} and
+#'   \code{\link{tte_data_melt}()}.
+#' @param valid_data An optional \code{data.table} representing a holdout
+#'   dataset of the observed data. It is only used for cross-fitting purposes.
+#'   Defaults to \code{NULL}.
+#' @param learners A \code{\link[sl3]{Stack}}, or other learner class
+#'   (inheriting from \code{\link[sl3]{Lrnr_base}}), containing a set of
+#'   learners from \pkg{sl3} to estimate the propensity score model.
+#' @param exposure A \code{character} corresponding to the exposure variable.
+#' @param confounders A \code{character} vector of column names corresponding to
+#'   baseline covariates.
+#'
+#' @return A named \code{list} of three elements. (1) \code{"estimates"}, the
+#'   expected failure hazards for each observation at each timepoint in
+#'   \code{valid_data}, if specified, or \code{train_data} otherwise. (2)
+#'   \code{"exp_estimates"}, the expected conditional failure hazards for each
+#'   observation at each timepoint in \code{valid_data}, if specified, or
+#'   \code{train_data} otherwise, had these observations been exposed. (3)
+#'   \code{"noexp_estimates"}, the expected conditional failure hazards for each
+#'   observation at each timepoint in \code{valid_data}, if specified, or
+#'   \code{train_data} otherwise, had these observations not been exposed.
+#'
+#' @importFrom sl3 sl3_Task
+#' @importFrom data.table copy
+#'
+#' @keywords internal
 #'
 fit_failure_hazard <- function(train_data,
                                valid_data,

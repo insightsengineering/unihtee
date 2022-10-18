@@ -232,7 +232,7 @@ test_that(
 
     expect_equal(mean((fit$exp_estimates - exp_truth)^2), 0, tolerance = 0.1)
     expect_equal(
-      mean((fit$noexp_estimates - noexp_truth)^2), 0, tolerance = 0.1
+      mean((fit$noexp_estimates - noexp_truth)^2), 0, tolerance = 0.05
     )
   }
 )
