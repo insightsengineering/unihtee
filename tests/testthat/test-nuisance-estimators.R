@@ -217,18 +217,10 @@ test_that(
     cond_surv_hazard <- function(time, exposure, w_1, w_2, w_3) {
       (time < 9) / (1 + exp(2 + 3 * exposure * w_1)) + (time == 9)
     }
-    exp_truth <- sapply(
-      nrow(long_dt),
-      function(obs) {
-        cond_surv_hazard(long_dt$time, 1, long_dt$w_1, long_dt$w_2, long_dt$w_3)
-      }
-    )
-    noexp_truth <- sapply(
-      nrow(long_dt),
-      function(obs) {
-        cond_surv_hazard(long_dt$time, 0, long_dt$w_1, long_dt$w_2, long_dt$w_3)
-      }
-    )
+    exp_truth <-
+      cond_surv_hazard(long_dt$time, 1, long_dt$w_1, long_dt$w_2, long_dt$w_3)
+    noexp_truth <-
+      cond_surv_hazard(long_dt$time, 0, long_dt$w_1, long_dt$w_2, long_dt$w_3)
 
     expect_equal(mean((fit$exp_estimates - exp_truth)^2), 0, tolerance = 0.05)
     expect_equal(
