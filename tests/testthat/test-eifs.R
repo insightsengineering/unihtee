@@ -206,7 +206,7 @@ test_that(
 
     # generate data
     set.seed(1042)
-    dt <- generate_test_data(n_obs = 1000, outcome_type = "time-to-event")
+    dt <- generate_test_data(n_obs = 10000, outcome_type = "time-to-event")
     long_dt <- tte_data_melt(
       data = dt,
       confounders = c("w_1", "w_2", "w_3"),
@@ -215,6 +215,15 @@ test_that(
       censoring = "censoring",
       time_cutoff = 5,
       prop_score_values = NULL
+    )
+
+    # fit the propensity score
+    prop_score_fit <- fit_prop_score(
+      train_data = dt,
+      valid_data = long_dt,
+      learners = sl3::Lrnr_glm_fast$new(),
+      exposure = "a",
+      confounders = c("w_1", "w_2", "w_3")
     )
 
     # fit the expected failure hazard
@@ -244,7 +253,7 @@ test_that(
       exposure = "a",
       outcome = "time",
       modifiers = c("w_1", "w_3"),
-      prop_score_fit = NULL,
+      prop_score_fit = prop_score_fit,
       cond_outcome_fit = NULL,
       prop_score_values = NULL,
       failure_hazard_fit = fail_fit,

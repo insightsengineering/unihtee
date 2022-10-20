@@ -1,4 +1,4 @@
-utils::globalVariables(names = c("a", ".SD"))
+utils::globalVariables(names = c("a", ".SD", "surv_est"))
 #' @title Uncentered Efficient Influence Function Computer
 #'
 #' @description \code{uncentered_eif()} computes thei efficient influence
@@ -50,10 +50,8 @@ uncentered_eif <- function(data,
                            failure_hazard_fit,
                            censoring_hazard_fit) {
 
-  ## compute conditional outcome residuals
-  cond_outcome_resid <- data[[outcome]] - cond_outcome_fit$estimates
-
   ## compute the inverse probability weights
+  ## NOTE: PS estimates must be as long as long_dt in TTE settings
   if (!is.null(prop_score_values)) {
     prop_scores <- prop_score_values
   } else {
@@ -66,6 +64,9 @@ uncentered_eif <- function(data,
   ## decide which EIFs to compute
   ## EIFs for continuous and binary outcomes with binary exposure
   if (is.null(failure_hazard_fit) && is.null(censoring_hazard_fit)) {
+
+    ## compute conditional outcome residuals
+    cond_outcome_resid <- data[[outcome]] - cond_outcome_fit$estimates
 
     ## compute augmented inverse probability weights outcomes
     if (type == "risk difference") {
@@ -87,13 +88,38 @@ uncentered_eif <- function(data,
     ## EIFs for time-to-event outcomes
   } else if (is.null(cond_outcome_fit)) {
     ## compute the survival probabilities
-    ## compute the censoring probabilities
-    ## add survival probability at time_cutoff to each row
-    ## get the lagged censoring probability in each row
+    data$ipws <- ipws
+    data$failure_haz_est <- failure_hazard_fit$estimates
+    data$failure_haz_exp_est <- failure_hazard_fit$exp_estimates
+    data$failure_haz_noexp_est <- failure_hazard_fit$noexp_estimates
+    data$censoring_haz_est <- censoring_hazard_fit$estimates
+    data[, surv_est := cumprod(1 - failure_haz_est), by = "id"]
+    data[, `:=`(
+      surv_time_cutoff = min(surv_est),
+      surv_exp_est = cumprod(1 - failure_haz_exp_est),
+      surv_noexp_est = cumprod(1 - failure_haz_noexp_est),
+      cens_est = cumprod(1 - censoring_haz_est)
+    ), by = "id"]
+    data[, cens_est_lag := data.table::shift(cens_est, n = 1, fill = 1),
+         by = "id"]
+
     ## compute the integrand of the EIF for each row
-    ## compute the integral for each observation
-    ## compute the AIPWs for each observation
-    TRUE
+    data[, prev_time := data.table::shift(get(outcome), n = 1, fill = 0),
+         by = "id"]
+    data[, int_weight := as.numeric(get(outcome)) - as.numeric(prev_time),
+         by = "id"]
+    data[, int_exp := int_weight * keep * ipws * surv_time_cutoff /
+           (cens_est_lag * surv_est) * (failure - failure_haz_est),
+         by = "id"]
+    data[, int_exp := cumsum(int_exp), by = "id"]
+
+    ## use only the observations at the time_cutoff
+    time_cutoff <- max(data[[outcome]])
+    data <- data[get(outcome) == time_cutoff, ]
+
+    ## compute the uncentered EIF
+    aipws <- data$int_exp + data$surv_exp_est - data$surv_noexp_est
+
   }
 
   ## compute that variance of the effect modifiers
