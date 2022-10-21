@@ -205,8 +205,8 @@ test_that(
     library(sl3)
 
     # generate data
-    set.seed(1042)
-    dt <- generate_test_data(n_obs = 10000, outcome_type = "time-to-event")
+    set.seed(16234)
+    dt <- generate_test_data(n_obs = 100000, outcome_type = "time-to-event")
     long_dt <- tte_data_melt(
       data = dt,
       confounders = c("w_1", "w_2", "w_3"),
@@ -221,7 +221,7 @@ test_that(
     prop_score_fit <- fit_prop_score(
       train_data = dt,
       valid_data = long_dt,
-      learners = sl3::Lrnr_glm_fast$new(),
+      learners = sl3::Lrnr_xgboost$new(),
       exposure = "a",
       confounders = c("w_1", "w_2", "w_3")
     )
@@ -230,7 +230,7 @@ test_that(
     fail_fit <- fit_failure_hazard(
       train_data = long_dt,
       valid_data = NULL,
-      learners = sl3:::Lrnr_ranger$new(),
+      learners = sl3:::Lrnr_xgboost$new(),
       exposure = "a",
       confounders = c("w_1", "w_2", "w_3")
     )
@@ -239,7 +239,7 @@ test_that(
     cens_fit <- fit_censoring_hazard(
       train_data = long_dt,
       valid_data = NULL,
-      learners = sl3:::Lrnr_glm_fast$new(),
+      learners = sl3:::Lrnr_xgboost$new(),
       exposure = "a",
       confounders = c("w_1", "w_2", "w_3"),
       censoring = "censoring"
@@ -266,43 +266,42 @@ test_that(
     ## set.seed(4514)
     ## dt <- generate_test_data(n_obs = 100000, outcome_type = "time-to-event")
 
-    ## # make it long
-    ## long_dt <- lapply(
-    ##   seq_len(nrow(dt)),
-    ##   function(obs) {
-    ##     obs_dt <- dt[obs]
-    ##     obs_dt <- obs_dt[rep(1:.N, 5)]
-    ##     obs_dt$time <- seq_len(5)
-    ##     obs_dt
-    ##   }
-    ## )
-    ## long_dt <- rbindlist(long_dt, idcol = "id")
-
-    ## # compute the true failure hazard at each timepoint under each condition
-    ## cond_surv_hazard <- function(time, exposure, w_1, w_2, w_3) {
-    ##   (time < 9) / (1 + exp(2 + 3 * exposure * w_1)) + (time == 9)
-    ## }
-    ## exp_truth <-
-    ##     cond_surv_hazard(long_dt$time, 1, long_dt$w_1, long_dt$w_2, long_dt$w_3)
-    ## noexp_truth <-
-    ##     cond_surv_hazard(long_dt$time, 0, long_dt$w_1, long_dt$w_2, long_dt$w_3)
-
-    ## # compute the survival probability at each time
-    ## long_dt$true_haz_exp <- exp_truth
-    ## long_dt$true_haz_noexp <- noexp_truth
-    ## long_dt[, surv_exp := cumprod(1 - true_haz_exp), by = "id"]
-    ## long_dt[, surv_noexp := cumprod(1 - true_haz_noexp), by = "id"]
-
-    ## # compute the restricted mean survival time differences
-    ## long_dt[, rmst := cumsum(surv_exp - surv_noexp), by = "id"]
-
-    ## # retain only the rmst differences at time_cutoff, and compute parameters
-    ## res_dt <- long_dt[time == 5]
-    ## w_1_param <- cov(res_dt$w_1, res_dt$rmst) / var(res_dt$w_1) # 1.721
-    ## w_3_param <- cov(res_dt$w_3, res_dt$rmst) / var(res_dt$w_3) # -0.005
-
-    expect_equal(eif[, sapply(.SD, mean)], c("w_1" = 1.72, "w_3" = 0),
-      tolerance = 0.1
+    # make it long
+    long_dt <- lapply(
+      seq_len(nrow(dt)),
+      function(obs) {
+        obs_dt <- dt[obs]
+        obs_dt <- obs_dt[rep(1:.N, 5)]
+        obs_dt$time <- seq_len(5)
+        obs_dt
+      }
     )
+    long_dt <- rbindlist(long_dt, idcol = "id")
+
+    # compute the true failure hazard at each timepoint under each condition
+    cond_surv_hazard <- function(time, exposure, w_1, w_2, w_3) {
+      (time < 9) / (1 + exp(2 + 3 * exposure * w_1)) + (time == 9)
+    }
+    exp_truth <-
+        cond_surv_hazard(long_dt$time, 1, long_dt$w_1, long_dt$w_2, long_dt$w_3)
+    noexp_truth <-
+        cond_surv_hazard(long_dt$time, 0, long_dt$w_1, long_dt$w_2, long_dt$w_3)
+
+    # compute the survival probability at each time
+    long_dt$true_haz_exp <- exp_truth
+    long_dt$true_haz_noexp <- noexp_truth
+    long_dt[, surv_exp := cumprod(1 - true_haz_exp), by = "id"]
+    long_dt[, surv_noexp := cumprod(1 - true_haz_noexp), by = "id"]
+
+    # compute the restricted mean survival time differences
+    long_dt[, rmst := cumsum(surv_exp - surv_noexp), by = "id"]
+
+    # retain only the rmst differences at time_cutoff, and compute parameters
+    res_dt <- long_dt[time == 5]
+    w_1_param <- cov(res_dt$w_1, res_dt$rmst) / var(res_dt$w_1) # 1.721
+    w_3_param <- cov(res_dt$w_3, res_dt$rmst) / var(res_dt$w_3) # -0.005
+
+    expect_equal(mean(eif$w_1), w_1_param, tolerance = 0.1)
+    expect_equal(mean(eif$w_3), w_3_param, tolerance = 0.1)
   }
 )
