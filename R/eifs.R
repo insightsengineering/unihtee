@@ -2,9 +2,8 @@ utils::globalVariables(
   names = c("a", ".SD", "surv_est", "failure_haz_est", "failure_haz_exp_est",
             "failure_haz_noexp_est", "censoring_haz_est", "cens_est",
             "cens_est_lag", "prev_time", "int_weight", "inner_integrand",
-            "keep", "surv_time_cutoff", "inner_integral", "outer_integrand",
-            "outer_integral", "failure", "surv_exp_est", "surv_noexp_est",
-            "`:=`")
+            "keep", "inner_integral", "outer_integrand", "outer_integral",
+            "failure", "surv_exp_est", "surv_noexp_est", "`:=`")
 )
 #' @title Uncentered Efficient Influence Function Computer
 #'
@@ -102,7 +101,6 @@ uncentered_eif <- function(data,
     data$censoring_haz_est <- censoring_hazard_fit$estimates
     data[, surv_est := cumprod(1 - failure_haz_est), by = "id"]
     data[, `:=`(
-      surv_time_cutoff = min(surv_est),
       surv_exp_est = cumprod(1 - failure_haz_exp_est),
       surv_noexp_est = cumprod(1 - failure_haz_noexp_est),
       cens_est = cumprod(1 - censoring_haz_est)
