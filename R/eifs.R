@@ -115,12 +115,12 @@ uncentered_eif <- function(data,
          by = "id"]
     data[, int_weight := as.numeric(get(outcome)) - as.numeric(prev_time),
          by = "id"]
-    data[, inner_integrand := int_weight * keep * ipws * surv_time_cutoff /
+    data[, inner_integrand := int_weight * keep * ipws /
            (cens_est_lag * surv_est) * (failure - failure_haz_est),
          by = "id"]
     data[, inner_integral := cumsum(inner_integrand), by = "id"]
-    data[, outer_integrand := inner_integral + surv_exp_est - surv_noexp_est,
-         by = "id"]
+    data[, outer_integrand := int_weight * (surv_est * inner_integral +
+             surv_exp_est - surv_noexp_est), by = "id"]
     data[, outer_integral := cumsum(outer_integrand), by = "id"]
 
     ## use only the observations at the time_cutoff
