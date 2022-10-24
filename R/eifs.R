@@ -1,4 +1,11 @@
-utils::globalVariables(names = c("a", ".SD", "surv_est"))
+utils::globalVariables(
+  names = c("a", ".SD", "surv_est", "failure_haz_est", "failure_haz_exp_est",
+            "failure_haz_noexp_est", "censoring_haz_est", "cens_est",
+            "cens_est_lag", "prev_time", "int_weight", "inner_integrand",
+            "keep", "surv_time_cutoff", "inner_integral", "outer_integrand",
+            "outer_integral", "failure", "surv_exp_est", "surv_noexp_est",
+            "`:=`")
+)
 #' @title Uncentered Efficient Influence Function Computer
 #'
 #' @description \code{uncentered_eif()} computes thei efficient influence
@@ -34,7 +41,7 @@ utils::globalVariables(names = c("a", ".SD", "surv_est"))
 #'   influence functions of each variable in \code{modifiers}. The rows
 #'   correspond to the observations of \code{data}.
 #'
-#' @importFrom data.table copy as.data.table
+#' @importFrom data.table copy as.data.table `:=` shift
 #'
 #' @keywords internal
 
@@ -112,16 +119,16 @@ uncentered_eif <- function(data,
            (cens_est_lag * surv_est) * (failure - failure_haz_est),
          by = "id"]
     data[, inner_integral := cumsum(inner_integrand), by = "id"]
-    data[, outter_integrand := inner_integral + surv_exp_est - surv_noexp_est,
+    data[, outer_integrand := inner_integral + surv_exp_est - surv_noexp_est,
          by = "id"]
-    data[, outter_integral := cumsum(outter_integrand), by = "id"]
+    data[, outer_integral := cumsum(outer_integrand), by = "id"]
 
     ## use only the observations at the time_cutoff
     time_cutoff <- max(data[[outcome]])
     data <- data[get(outcome) == time_cutoff, ]
 
     ## return the AIPWs
-    aipws <- data$outter_integral
+    aipws <- data$outer_integral
 
   }
 
