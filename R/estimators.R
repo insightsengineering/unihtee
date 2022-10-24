@@ -1,4 +1,11 @@
-utils::globalVariables(c(".SD", "..modifiers"))
+utils::globalVariables(
+  c(".SD", "..modifiers", ".I", ".N", "ipws", "surv_est", "cens_est",
+    "cens_est_lag", "surv_exp_est", "surv_noexp_est", "surv_exp_est_star",
+    "surv_noexp_est_star", "prev_time", "int_weight", "inner_integrand",
+    "surv_time_cutoff", "partial_h", "partial_h_1", "partial_h_0",
+    "failure_haz_exp_est", "failure_haz_noexp_est", "failure_haz_exp_est_star",
+    "failure_haz_noexp_est_star")
+)
 #' @title One Step Estimator
 #'
 #' @description \code{one_step_estimator()} computes the one-step estimates of
@@ -62,7 +69,9 @@ tml_estimator <- function(data,
                           type,
                           prop_score_fit,
                           prop_score_values = NULL,
-                          cond_outcome_fit) {
+                          cond_outcome_fit,
+                          failure_hazard_fit,
+                          censoring_hazard_fit) {
 
   # constant used to truncate estimates near zero
   eps <- 1e-10
@@ -136,7 +145,13 @@ tml_estimator <- function(data,
 
   } else if (is.null(cond_outcome_fit)) {
 
+    ## compute modifier variances
+    mod_dt <- data[data[, .I[1], by = "id"]$V1]
+    mod_dt <- mod_dt[, ..modifiers]
+    mod_vars <- mod_dt[, lapply(.SD, var)]
+
     ## compute the IPWs
+    data$prop_scores <- prop_scores
     data$ipws <- (2 * data[[exposure]] - 1) /
     (data[[exposure]] * prop_scores +
       (1 - data[[exposure]]) * (1 - prop_scores))
@@ -165,11 +180,6 @@ tml_estimator <- function(data,
     data[, inner_integrand := keep * ipws / (cens_est_lag * surv_est),
          by = "id"]
 
-    ## compute modifier variances
-    mod_dt <- data[, .I[1], by = "id"] # extract modifiers and ID
-    mod_dt <- mod_dt[, ..modifiers] # unique IDs
-    mod_vars <- mod_dt[, .lapply(.SD, var)]# compute modifier variances
-
     # compute the partial clever covariates at each timepoint
     the_times <- unique(data[[outcome]])
     survival_preds <- lapply(
@@ -187,9 +197,9 @@ tml_estimator <- function(data,
         filtered_dt[, `:=`(
           partial_h = inner_integrand * surv_time_cutoff,
           partial_h_1 = surv_time_cutoff * keep /
-            (cens_est_lag * sruv_est * prop_scores),
+            (cens_est_lag * surv_est * prop_scores),
           partial_h_0 = -surv_time_cutoff * keep /
-            (cens_est_lag * sruv_est * (1 - prop_scores)),
+            (cens_est_lag * surv_est * (1 - prop_scores))
         )]
 
         tilted_survivals <- lapply(
@@ -197,39 +207,39 @@ tml_estimator <- function(data,
           function(mod) {
 
             ## finalize the clever covariate
-            mod_h <- filtered_dt[[mod]] * filtered_dt[[partial_h]] /
+            mod_h <- filtered_dt[[mod]] * filtered_dt$partial_h /
               mod_vars[[mod]]
-            mod_h_1 <- filtered_dt[[mod]] * filtered_dt[[partial_h_1]] /
+            mod_h_1 <- filtered_dt[[mod]] * filtered_dt$partial_h_1 /
               mod_vars[[mod]]
-            mod_h_0 <- filtered_dt[[mod]] * filtered_dt[[partial_h_0]] /
+            mod_h_0 <- filtered_dt[[mod]] * filtered_dt$partial_h_0 /
               mod_vars[[mod]]
 
             ## tilt the conditional failure estimates
             epsilon <- stats::coef(
               stats::glm(
                 filtered_dt$failure ~ -1 + mod_h,
-                offset = stats::qlogis(estimates),
+                offset = stats::qlogis(filtered_dt$failure_haz_est),
                 family = "quasibinomial"
               )
             )
 
             ## compute the tilted conditional survival probabilities differences
             filtered_dt$failure_haz_exp_est_star <- stats::plogis(
-              stats::qlogis(failure_haz_exp_est) + epsilon * mod_h_1
+              stats::qlogis(filtered_dt$failure_haz_exp_est) + epsilon * mod_h_1
             )
             filtered_dt$failure_haz_noexp_est_star <- stats::plogis(
-              stats::qlogis(failure_haz_noexp_est) + epsilon * mod_h_0
+              stats::qlogis(filtered_dt$failure_haz_noexp_est) +
+                epsilon * mod_h_0
             )
             filtered_dt[, `:=`(
               surv_exp_est_star = cumprod(1 - failure_haz_exp_est_star),
               surv_noexp_est_star = cumprod(1 - failure_haz_noexp_est_star)
             ), by = "id"]
-            filtered_dt <- filtered_dt[, .I[.N], by = "id"]
+            filtered_dt <- filtered_dt[filtered_dt[, .I[.N], by = "id"]$V1]
             filtered_dt <- filtered_dt[, `:=`(
               weighted_surv_diff = int_weight *
-                (surv_exp_est_star - surv_noexp_est_star_,
-              modifier = mod,
-              time = t
+                (surv_exp_est_star - surv_noexp_est_star),
+              modifier = mod
             )]
 
             ## return the modifier and surv diff
@@ -249,8 +259,10 @@ tml_estimator <- function(data,
     survival_preds <- data.table::rbindlist(survival_preds)
 
     ## compute the restricted mean survival times
-    survival_preds <- data.table::dcast(survival_preds, modifier ~ surv_diff)
-    rmst_dt <- survival_preds[, lapply(.SD, sum), by = "id"]
+    rmst_dt <- data.table::dcast(
+      survival_preds, id ~ modifier, value.var = "weighted_surv_diff",
+      fun.aggregate = sum
+    )
 
     ## compute the TML estimates
     estimates <- lapply(
