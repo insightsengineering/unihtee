@@ -214,14 +214,22 @@ tml_estimator <- function(data,
             mod_h_0 <- filtered_dt[[mod]] * filtered_dt$partial_h_0 /
               mod_vars[[mod]]
 
+            init_fail_haz_est <- filtered_dt$failure_haz_est
+            epsilon <- 1
+
             ## tilt the conditional failure estimates
-            epsilon <- stats::coef(
-              stats::glm(
-                filtered_dt$failure ~ -1 + mod_h,
-                offset = stats::qlogis(filtered_dt$failure_haz_est),
-                family = "quasibinomial"
+            while (abs(epsilon) > 1e-10) {
+              epsilon <- stats::coef(
+                stats::glm(
+                  filtered_dt$failure ~ -1 + mod_h,
+                  offset = stats::qlogis(init_fail_haz_est),
+                  family = "quasibinomial"
+                )
               )
-            )
+              init_fail_haz_est <- stats::plogis(
+                stats::qlogis(init_fail_haz_est) + epsilon * mod_h
+              )
+            }
 
             ## compute the tilted conditional survival probabilities differences
             filtered_dt$failure_haz_exp_est_star <- stats::plogis(
