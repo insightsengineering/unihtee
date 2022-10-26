@@ -188,118 +188,186 @@ tml_estimator <- function(data,
     data[, int_weight := as.numeric(get(outcome)) - as.numeric(prev_time),
          by = "id"]
 
-    ## compute the partial clever covariate at each timepoint
-    data[, inner_integrand := keep * ipws / (cens_est_lag * surv_est),
-         by = "id"]
+    ## risk difference TEM VIP
+    if (type == "risk difference") {
+      ## compute the partial clever covariate at each timepoint
+      data[, inner_integrand := keep * ipws / (cens_est_lag * surv_est),
+           by = "id"]
 
-    # compute the partial clever covariates at each timepoint
-    the_times <- unique(data[[outcome]])
-    survival_preds <- lapply(
-      the_times,
-      function(t) {
+      ## compute the partial clever covariates at each timepoint
+      the_times <- sort(unique(data[[outcome]]))
+      survival_preds <- lapply(
+        the_times,
+        function(t) {
 
-        ## extract timepoints used for tilting
-        filtered_dt <- data.table::copy(data)
-        filtered_dt <- filtered_dt[get(outcome) <= t, ]
+          ## extract timepoints used for tilting
+          filtered_dt <- data.table::copy(data)
+          filtered_dt <- filtered_dt[get(outcome) <= t, ]
 
-        ## the time cutoff
-        filtered_dt[, surv_time_cutoff := min(surv_est)]
+          ## the time cutoff
+          filtered_dt[, surv_time_cutoff := min(surv_est)]
 
-        ## compute the partial clever covariates
-        filtered_dt[, `:=`(
-          partial_h = inner_integrand * surv_time_cutoff,
-          partial_h_1 = surv_time_cutoff * keep /
-            (cens_est_lag * surv_est * prop_scores),
-          partial_h_0 = -surv_time_cutoff * keep /
-            (cens_est_lag * surv_est * (1 - prop_scores))
-        )]
+          ## compute the partial clever covariates
+          filtered_dt[, `:=`(
+            partial_h = inner_integrand * surv_time_cutoff,
+            partial_h_1 = surv_time_cutoff * keep /
+              (cens_est_lag * surv_est * prop_scores),
+            partial_h_0 = -surv_time_cutoff * keep /
+              (cens_est_lag * surv_est * (1 - prop_scores))
+          )]
 
-        tilted_survivals <- lapply(
-          modifiers,
-          function(mod) {
+          tilted_survivals <- lapply(
+            modifiers,
+            function(mod) {
 
-            ## finalize the clever covariate
-            mod_h <- filtered_dt[[mod]] * filtered_dt$partial_h /
-              mod_vars[[mod]]
-            mod_h_1 <- filtered_dt[[mod]] * filtered_dt$partial_h_1 /
-              mod_vars[[mod]]
-            mod_h_0 <- filtered_dt[[mod]] * filtered_dt$partial_h_0 /
-              mod_vars[[mod]]
+              ## finalize the clever covariate
+              mod_h <- filtered_dt[[mod]] * filtered_dt$partial_h /
+                mod_vars[[mod]]
+              mod_h_1 <- filtered_dt[[mod]] * filtered_dt$partial_h_1 /
+                mod_vars[[mod]]
+              mod_h_0 <- filtered_dt[[mod]] * filtered_dt$partial_h_0 /
+                mod_vars[[mod]]
 
-            ## set initial values
-            init_fail_haz_est <- filtered_dt$failure_haz_est
-            filtered_dt$failure_haz_exp_est_star <-
-              filtered_dt$failure_haz_exp_est
-            filtered_dt$failure_haz_noexp_est_star <-
-              filtered_dt$failure_haz_noexp_est
-            epsilon <- 1
+              ## set initial values
+              init_fail_haz_est <- filtered_dt$failure_haz_est
+              filtered_dt$failure_haz_exp_est_star <-
+                filtered_dt$failure_haz_exp_est
+              filtered_dt$failure_haz_noexp_est_star <-
+                filtered_dt$failure_haz_noexp_est
+              epsilon <- 1
 
-            ## tilt the conditional failure estimates
-            while (abs(epsilon) > 1e-10) {
-              epsilon <- stats::coef(
-                stats::glm(
-                  filtered_dt$failure ~ -1 + mod_h,
-                  offset = stats::qlogis(init_fail_haz_est),
-                  family = "quasibinomial"
+              ## tilt the conditional failure estimates
+              while (abs(epsilon) > 1e-10) {
+                epsilon <- stats::coef(
+                  stats::glm(
+                    filtered_dt$failure ~ -1 + mod_h,
+                    offset = stats::qlogis(init_fail_haz_est),
+                    family = "quasibinomial"
+                  )
                 )
-              )
-              init_fail_haz_est <- stats::plogis(
-                stats::qlogis(init_fail_haz_est) + epsilon * mod_h
-              )
+                init_fail_haz_est <- stats::plogis(
+                  stats::qlogis(init_fail_haz_est) + epsilon * mod_h
+                )
 
-              ## compute the tilted conditional survival probabilities
-              ## differences
-              filtered_dt$failure_haz_exp_est_star <- stats::plogis(
-                stats::qlogis(filtered_dt$failure_haz_exp_est_star) +
-                  epsilon * mod_h_1
-              )
-              filtered_dt$failure_haz_noexp_est_star <- stats::plogis(
-                stats::qlogis(filtered_dt$failure_haz_noexp_est_star) +
-                  epsilon * mod_h_0
-              )
+                ## compute the tilted conditional survival probabilities
+                ## differences
+                filtered_dt$failure_haz_exp_est_star <- stats::plogis(
+                  stats::qlogis(filtered_dt$failure_haz_exp_est_star) +
+                    epsilon * mod_h_1
+                )
+                filtered_dt$failure_haz_noexp_est_star <- stats::plogis(
+                  stats::qlogis(filtered_dt$failure_haz_noexp_est_star) +
+                    epsilon * mod_h_0
+                )
+              }
+
+              filtered_dt[, `:=`(
+                surv_exp_est_star = cumprod(1 - failure_haz_exp_est_star),
+                surv_noexp_est_star = cumprod(1 - failure_haz_noexp_est_star)
+              ), by = "id"]
+              filtered_dt <- filtered_dt[filtered_dt[, .I[.N], by = "id"]$V1]
+              filtered_dt <- filtered_dt[, `:=`(
+                weighted_surv_diff = int_weight *
+                  (surv_exp_est_star - surv_noexp_est_star),
+                modifier = mod
+              )]
+
+              ## return the modifier and surv diff
+              filtered_dt[, c("id", "modifier", "weighted_surv_diff"),
+                          with = FALSE]
+
             }
+          )
 
-            filtered_dt[, `:=`(
-              surv_exp_est_star = cumprod(1 - failure_haz_exp_est_star),
-              surv_noexp_est_star = cumprod(1 - failure_haz_noexp_est_star)
-            ), by = "id"]
-            filtered_dt <- filtered_dt[filtered_dt[, .I[.N], by = "id"]$V1]
-            filtered_dt <- filtered_dt[, `:=`(
-              weighted_surv_diff = int_weight *
-                (surv_exp_est_star - surv_noexp_est_star),
-              modifier = mod
-            )]
+          ## combine all the modifiers into a long data.table
+          data.table::rbindlist(tilted_survivals)
 
-            ## return the modifier and surv diff
-            filtered_dt[, c("id", "modifier", "weighted_surv_diff"),
-                        with = FALSE]
+        }
+      )
 
+      ## combine all times and survival probabilities into a long data.table
+      survival_preds <- data.table::rbindlist(survival_preds)
+
+      ## compute the restricted mean survival times
+      rmst_dt <- data.table::dcast(
+        survival_preds, id ~ modifier, value.var = "weighted_surv_diff",
+        fun.aggregate = sum
+      )
+
+      ## compute the TML estimates
+      estimates <- lapply(
+        modifiers,
+        function(mod) {
+          cov(rmst_dt[[mod]], mod_dt[[mod]]) / mod_vars[[mod]]
+        }
+      )
+
+    } else if (type == "relative risk") {
+      ## compute the clever covariate
+      data[, `:=`(
+        partial_h = keep * ipws / (cens_est_lag * surv_est),
+        partial_h_1 = keep / (cens_est_lag * surv_est * prop_scores),
+        partial_h_0 = -keep / (cens_est_lag * surv_est * (1 - prop_scores))
+      )]
+
+      estimates <- lapply(
+        modifiers,
+        function(mod) {
+
+          data_mod <- data.table::copy(data)
+
+          ## finalize the clever covariate
+          mod_h <- data_mod[[mod]] * data_mod$partial_h / mod_vars[[mod]]
+          mod_h_1 <- data_mod[[mod]] * data_mod$partial_h_1 / mod_vars[[mod]]
+          mod_h_0 <- data_mod[[mod]] * data_mod$partial_h_0 / mod_vars[[mod]]
+
+          ## set initial values
+          data_mod$failure_haz_est_star <- data_mod$failure_haz_est
+          data_mod$failure_haz_exp_est_star <- data_mod$failure_haz_exp_est
+          data_mod$failure_haz_noexp_est_star <- data_mod$failure_haz_noexp_est
+          epsilon <- 1
+
+          ## tilt the conditional failure estimates
+          while (abs(epsilon) > 1e-10) {
+            epsilon <- stats::coef(
+              stats::glm(
+                data_mod$failure ~ -1 + mod_h,
+                offset = stats::qlogis(data_mod$failure_haz_est_star),
+                family = "quasibinomial"
+              )
+            )
+            data_mod$failure_haz_est_star <- stats::plogis(
+              stats::qlogis(data_mod$failure_haz_est) + epsilon * mod_h
+            )
+
+            ## compute the tilted conditional survival probabilities differences
+            data_mod$failure_haz_exp_est_star <- stats::plogis(
+              stats::qlogis(data_mod$failure_haz_exp_est_star) +
+                epsilon * mod_h_1
+            )
+            data_mod$failure_haz_noexp_est_star <- stats::plogis(
+              stats::qlogis(data_mod$failure_haz_noexp_est_star) +
+                epsilon * mod_h_0
+            )
           }
-        )
 
-        ## combine all the modifiers into a long data.table
-        data.table::rbindlist(tilted_survivals)
+          ## compute the conditional survival under treatment and control
+          data_mod[, `:=`(
+            surv_exp_est_star = cumprod(1 - failure_haz_exp_est_star),
+            surv_noexp_est_star = cumprod(1 - failure_haz_noexp_est_star)
+          ), by = "id"]
 
-      }
-    )
+          ## only retain the rows at the designated time cutoff
+          data_mod <- data_mod[data_mod[, .I[.N], by = "id"]$V1]
 
-    ## combine all times and survival probabilities into a long data.table
-    survival_preds <- data.table::rbindlist(survival_preds)
+          ## compute the estimate
+          log_diff <- log(data_mod$surv_exp_est_star /
+                            data_mod$surv_noexp_est_star)
+          cov(log_diff, data_mod[[mod]]) / mod_vars[[mod]]
 
-    ## compute the restricted mean survival times
-    rmst_dt <- data.table::dcast(
-      survival_preds, id ~ modifier, value.var = "weighted_surv_diff",
-      fun.aggregate = sum
-    )
-
-    ## compute the TML estimates
-    estimates <- lapply(
-      modifiers,
-      function(mod) {
-        cov(rmst_dt[[mod]], mod_dt[[mod]]) / mod_vars[[mod]]
-      }
-    )
-
+        }
+      )
+    }
   }
 
   # assemble the estimates into a data.table
