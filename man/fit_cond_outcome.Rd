@@ -41,7 +41,7 @@ expected conditional outcome for each observation in \code{valid_data}, if
 specified, or \code{train_data} otherwise, had these observations been
 exposed. (4) \code{"noexp_estimates"}, the expected conditional outcome for
 each observation in \code{valid_data}, if specified, or \code{train_data}
-otherwise, had these observations been exposed.
+otherwise, had these observations not been exposed.
 }
 \description{
 \code{fit_cond_outcome()} estimates the conditional outcome,

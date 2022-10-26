@@ -1,10 +1,11 @@
 source("testing-utils.R")
 
 test_that(
-  paste("fit_prop_score() outputs a vector of estimates that is similar to",
-        "ground truth when a validation dataset isn't provided"),
+  paste(
+    "fit_prop_score() outputs a vector of estimates that is similar to",
+    "ground truth when a validation dataset isn't provided"
+  ),
   {
-
     library(sl3)
 
     # generate data
@@ -12,21 +13,22 @@ test_that(
     dt <- generate_test_data(n_obs = 200)
 
     # fit the propensity score
-    fit <- fit_prop_score(train_data = dt,
-                          valid_data = NULL,
-                          learners = sl3::Lrnr_glm_fast$new(),
-                          exposure = "a",
-                          confounders = c("w_1", "w_2", "w_3"))
+    fit <- fit_prop_score(
+      train_data = dt,
+      valid_data = NULL,
+      learners = sl3::Lrnr_glm_fast$new(),
+      exposure = "a",
+      confounders = c("w_1", "w_2", "w_3")
+    )
 
     # make sure that the MSE is approximately zero
     expect_equal(mean((fit$estimates - dt$prop_score)^2), 0, tolerance = 0.01)
-
-})
+  }
+)
 
 test_that(
   "fit_prop_score() outputs the sl3 lrnr object fit on the training data",
-{
-
+  {
     library(sl3)
 
     # generate data
@@ -34,21 +36,24 @@ test_that(
     dt <- generate_test_data(n_obs = 200)
 
     # fit the propensity score
-    fit <- fit_prop_score(train_data = dt,
-                          valid_data = NULL,
-                          learners = sl3::Lrnr_glm_fast$new(),
-                          exposure = "a",
-                          confounders = c("w_1", "w_2", "w_3"))
+    fit <- fit_prop_score(
+      train_data = dt,
+      valid_data = NULL,
+      learners = sl3::Lrnr_glm_fast$new(),
+      exposure = "a",
+      confounders = c("w_1", "w_2", "w_3")
+    )
 
     expect_equal(class(fit$fit), c("Lrnr_glm_fast", "Lrnr_base", "R6"))
-
-})
+  }
+)
 
 test_that(
-  paste("fit_prop_score() outputs a vector of estimates that is similar to",
-        "ground truth when a validation set is provided"),
+  paste(
+    "fit_prop_score() outputs a vector of estimates that is similar to",
+    "ground truth when a validation set is provided"
+  ),
   {
-
     library(sl3)
 
     # generate data
@@ -57,21 +62,26 @@ test_that(
     valid_dt <- generate_test_data(n_obs = 200)
 
     # fit the propensity score
-    fit <- fit_prop_score(train_data = train_dt,
-                          valid_data = valid_dt,
-                          learners = sl3::Lrnr_glm_fast$new(),
-                          exposure = "a",
-                          confounders = c("w_1", "w_2", "w_3"))
+    fit <- fit_prop_score(
+      train_data = train_dt,
+      valid_data = valid_dt,
+      learners = sl3::Lrnr_glm_fast$new(),
+      exposure = "a",
+      confounders = c("w_1", "w_2", "w_3")
+    )
 
     # make sure that the MSE is approximately zero
     expect_equal(mean((fit$estimates - valid_dt$prop_score)^2), 0,
-                 tolerance = 0.01)
-
-})
+      tolerance = 0.01
+    )
+  }
+)
 
 test_that(
-  paste("fit_cond_est() returns a vector of estimates that is similar to",
-        "ground truth when no validation set is provided"),
+  paste(
+    "fit_cond_est() returns a vector of estimates that is similar to",
+    "ground truth when no validation set is provided"
+  ),
   {
     library(sl3)
 
@@ -80,20 +90,25 @@ test_that(
     dt <- generate_test_data(n_obs = 1000)
 
     # fit the expected cond outcome
-    fit <- fit_cond_outcome(train_data = dt,
-                            valid_data = NULL,
-                            learners = sl3::Lrnr_ranger$new(),
-                            exposure = "a",
-                            confounders = c("w_1", "w_2", "w_3"),
-                            outcome = "y")
+    fit <- fit_cond_outcome(
+      train_data = dt,
+      valid_data = NULL,
+      learners = sl3::Lrnr_ranger$new(),
+      exposure = "a",
+      confounders = c("w_1", "w_2", "w_3"),
+      outcome = "y"
+    )
 
     # make sure that the MSE is approximately zero
     expect_equal(mean((fit$estimates - dt$y)^2), 0, tolerance = 0.05)
-})
+  }
+)
 
 test_that(
-  paste("fit_cond_est() returns a vector of estimates that is similar to",
-        "ground truth when a validation set is provided"),
+  paste(
+    "fit_cond_est() returns a vector of estimates that is similar to",
+    "ground truth when a validation set is provided"
+  ),
   {
     library(sl3)
 
@@ -103,21 +118,23 @@ test_that(
     valid_dt <- generate_test_data(n_obs = 200)
 
     # fit the expected cond outcome
-    fit <- fit_cond_outcome(train_data = train_dt,
-                            valid_data = valid_dt,
-                            learners = sl3::Lrnr_ranger$new(),
-                            exposure = "a",
-                            confounders = c("w_1", "w_2", "w_3"),
-                            outcome = "y")
+    fit <- fit_cond_outcome(
+      train_data = train_dt,
+      valid_data = valid_dt,
+      learners = sl3::Lrnr_ranger$new(),
+      exposure = "a",
+      confounders = c("w_1", "w_2", "w_3"),
+      outcome = "y"
+    )
 
     # make sure that the MSE is approximately zero
     expect_equal(mean((fit$estimates - valid_dt$y)^2), 0, tolerance = 0.05)
-})
+  }
+)
 
 test_that(
   "fit_cond_outcome() outputs the sl3 lrnr object fit on the training data",
-{
-
+  {
     library(sl3)
 
     # generate data
@@ -125,20 +142,24 @@ test_that(
     dt <- generate_test_data(n_obs = 200)
 
     # fit the expected cond outcome
-    fit <- fit_cond_outcome(train_data = dt,
-                            valid_data = NULL,
-                            learners = sl3::Lrnr_glm_fast$new(),
-                            exposure = "a",
-                            confounders = c("w_1", "w_2", "w_3"),
-                            outcome = "y")
+    fit <- fit_cond_outcome(
+      train_data = dt,
+      valid_data = NULL,
+      learners = sl3::Lrnr_glm_fast$new(),
+      exposure = "a",
+      confounders = c("w_1", "w_2", "w_3"),
+      outcome = "y"
+    )
 
     expect_equal(class(fit$fit), c("Lrnr_glm_fast", "Lrnr_base", "R6"))
-
-})
+  }
+)
 
 test_that(
-  paste("fit_cond_est() returns vectors of potential outcome estimates that is",
-        "similar to ground truth when no validation set is provided"),
+  paste(
+    "fit_cond_est() returns vectors of potential outcome estimates that is",
+    "similar to ground truth when no validation set is provided"
+  ),
   {
     library(sl3)
 
@@ -147,14 +168,103 @@ test_that(
     dt <- generate_test_data(n_obs = 5000)
 
     # fit the expected cond outcome
-    fit <- fit_cond_outcome(train_data = dt,
-                            valid_data = NULL,
-                            learners = sl3::Lrnr_ranger$new(),
-                            exposure = "a",
-                            confounders = c("w_1", "w_2", "w_3"),
-                            outcome = "y")
+    fit <- fit_cond_outcome(
+      train_data = dt,
+      valid_data = NULL,
+      learners = sl3::Lrnr_ranger$new(),
+      exposure = "a",
+      confounders = c("w_1", "w_2", "w_3"),
+      outcome = "y"
+    )
 
     # make sure that the MSE is approximately zero
     expect_equal(mean((fit$exp_estimates - dt$y_1)^2), 0, tolerance = 0.1)
     expect_equal(mean((fit$noexp_estimates - dt$y_0)^2), 0, tolerance = 0.1)
-})
+  }
+)
+
+test_that(
+  paste(
+    "fit_failure_hazard() returns vectors of potential conditional failure",
+    "hazard estmiates that are close to the ground truth"
+  ),
+  {
+    library(sl3)
+
+    # generate the data
+    set.seed(100)
+    dt <- generate_test_data(n_obs = 300, outcome_type = "time-to-event")
+    long_dt <- tte_data_melt(
+      data = dt,
+      confounders = c("w_1", "w_2", "w_3"),
+      exposure = "a",
+      outcome = "time",
+      censoring = "censoring",
+      time_cutoff = 5,
+      prop_score_values = NULL
+    )
+
+    # fit the expected failure hazard
+    fit <- fit_failure_hazard(
+      train_data = long_dt,
+      valid_data = NULL,
+      learners = sl3:::Lrnr_ranger$new(),
+      exposure = "a",
+      confounders = c("w_1", "w_2", "w_3")
+    )
+
+    # compute the true hazards
+    cond_surv_hazard <- function(time, exposure, w_1, w_2, w_3) {
+      (time < 9) / (1 + exp(2 + 3 * exposure * w_1)) + (time == 9)
+    }
+    exp_truth <-
+      cond_surv_hazard(long_dt$time, 1, long_dt$w_1, long_dt$w_2, long_dt$w_3)
+    noexp_truth <-
+      cond_surv_hazard(long_dt$time, 0, long_dt$w_1, long_dt$w_2, long_dt$w_3)
+
+    expect_equal(mean((fit$exp_estimates - exp_truth)^2), 0, tolerance = 0.05)
+    expect_equal(
+      mean((fit$noexp_estimates - noexp_truth)^2), 0, tolerance = 0.05
+    )
+  }
+)
+
+
+test_that(
+  paste(
+    "fit_censoring_hazard() returns vectors of potential conditional censoring",
+    "hazard estimates that are close to the ground truth"
+  ),
+  {
+    library(sl3)
+
+    # generate the data
+    set.seed(100)
+    dt <- generate_test_data(n_obs = 300, outcome_type = "time-to-event")
+    long_dt <- tte_data_melt(
+      data = dt,
+      confounders = c("w_1", "w_2", "w_3"),
+      exposure = "a",
+      outcome = "time",
+      censoring = "censoring",
+      time_cutoff = 5,
+      prop_score_values = NULL
+    )
+
+    # fit the expected failure hazard
+    fit <- fit_censoring_hazard(
+      train_data = long_dt,
+      valid_data = NULL,
+      learners = sl3:::Lrnr_glm_fast$new(),
+      exposure = "a",
+      confounders = c("w_1", "w_2", "w_3"),
+      censoring = "censoring"
+    )
+
+    # compute the true hazards
+    expect_equal(mean((fit$exp_estimates - 0.05)^2), 0, tolerance = 0.005)
+    expect_equal(
+      mean((fit$noexp_estimates - 0.05)^2), 0, tolerance = 0.005
+    )
+  }
+)

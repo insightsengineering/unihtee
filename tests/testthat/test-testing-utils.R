@@ -1,8 +1,8 @@
 source("testing-utils.R")
 
 test_that(
-  "test_hypotheses() outputs a data.table with one row per modifier", {
-
+  "test_hypotheses() outputs a data.table with one row per modifier",
+  {
     library(sl3)
 
     # generate data
@@ -35,7 +35,9 @@ test_that(
       modifiers = c("w_1", "w_3"),
       prop_score_fit = prop_score_fit,
       prop_score_values = NULL,
-      cond_outcome_fit = cond_outcome_fit
+      cond_outcome_fit = cond_outcome_fit,
+      failure_hazard_fit = NULL,
+      censoring_hazard_fit = NULL
     )
 
     eif_vars <- ueif_dt[, lapply(.SD, var)]
@@ -48,12 +50,15 @@ test_that(
     )
 
     expect_equal(nrow(test_dt), 2)
-})
+  }
+)
 
 test_that(
-  paste("test_hypotheses() contains modifier, estimate, se, z, p_value,",
-        "ci_lower", "ci_upper", "p_value_fdr columns"), {
-
+  paste(
+    "test_hypotheses() contains modifier, estimate, se, z, p_value,",
+    "ci_lower", "ci_upper", "p_value_fdr columns"
+  ),
+  {
     library(sl3)
 
     # generate data
@@ -86,10 +91,13 @@ test_that(
       modifiers = c("w_1", "w_3"),
       prop_score_fit = prop_score_fit,
       prop_score_values = NULL,
-      cond_outcome_fit = cond_outcome_fit
+      cond_outcome_fit = cond_outcome_fit,
+      failure_hazard_fit = NULL,
+      censoring_hazard_fit = NULL
     )
 
-    eif_vars <- ueif_dt[, lapply(.SD, var)]
+    eif_vars <-
+      ueif_dt[, lapply(.SD, var)]
 
     test_dt <- test_hypotheses(
       n_obs = nrow(dt),
@@ -98,14 +106,19 @@ test_that(
       rescale_factor = 1
     )
 
-    expect_equal(colnames(test_dt),
-                 c("modifier", "estimate", "se", "z", "p_value",
-                   "ci_lower", "ci_upper", "p_value_fdr"))
-})
+    expect_equal(
+      colnames(test_dt),
+      c(
+        "modifier", "estimate", "se", "z", "p_value",
+        "ci_lower", "ci_upper", "p_value_fdr"
+      )
+    )
+  }
+)
 
 test_that(
-  "test_hypotheses() properly rescales the estimates", {
-
+  "test_hypotheses() properly rescales the estimates",
+  {
     library(sl3)
 
     # generate data
@@ -143,7 +156,9 @@ test_that(
       modifiers = c("w_1", "w_3"),
       prop_score_fit = prop_score_fit,
       prop_score_values = NULL,
-      cond_outcome_fit = cond_outcome_fit
+      cond_outcome_fit = cond_outcome_fit,
+      failure_hazard_fit = NULL,
+      censoring_hazard_fit = NULL
     )
 
     eif_vars <- ueif_dt[, lapply(.SD, var)]
@@ -157,11 +172,12 @@ test_that(
 
     expect_equal(test_dt$estimate[1], 0, tolerance = 0.05)
     expect_equal(test_dt$estimate[2], 1, tolerance = 0.05)
-})
+  }
+)
 
 test_that(
-  "test_hypotheses() properly rescales the variance estimates", {
-
+  "test_hypotheses() properly rescales the variance estimates",
+  {
     library(sl3)
 
     # generate data
@@ -199,7 +215,9 @@ test_that(
       modifiers = c("w_1", "w_3"),
       prop_score_fit = prop_score_fit,
       prop_score_values = NULL,
-      cond_outcome_fit = cond_outcome_fit
+      cond_outcome_fit = cond_outcome_fit,
+      failure_hazard_fit = NULL,
+      censoring_hazard_fit = NULL
     )
 
     eif_vars <- ueif_dt[, lapply(.SD, var)]
@@ -241,7 +259,9 @@ test_that(
       modifiers = c("w_1", "w_3"),
       prop_score_fit = prop_score_fit,
       prop_score_values = NULL,
-      cond_outcome_fit = cond_outcome_fit
+      cond_outcome_fit = cond_outcome_fit,
+      failure_hazard_fit = NULL,
+      censoring_hazard_fit = NULL
     )
 
     eif_vars <- ueif_dt[, lapply(.SD, var)]
@@ -255,4 +275,5 @@ test_that(
 
     expect_equal(rescaled_test_dt$se[1], test_dt$se[1], tolerance = 0.001)
     expect_equal(rescaled_test_dt$se[2], test_dt$se[2], tolerance = 0.001)
-})
+  }
+)
