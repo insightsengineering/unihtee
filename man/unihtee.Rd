@@ -10,12 +10,16 @@ unihtee(
   modifiers,
   exposure,
   outcome,
-  outcome_type = c("continuous", "binary"),
+  censoring = NULL,
+  time_cutoff = NULL,
+  outcome_type = c("continuous", "binary", "time-to-event"),
   risk_type = c("risk difference", "relative risk"),
   estimator = c("tmle", "onestep"),
   cond_outcome_estimator = sl3::Lrnr_glm_fast$new(),
   prop_score_estimator = sl3::Lrnr_glm_fast$new(),
-  prop_score_values = NULL
+  prop_score_values = NULL,
+  failure_hazard_estimator = sl3::Lrnr_xgboost$new(),
+  censoring_hazard_estimator = sl3::Lrnr_xgboost$new()
 )
 }
 \arguments{
@@ -32,8 +36,16 @@ the suspected effect modifiers. This vector must be a subset of
 
 \item{outcome}{A \code{character} corresponding to the outcome variable.}
 
+\item{censoring}{A \code{character} indicating the right censoring indicator
+variable. Only used with time-to-event outcomes. Defaults to \code{NULL}.}
+
+\item{time_cutoff}{A \code{numeric} representing the timepoint at which to
+evaluate the time-to-event parameter. Only used with time-to-event
+outcomes. Defaults to \code{NULL}.}
+
 \item{outcome_type}{A \code{character} indicating the outcome type.
-\code{"continuous"} and \code{"binary"} are currently supported.}
+\code{"continuous"}, \code{"binary"} and \code{"time-to-event"} are
+currently supported.}
 
 \item{risk_type}{A \code{character} indicating the type of treatment effect
 modifier variable importance parameter. Currently supports
@@ -46,19 +58,34 @@ latter uses a one step estimator.}
 
 \item{cond_outcome_estimator}{A \code{\link[sl3]{Stack}}, or other learner
 class (inheriting from \code{\link[sl3]{Lrnr_base}}), containing a set of
-learners from \pkg{sl3} to estimate the propensity score model. Defaults to
-a generalized linear model with one- and two- way interactions among all
-\code{confounders} and \code{exposure} variables.}
+learners from \pkg{sl3} to estimate the conditional outcome. Defaults to a
+generalized linear model with one- and two- way interactions among all
+\code{confounders} and \code{exposure} variables. Only used with continuous
+and binary outcomes.}
 
 \item{prop_score_estimator}{A \code{\link[sl3]{Stack}}, or other learner
 class (inheriting from \code{\link[sl3]{Lrnr_base}}), containing a set of
-learners from \pkg{sl3} to estimate the propensity score model. Defaults to
-a generalized linear model with one- and two- way interactions among all
+learners from \pkg{sl3} to estimate the propensity score. Defaults to a
+generalized linear model with one- and two- way interactions among all
 \code{confounders} variables.}
 
 \item{prop_score_values}{An optional \code{character} corresponding to the
 (known) propensity score values for each observation in \code{data}.
 Defaults to \code{NULL}.}
+
+\item{failure_hazard_estimator}{A \code{\link[sl3]{Stack}}, or other learner
+class (inheriting from \code{\link[sl3]{Lrnr_base}}), containing a set of
+learners from \pkg{sl3} to estimate the conditional failure hazard
+function. Defaults to an xgboost learner with \code{confounders} and
+\code{exposure} variables as covariates. Only used with time-to-event
+outcomes.}
+
+\item{censoring_hazard_estimator}{A \code{\link[sl3]{Stack}}, or other
+learner class (inheriting from \code{\link[sl3]{Lrnr_base}}), containing a
+set of learners from \pkg{sl3} to estimate the conditional censoring hazard
+function. Defaults to an xgboost learner with \code{confounders} and
+\code{exposure} variables as covariates. Only used with time-to-event
+outcomes.}
 }
 \value{
 A \code{data.table} containing the effect estimates and (adjusted)
@@ -68,6 +95,6 @@ ordered according to ascending p-values.
 \description{
 \code{unihtee()} estimates treatment effect modifiers variable
 importance parameters (TEM VIPs). These TEM VIPs are defined on the risk
-difference or relative risk scales and can be estimated using one step or
+difference or relative risk scales and can be estimated using one-step or
 targeted maximum likelihood estimators.
 }
