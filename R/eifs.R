@@ -3,7 +3,8 @@ utils::globalVariables(
             "failure_haz_noexp_est", "censoring_haz_est", "cens_est",
             "cens_est_lag", "prev_time", "int_weight", "inner_integrand",
             "keep", "inner_integral", "outer_integrand", "outer_integral",
-            "failure", "surv_exp_est", "surv_noexp_est", "`:=`")
+            "failure", "surv_exp_est", "surv_noexp_est", "`:=`", "integrand",
+            "integral")
 )
 #' @title Uncentered Efficient Influence Function Computer
 #'
