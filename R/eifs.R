@@ -124,12 +124,12 @@ uncentered_eif <- function(data,
           ]
       data[, aipws := cumsum(outer_integrand), by = "id"]
     } else if (type == "relative risk") {
-      data[, inner_integrand := int_weight * keep * ipws /
+      data[, integrand := int_weight * keep * ipws /
                (cens_est_lag * surv_est) * (failure - failure_haz_est),
            by = "id"
            ]
-      data[, inner_integral := cumsum(inner_integrand), by = "id"]
-      data[, aipws := inner_integral + log(surv_exp_est / surv_noexp_est)]
+      data[, integral := cumsum(integrand), by = "id"]
+      data[, aipws := integral + log(surv_exp_est / surv_noexp_est)]
     }
 
     ## use only the observations at the time_cutoff

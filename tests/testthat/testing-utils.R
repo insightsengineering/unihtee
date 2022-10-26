@@ -41,13 +41,20 @@ generate_test_data <- function(n_obs = 200, outcome_type = "continuous") {
       y = y
     )
 
-  } else if (outcome_type == "time-to-event") {
+  } else if (outcome_type %in% c("time-to-event", "time-to-event RR")) {
 
     # define hazard functions
-    cond_surv_hazard <- function(time, exposure, w_1, w_2, w_3) {
-      (time < 9) / (1 + exp(2 + 3 * exposure * w_1)) + (time == 9)
-    }
     cond_cens_hazard <- function(time, exposure, w_1, w_2, w_3) 0.05
+    if (outcome_type == "time-to-event RR") {
+      cond_surv_hazard <- function(time, exposure, w_1, w_2, w_3) {
+        (time < 9) / (2 + exp(2 * exposure * w_1)) + (time == 9)
+      }
+    } else {
+      # very prone to survival probabilities near 0 or 1
+      cond_surv_hazard <- function(time, exposure, w_1, w_2, w_3) {
+        (time < 9) / (1 + exp(2 + 3 * exposure * w_1)) + (time == 9)
+      }
+    }
 
     # generate the failure events for t = 1 to 9
     failure_time_sim <- function(exposure) {
