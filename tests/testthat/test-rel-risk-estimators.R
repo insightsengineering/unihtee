@@ -285,3 +285,70 @@ test_that(
     )
   }
 )
+
+test_that(
+  paste("one_step_estimator() produces accurate estimates without",
+        "cross-fitting, TTE outcome"),
+  {
+    # generate data
+    set.seed(507)
+    dt <- generate_test_data(n_obs = 5000, outcome_type = "time-to-event RR")
+    long_dt <- tte_data_melt(
+      data = dt,
+      confounders = c("w_1", "w_2", "w_3"),
+      exposure = "a",
+      outcome = "time",
+      censoring = "censoring",
+      time_cutoff = 3,
+      prop_score_values = NULL
+    )
+
+    # fit the propensity score
+    prop_score_fit <- fit_prop_score(
+      train_data = dt,
+      valid_data = long_dt,
+      learners = sl3::Lrnr_glm_fast$new(),
+      exposure = "a",
+      confounders = c("w_1", "w_2", "w_3")
+    )
+
+    # fit the expected failure hazard
+    fail_fit <- fit_failure_hazard(
+      train_data = long_dt,
+      valid_data = NULL,
+      learners = sl3:::Lrnr_xgboost$new(),
+      exposure = "a",
+      confounders = c("w_1", "w_2", "w_3")
+    )
+
+    # fit the expected failure hazard
+    cens_fit <- fit_censoring_hazard(
+      train_data = long_dt,
+      valid_data = NULL,
+      learners = sl3:::Lrnr_xgboost$new(),
+      exposure = "a",
+      confounders = c("w_1", "w_2", "w_3"),
+      censoring = "censoring"
+    )
+
+    # TML estimates
+    tmle <- tml_estimator(
+      data = long_dt,
+      confounders = c("w_1", "w_2", "w_3"),
+      modifiers = c("w_1", "w_2", "w_3"),
+      exposure = "a",
+      outcome = "time",
+      type = "relative risk",
+      prop_score_values = NULL,
+      prop_score_fit = prop_score_fit,
+      cond_outcome_fit = NULL,
+      failure_hazard_fit = fail_fit,
+      censoring_hazard_fit = cens_fit
+    )
+
+    # note that the true parameter values for w_1, w_2, w_3 are 0.6, 0, 0
+    expect_equal(abs(tmle$w_1 - 0.6), 0, tolerance = 0.1)
+    expect_equal(tmle$w_2, 0, tolerance = 0.1)
+    expect_equal(tmle$w_3, 0, tolerance = 0.1)
+  }
+)
