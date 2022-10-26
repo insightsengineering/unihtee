@@ -313,8 +313,8 @@ test_that(
     library(sl3)
 
     # generate data
-    set.seed(84891)
-    dt <- generate_test_data(n_obs = 10000, outcome_type = "time-to-event")
+    set.seed(72341)
+    dt <- generate_test_data(n_obs = 5000, outcome_type = "time-to-event")
     long_dt <- tte_data_melt(
       data = dt,
       confounders = c("w_1", "w_2", "w_3"),
@@ -369,7 +369,7 @@ test_that(
     )
 
     # note that the true parameter values for w_1, w_3 are approx 1.7, 0, 0
-    expect_equal(tmle_fit$w_1, 1.7, tolerance = 0.1)
+    expect_equal(tmle_fit$w_1, 1.72, tolerance = 0.1)
     expect_equal(tmle_fit$w_2, 0, tolerance = 0.1)
     expect_equal(tmle_fit$w_3, 0, tolerance = 0.1)
   }

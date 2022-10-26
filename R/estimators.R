@@ -111,30 +111,42 @@ tml_estimator <- function(data,
       h_partial_0 <- -1 / ((1 - prop_scores) * noexp_estimates)
     }
 
-    # compute TML estimate
+    ## compute TML estimate
     estimates <- lapply(
       modifiers,
       function(mod) {
 
-        # compute the tilted conditional outcome estimators
+        ## compute the tilted conditional outcome estimators
         mod_var <- var(data[[mod]])
         mod_h <- data[[mod]] * h_partial / mod_var
         mod_h_1 <- data[[mod]] * h_partial_1 / mod_var
         mod_h_0 <- data[[mod]] * h_partial_0 / mod_var
-        epsilon <- stats::coef(
-          stats::glm(data[[outcome]] ~ -1 + mod_h,
-                     offset = stats::qlogis(estimates),
-                     family = "quasibinomial"
-                     )
-        )
-        q_1_star <- stats::plogis(
-          stats::qlogis(exp_estimates) + epsilon * mod_h_1
-        )
-        q_0_star <- stats::plogis(
-          stats::qlogis(noexp_estimates) + epsilon * mod_h_0
-        )
 
-        # compute the plugin estimate with the update cond outcome estimates
+        ## tilt the estimators
+        epsilon <- 1
+        q_star <- estimates
+        q_1_star <- exp_estimates
+        q_0_star <- noexp_estimates
+        while(abs(epsilon) > 1e-10) {
+          epsilon <- stats::coef(
+            stats::glm(
+              data[[outcome]] ~ -1 + mod_h,
+              offset = stats::qlogis(q_star),
+              family = "quasibinomial"
+            )
+          )
+          q_star <- stats::plogis(
+            stats::qlogis(q_star) + epsilon * mod_h
+          )
+          q_1_star <- stats::plogis(
+            stats::qlogis(q_1_star) + epsilon * mod_h_1
+          )
+          q_0_star <- stats::plogis(
+            stats::qlogis(q_0_star) + epsilon * mod_h_0
+          )
+        }
+
+        ## compute the plugin estimate with the update cond outcome estimates
         if (type == "risk difference") {
           stats::cov(data[[mod]], q_1_star - q_0_star) / mod_var
         } else if (type == "relative risk") {
@@ -214,7 +226,12 @@ tml_estimator <- function(data,
             mod_h_0 <- filtered_dt[[mod]] * filtered_dt$partial_h_0 /
               mod_vars[[mod]]
 
+            ## set initial values
             init_fail_haz_est <- filtered_dt$failure_haz_est
+            filtered_dt$failure_haz_exp_est_star <-
+              filtered_dt$failure_haz_exp_est
+            filtered_dt$failure_haz_noexp_est_star <-
+              filtered_dt$failure_haz_noexp_est
             epsilon <- 1
 
             ## tilt the conditional failure estimates
@@ -229,16 +246,19 @@ tml_estimator <- function(data,
               init_fail_haz_est <- stats::plogis(
                 stats::qlogis(init_fail_haz_est) + epsilon * mod_h
               )
+
+              ## compute the tilted conditional survival probabilities
+              ## differences
+              filtered_dt$failure_haz_exp_est_star <- stats::plogis(
+                stats::qlogis(filtered_dt$failure_haz_exp_est_star) +
+                  epsilon * mod_h_1
+              )
+              filtered_dt$failure_haz_noexp_est_star <- stats::plogis(
+                stats::qlogis(filtered_dt$failure_haz_noexp_est_star) +
+                  epsilon * mod_h_0
+              )
             }
 
-            ## compute the tilted conditional survival probabilities differences
-            filtered_dt$failure_haz_exp_est_star <- stats::plogis(
-              stats::qlogis(filtered_dt$failure_haz_exp_est) + epsilon * mod_h_1
-            )
-            filtered_dt$failure_haz_noexp_est_star <- stats::plogis(
-              stats::qlogis(filtered_dt$failure_haz_noexp_est) +
-                epsilon * mod_h_0
-            )
             filtered_dt[, `:=`(
               surv_exp_est_star = cumprod(1 - failure_haz_exp_est_star),
               surv_noexp_est_star = cumprod(1 - failure_haz_noexp_est_star)
