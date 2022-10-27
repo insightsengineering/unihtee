@@ -61,6 +61,8 @@ utils::globalVariables(c("..to_keep", ".SD", "p_value"))
 #'   ordered according to ascending p-values.
 #'
 #' @importFrom data.table as.data.table
+#'
+#' @export
 unihtee <- function(data,
                     confounders,
                     modifiers,
