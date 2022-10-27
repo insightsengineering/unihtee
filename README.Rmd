@@ -13,42 +13,100 @@ knitr::opts_chunk$set(
 )
 ```
 
-# unihtee
+# `R`/`unihtee`
+
+> Univariate Heterogeneous Treatment Effect Estimation
+
+__Author:__ [Philippe Boileau](https://pboileau.ca/)
 
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of unihtee is to ...
+---
+
+`unicate` provides tools for uncovering treatment effect modifiers in
+high-dimensional data. Treatment effect modification is defined using variable
+importance parameters based on risk differences or relative risks. The variable
+importance parameters are model-agnostic, meaning they do not depend on specific
+regression pocedures (for example, the variable importance measures of Random
+Forests). Inference is performed about these variable importance measures using
+nonparametric estimators. Users may use one-step or targeted maximum likelihood
+estimators. Under general conditions, these estimators are double-robust, linear
+and efficient.
 
 ## Installation
 
-You can install the development version of unihtee like so:
+The package may be installed from GitHub using
+[`remotes`](https://CRAN.R-project.org/package=remotes):
 
-``` r
-# FILL THIS IN! HOW CAN PEOPLE INSTALL YOUR DEV PACKAGE?
+```{r gh-master-installation, eval=FALSE}
+remotes::install_github("insightsengineering/unihtee")
 ```
+
+`unihtee` is under active development. Check back often for updates.
+
+## Usage
+
+`unihtee()` is the only user-facing function. It can be used to perform
+inference about the treatment effect modification variable importance
+parameters. These parameters are defined for use with continuous, binary and
+time-to-event outcomes with binary exposure variables. Variable importance
+parameters are defined on both the risk difference and relative risk scales.
 
 ## Example
 
-This is a basic example which shows you how to solve a common problem:
+We simulate some observational data that contains ten confounders, of which are
+two treatment effect modifiers. We then perform inference about the
+risk-difference-based variable importance parameter.
 
 ```{r example}
-## library(unihtee)
-## basic example code
+library(unihtee)
+library(MASS)
+library(data.table)
+library(sl3)
+
+set.seed(510)
+
+## create the dataset
+n_obs <- 500
+w <- mvrnorm(n = n_obs, mu = rep(0, 10), Sigma = diag(10))
+confounder_names <- paste0("w_", seq_len(10))
+colnames(w) <- confounder_names
+a <- rbinom(n = n_obs, size = 1, prob = plogis(w[, 1] + w[, 2]))
+y <- rnorm(n = n_obs, mean = w[, 1] + w[, 2] + a * w[, 3] - a * w[, 4])
+dt <- as.data.table(cbind(w, a, y))
+
+## targeted maximum likelihood estimates and testing procedure
+unihtee(
+  data = dt,
+  confounders = confounder_names,
+  modifiers = confounder_names,
+  exposure = "a",
+  outcome = "y",
+  outcome_type = "continuous",
+  risk_type = "risk difference",
+  estimator = "tmle"
+)
 ```
 
-What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
+## Issues
 
-```{r cars}
-summary(cars)
-```
+If you encounter any bugs or have any specific feature requests, please [file
+an issue](https://github.com/insightsengineering/unihtee/issues).
 
-You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date. `devtools::build_readme()` is handy for this. You could also use GitHub Actions to re-render `README.Rmd` every time you push. An example workflow can be found here: <https://github.com/r-lib/actions/tree/v1/examples>.
+## Contributions
 
-You can also embed plots, for example:
+Contributions are very welcome. Interested contributors should consult our
+[contribution
+guidelines](https://github.com/insightsengineering/unihtee/blob/master/.github/CONTRIBUTING.md)
+prior to submitting a pull request.
 
-```{r pressure, echo = FALSE}
-plot(pressure)
-```
 
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub and CRAN.
+## License
+
+The contents of this repository are distributed under the Apache 2.0 license.
+See the
+[`LICENSE.md`](https://github.com/insightsengineering/unihtee/blob/main/LICENSE.md)
+and
+[`LICENSE`](https://github.com/insightsengineering/unihtee/blob/main/LICENSE)
+files for details.
