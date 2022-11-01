@@ -59,6 +59,12 @@ utils::globalVariables(c("..to_keep", ".SD", ".I", "p_value"))
 #'   function. Defaults to an xgboost learner with \code{confounders} and
 #'   \code{exposure} variables as covariates. Only used with time-to-event
 #'   outcomes.
+#' @param parallel A \code{logical} stating if
+#'   \code{\link[origami:cross_validate]{origami}}'s built-in parallelized
+#'   cross-validation routines should be used when \code{cross_fit = TRUE}. The
+#'   \href{https://cran.r-project.org/package=future}{\code{future}} suite is
+#'   used. Defaults to \code{FALSE}.
+#'
 #'
 #' @return A \code{data.table} containing the effect estimates and (adjusted)
 #'   p-values of the \code{modifiers}. The suspected treatment effect modifiers
@@ -83,7 +89,8 @@ unihtee <- function(data,
                     prop_score_estimator = sl3::Lrnr_glm_fast$new(),
                     prop_score_values = NULL,
                     failure_hazard_estimator = sl3::Lrnr_xgboost$new(),
-                    censoring_hazard_estimator = sl3::Lrnr_xgboost$new()) {
+                    censoring_hazard_estimator = sl3::Lrnr_xgboost$new(),
+                    parallel = FALSE) {
 
   ## specify the TEM VIP type
   risk_type <- match.arg(risk_type)
@@ -241,7 +248,8 @@ unihtee <- function(data,
       prop_score_values = prop_score_values,
       failure_hazard_estimator = failure_hazard_estimator,
       censoring_hazard_estimator = censoring_hazard_estimator,
-      .combine = FALSE
+      .combine = FALSE,
+      use_future = parallel
     )
 
     ## extract the efficient influence function

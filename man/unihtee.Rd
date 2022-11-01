@@ -21,7 +21,8 @@ unihtee(
   prop_score_estimator = sl3::Lrnr_glm_fast$new(),
   prop_score_values = NULL,
   failure_hazard_estimator = sl3::Lrnr_xgboost$new(),
-  censoring_hazard_estimator = sl3::Lrnr_xgboost$new()
+  censoring_hazard_estimator = sl3::Lrnr_xgboost$new(),
+  parallel = FALSE
 )
 }
 \arguments{
@@ -94,6 +95,12 @@ set of learners from \pkg{sl3} to estimate the conditional censoring hazard
 function. Defaults to an xgboost learner with \code{confounders} and
 \code{exposure} variables as covariates. Only used with time-to-event
 outcomes.}
+
+\item{parallel}{A \code{logical} stating if
+\code{\link[origami:cross_validate]{origami}}'s built-in parallelized
+cross-validation routines should be used when \code{cross_fit = TRUE}. The
+\href{https://cran.r-project.org/package=future}{\code{future}} suite is
+used. Defaults to \code{FALSE}.}
 }
 \value{
 A \code{data.table} containing the effect estimates and (adjusted)

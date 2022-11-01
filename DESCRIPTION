@@ -20,6 +20,7 @@ Suggests:
     speedglm,
     ranger,
     xgboost,
+    future,
     testthat (>= 3.0.0)
 Remotes:
     github::tlverse/sl3
