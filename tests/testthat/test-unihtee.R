@@ -34,6 +34,39 @@ test_that(
   }
 )
 
+
+test_that(
+  paste(
+    "unihtee() uncovers treatment effect modifiers on the risk diff scale",
+    "when outcomes are continuous with the cross-fitted one-step estimator"
+  ),
+  {
+
+    # generate data
+    set.seed(8234)
+    dt <- generate_test_data(n_obs = 500)
+
+    # apply unihtee
+    results <- unihtee(
+      data = dt,
+      confounders = c("w_1", "w_2", "w_3"),
+      modifiers = c("w_1", "w_2", "w_3"),
+      exposure = "a",
+      outcome = "y",
+      outcome_type = "continuous",
+      risk_type = "risk difference",
+      estimator = "onestep",
+      cross_fit = TRUE,
+      cond_outcome_estimator = sl3::Lrnr_xgboost$new()
+    )
+
+    # ensure that the adjusted p-value of w_3 is less than 0.05, and those of
+    # w_1 and w_2 are above 0.05
+    expect_equal(results$p_value_fdr < 0.05, c(TRUE, FALSE, FALSE))
+  }
+)
+
+
 test_that(
   paste(
     "unihtee() uncovers treatment effect modifiers on the risk diff scale",
@@ -66,6 +99,37 @@ test_that(
     expect_equal(results$estimate[1], 1, tolerance = 0.1)
     expect_equal(results$estimate[2], 0, tolerance = 0.1)
     expect_equal(results$estimate[3], 0, tolerance = 0.1)
+  }
+)
+
+test_that(
+  paste(
+    "unihtee() uncovers treatment effect modifiers on the risk diff scale",
+    "when outcomes are continuous with the cross-fitted TML estimator"
+  ),
+  {
+
+    # generate data
+    set.seed(12345)
+    dt <- generate_test_data(n_obs = 500)
+
+    # apply unihtee
+    results <- unihtee(
+      data = dt,
+      confounders = c("w_1", "w_2", "w_3"),
+      modifiers = c("w_1", "w_2", "w_3"),
+      exposure = "a",
+      outcome = "y",
+      outcome_type = "continuous",
+      risk_type = "risk difference",
+      estimator = "tmle",
+      cross_fit = TRUE,
+      cond_outcome_estimator = sl3::Lrnr_ranger$new()
+    )
+
+    # ensure that the adjusted p-value of w_3 is less than 0.05, and those of
+    # w_1 and w_2 are above 0.05
+    expect_equal(results$p_value_fdr < 0.05, c(TRUE, FALSE, FALSE))
   }
 )
 
@@ -176,6 +240,36 @@ test_that(
 test_that(
   paste(
     "unihtee() uncovers treatment effect modifiers on the rel risk scale",
+    "when outcomes are binary with the cross-fitted one-step estimator"
+  ),
+  {
+
+    # generate data
+    set.seed(90234)
+    dt <- generate_test_data(n_obs = 500, outcome_type = "binary")
+
+    # apply unihtee
+    results <- unihtee(
+      data = dt,
+      confounders = c("w_1", "w_2", "w_3"),
+      modifiers = c("w_1", "w_2", "w_3"),
+      exposure = "a",
+      outcome = "y",
+      outcome_type = "binary",
+      risk_type = "relative risk",
+      estimator = "onestep",
+      cross_fit = TRUE
+    )
+
+    # ensure that the adjusted p-value of w_3 is less than 0.05, and those of
+    # w_1 and w_2 are above 0.05
+    expect_equal(results$p_value_fdr < 0.05, c(TRUE, FALSE, FALSE))
+  }
+)
+
+test_that(
+  paste(
+    "unihtee() uncovers treatment effect modifiers on the rel risk scale",
     "when outcomes are binary with the TML estimator"
   ),
   {
@@ -204,6 +298,36 @@ test_that(
     expect_equal(results$estimate[1], 4.2, tolerance = 0.1)
     expect_equal(results$estimate[2], 0, tolerance = 0.1)
     expect_equal(results$estimate[3], 0, tolerance = 0.1)
+  }
+)
+
+test_that(
+  paste(
+    "unihtee() uncovers treatment effect modifiers on the rel risk scale",
+    "when outcomes are binary with the cross-fitted TML estimator"
+  ),
+  {
+
+    # generate data
+    set.seed(5140)
+    dt <- generate_test_data(n_obs = 500, outcome_type = "binary")
+
+    # apply unihtee
+    results <- unihtee(
+      data = dt,
+      confounders = c("w_1", "w_2", "w_3"),
+      modifiers = c("w_1", "w_2", "w_3"),
+      exposure = "a",
+      outcome = "y",
+      outcome_type = "binary",
+      risk_type = "relative risk",
+      estimator = "tmle",
+      cross_fit = TRUE
+    )
+
+    # ensure that the adjusted p-value of w_3 is less than 0.05, and those of
+    # w_1 and w_2 are above 0.05
+    expect_equal(results$p_value_fdr < 0.05, c(TRUE, FALSE, FALSE))
   }
 )
 
@@ -250,6 +374,42 @@ test_that(
 test_that(
   paste(
     "unihtee() uncovers treatment effect modifiers on the risk diff scale",
+    "with time-to-event outcomes with the cross-fitted one-step estimator"
+  ),
+  {
+
+    # generate data
+    set.seed(517)
+    dt <- generate_test_data(n_obs = 500, outcome_type = "time-to-event")
+
+    # apply unihtee
+    results <- unihtee(
+      data = dt,
+      confounders = c("w_1", "w_2", "w_3"),
+      modifiers = c("w_1", "w_2", "w_3"),
+      exposure = "a",
+      outcome = "time",
+      censoring = "censoring",
+      time_cutoff = 5,
+      outcome_type = "time-to-event",
+      risk_type = "risk difference",
+      estimator = "onestep",
+      cross_fit = TRUE,
+      prop_score_estimator = sl3::Lrnr_xgboost$new(),
+      cond_outcome_estimator = NULL,
+      failure_hazard_estimator = sl3::Lrnr_xgboost$new(),
+      censoring_hazard_estimator = sl3::Lrnr_xgboost$new()
+    )
+
+    # ensure that the adjusted p-value of w_1 is less than 0.05, and those of
+    # w_2 and w_2 are above 0.05
+    expect_equal(results$p_value_fdr < 0.05, c(TRUE, FALSE, FALSE))
+  }
+)
+
+test_that(
+  paste(
+    "unihtee() uncovers treatment effect modifiers on the risk diff scale",
     "with time-to-event outcomes with the TML estimator"
   ),
   {
@@ -284,5 +444,77 @@ test_that(
     expect_equal(results$estimate[1], 1.72, tolerance = 0.1)
     expect_equal(results$estimate[2], 0, tolerance = 0.1)
     expect_equal(results$estimate[3], 0, tolerance = 0.1)
+  }
+)
+
+test_that(
+  paste(
+    "unihtee() uncovers treatment effect modifiers on the risk diff scale",
+    "with time-to-event outcomes with the cross-fitted TML estimator"
+  ),
+  {
+
+    # generate data
+    set.seed(9951)
+    dt <- generate_test_data(n_obs = 500, outcome_type = "time-to-event")
+
+    # apply unihtee
+    results <- unihtee(
+      data = dt,
+      confounders = c("w_1", "w_2", "w_3"),
+      modifiers = c("w_1", "w_2", "w_3"),
+      exposure = "a",
+      outcome = "time",
+      censoring = "censoring",
+      time_cutoff = 5,
+      outcome_type = "time-to-event",
+      risk_type = "risk difference",
+      estimator = "tmle",
+      cross_fit = TRUE,
+      prop_score_estimator = sl3::Lrnr_xgboost$new(),
+      cond_outcome_estimator = NULL,
+      failure_hazard_estimator = sl3::Lrnr_xgboost$new(),
+      censoring_hazard_estimator = sl3::Lrnr_xgboost$new()
+    )
+
+    # ensure that the adjusted p-value of w_1 is less than 0.05, and those of
+    # w_2 and w_2 are above 0.05
+    expect_equal(results$p_value_fdr < 0.05, c(TRUE, FALSE, FALSE))
+  }
+)
+
+test_that(
+  paste(
+    "unihtee() uncovers treatment effect modifiers on the relative risk scale",
+    "with time-to-event outcomes with the cross-fitted TML estimator"
+  ),
+  {
+
+    # generate data
+    set.seed(97461)
+    dt <- generate_test_data(n_obs = 1000, outcome_type = "time-to-event")
+
+    # apply unihtee
+    results <- unihtee(
+      data = dt,
+      confounders = c("w_1", "w_2", "w_3"),
+      modifiers = c("w_1", "w_2", "w_3"),
+      exposure = "a",
+      outcome = "time",
+      censoring = "censoring",
+      time_cutoff = 5,
+      outcome_type = "time-to-event",
+      risk_type = "relative risk",
+      estimator = "tmle",
+      cross_fit = TRUE,
+      prop_score_estimator = sl3::Lrnr_xgboost$new(),
+      cond_outcome_estimator = NULL,
+      failure_hazard_estimator = sl3::Lrnr_xgboost$new(),
+      censoring_hazard_estimator = sl3::Lrnr_xgboost$new()
+    )
+
+    # ensure that the adjusted p-value of w_1 is less than 0.05, and those of
+    # w_2 and w_2 are above 0.05
+    expect_equal(results$p_value_fdr < 0.05, c(TRUE, FALSE, FALSE))
   }
 )
