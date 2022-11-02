@@ -164,7 +164,7 @@ tml_estimator <- function(data,
 
     ## compute the IPWs
     data$prop_scores <- prop_scores
-    data$ipws <- (2 * data[[exposure]] - 1) /
+    data$ipws <- -(2 * data[[exposure]] - 1) /
     (data[[exposure]] * prop_scores +
       (1 - data[[exposure]]) * (1 - prop_scores))
 
@@ -210,9 +210,9 @@ tml_estimator <- function(data,
           ## compute the partial clever covariates
           filtered_dt[, `:=`(
             partial_h = inner_integrand * surv_time_cutoff,
-            partial_h_1 = surv_time_cutoff * keep /
+            partial_h_1 = -surv_time_cutoff * keep /
               (cens_est_lag * surv_est * prop_scores),
-            partial_h_0 = -surv_time_cutoff * keep /
+            partial_h_0 = surv_time_cutoff * keep /
               (cens_est_lag * surv_est * (1 - prop_scores))
           )]
 
