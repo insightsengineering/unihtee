@@ -85,7 +85,7 @@ test_that(
       modifiers = c("w_1", "w_3"),
       prop_score_fit = NULL,
       cond_outcome_fit = cond_outcome_fit,
-      prop_score_values = dt$prop_score,
+      prop_score_values = "prop_score",
       failure_hazard_fit = NULL,
       censoring_hazard_fit = NULL
     )
@@ -183,7 +183,7 @@ test_that(
       modifiers = c("w_1", "w_3"),
       prop_score_fit = NULL,
       cond_outcome_fit = cond_outcome_fit,
-      prop_score_values = dt$prop_score,
+      prop_score_values = "prop_score",
       failure_hazard_fit = NULL,
       censoring_hazard_fit = NULL
     )
@@ -356,7 +356,7 @@ test_that(
       modifiers = c("w_1", "w_3"),
       prop_score_fit = NULL,
       cond_outcome_fit = NULL,
-      prop_score_values = long_dt$prop_score,
+      prop_score_values = "prop_score",
       failure_hazard_fit = fail_fit,
       censoring_hazard_fit = cens_fit
     )

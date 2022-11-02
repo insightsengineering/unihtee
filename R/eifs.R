@@ -60,7 +60,7 @@ uncentered_eif <- function(data,
   ## compute the inverse probability weights
   ## NOTE: PS estimates must be as long as long_dt in TTE settings
   if (!is.null(prop_score_values)) {
-    prop_scores <- prop_score_values
+    prop_scores <- data[[prop_score_values]]
   } else {
     prop_scores <- prop_score_fit$estimates
   }
