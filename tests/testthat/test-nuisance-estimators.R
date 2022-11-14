@@ -62,10 +62,17 @@ test_that(
     valid_dt <- generate_test_data(n_obs = 200)
 
     # fit the propensity score
+    interactions <- list(c("w_1", "a"))
+    lrnr_interactions <- sl3::Lrnr_define_interactions$new(
+      list(c("a", "w_1"), c("a", "w_2"), c("a", "w_3"))
+    )
+    lrnr_enet <- sl3::make_learner(
+      sl3::Pipeline, lrnr_interactions, sl3::Lrnr_glmnet$new(alpha = 0.5)
+    )
     fit <- fit_prop_score(
       train_data = train_dt,
       valid_data = valid_dt,
-      learners = sl3::Lrnr_glm_fast$new(),
+      learners = lrnr_enet,
       exposure = "a",
       confounders = c("w_1", "w_2", "w_3")
     )

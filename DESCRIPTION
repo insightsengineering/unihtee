@@ -17,6 +17,7 @@ Imports:
     origami
 Suggests:
     here,
+    glmnet,
     speedglm,
     ranger,
     xgboost,
