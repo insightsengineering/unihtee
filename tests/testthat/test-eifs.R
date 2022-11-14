@@ -85,7 +85,7 @@ test_that(
       modifiers = c("w_1", "w_3"),
       prop_score_fit = NULL,
       cond_outcome_fit = cond_outcome_fit,
-      prop_score_values = dt$prop_score,
+      prop_score_values = "prop_score",
       failure_hazard_fit = NULL,
       censoring_hazard_fit = NULL
     )
@@ -183,7 +183,7 @@ test_that(
       modifiers = c("w_1", "w_3"),
       prop_score_fit = NULL,
       cond_outcome_fit = cond_outcome_fit,
-      prop_score_values = dt$prop_score,
+      prop_score_values = "prop_score",
       failure_hazard_fit = NULL,
       censoring_hazard_fit = NULL
     )
@@ -317,7 +317,7 @@ test_that(
 
     # generate data
     set.seed(42)
-    dt <- generate_test_data(n_obs = 50000, outcome_type = "time-to-event RR")
+    dt <- generate_test_data(n_obs = 10000, outcome_type = "time-to-event RR")
     long_dt <- tte_data_melt(
       data = dt,
       confounders = c("w_1", "w_2", "w_3"),
@@ -356,7 +356,7 @@ test_that(
       modifiers = c("w_1", "w_3"),
       prop_score_fit = NULL,
       cond_outcome_fit = NULL,
-      prop_score_values = long_dt$prop_score,
+      prop_score_values = "prop_score",
       failure_hazard_fit = fail_fit,
       censoring_hazard_fit = cens_fit
     )
@@ -396,7 +396,7 @@ test_that(
     ## w_1_param <- cov(res_dt$w_1, res_dt$log_ratio) / var(res_dt$w_1) # 0.6
     ## w_3_param <- cov(res_dt$w_3, res_dt$log_ratio) / var(res_dt$w_3) # 0.0
 
-    expect_equal(mean(eif$w_1) - 0.6, 0, tolerance = 0.1)
+    expect_equal(mean(eif$w_1) - 0.62, 0, tolerance = 0.1)
     expect_equal(mean(eif$w_3), 0, tolerance = 0.1)
   }
 )

@@ -60,7 +60,7 @@ uncentered_eif <- function(data,
   ## compute the inverse probability weights
   ## NOTE: PS estimates must be as long as long_dt in TTE settings
   if (!is.null(prop_score_values)) {
-    prop_scores <- prop_score_values
+    prop_scores <- data[[prop_score_values]]
   } else {
     prop_scores <- prop_score_fit$estimates
   }
@@ -95,7 +95,7 @@ uncentered_eif <- function(data,
     ## EIFs for time-to-event outcomes
   } else if (is.null(cond_outcome_fit)) {
     ## compute the survival probabilities
-    data$ipws <- ipws
+    data$ipws <- -ipws
     data$failure_haz_est <- failure_hazard_fit$estimates
     data$failure_haz_exp_est <- failure_hazard_fit$exp_estimates
     data$failure_haz_noexp_est <- failure_hazard_fit$noexp_estimates

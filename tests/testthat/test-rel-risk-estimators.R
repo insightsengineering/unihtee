@@ -156,8 +156,8 @@ test_that(
         "cross-fitting, TTE outcome"),
   {
     # generate data
-    set.seed(508)
-    dt <- generate_test_data(n_obs = 15000, outcome_type = "time-to-event RR")
+    set.seed(142)
+    dt <- generate_test_data(n_obs = 5000, outcome_type = "time-to-event RR")
     long_dt <- tte_data_melt(
       data = dt,
       confounders = c("w_1", "w_2", "w_3"),
@@ -181,7 +181,7 @@ test_that(
     fail_fit <- fit_failure_hazard(
       train_data = long_dt,
       valid_data = NULL,
-      learners = sl3:::Lrnr_xgboost$new(),
+      learners = sl3:::Lrnr_glm_fast$new(),
       exposure = "a",
       confounders = c("w_1", "w_2", "w_3")
     )
@@ -267,7 +267,7 @@ test_that(
       modifiers = c("w_1", "w_2", "w_3"),
       prop_score_fit = NULL,
       cond_outcome_fit = NULL,
-      prop_score_values = long_dt$prop_score,
+      prop_score_values = "prop_score",
       failure_hazard_fit = fail_fit,
       censoring_hazard_fit = cens_fit
     )
@@ -287,12 +287,12 @@ test_that(
 )
 
 test_that(
-  paste("one_step_estimator() produces accurate estimates without",
+  paste("tml_estimator() produces accurate estimates without",
         "cross-fitting, TTE outcome"),
   {
     # generate data
     set.seed(507)
-    dt <- generate_test_data(n_obs = 5000, outcome_type = "time-to-event RR")
+    dt <- generate_test_data(n_obs = 10000, outcome_type = "time-to-event RR")
     long_dt <- tte_data_melt(
       data = dt,
       confounders = c("w_1", "w_2", "w_3"),

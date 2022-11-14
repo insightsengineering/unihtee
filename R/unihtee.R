@@ -149,7 +149,7 @@ unihtee <- function(data,
       )
     } else {
       prop_score_fit <- list(
-        estimates = data[[prop_score_values]]
+        "estimates" = data[[prop_score_values]]
       )
     }
 
