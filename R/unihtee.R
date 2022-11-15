@@ -108,6 +108,9 @@ unihtee <- function(data,
   ))
   data <- data[, ..to_keep]
 
+  ## get the number of observations
+  n_obs <- nrow(data)
+
   ## scale the outcome to be between 0 and 1 if outcome is continuous
   if (outcome_type == "continuous") {
     min_out <- min(data[[outcome]])
@@ -252,9 +255,6 @@ unihtee <- function(data,
       use_future = parallel
     )
 
-    ## extract the efficient influence function
-    ueif_dt <- data.table::rbindlist(results[[1]])
-
     ## combine the estimates
     weighted_estimates <- lapply(
       seq_len(cross_fit_folds),
@@ -265,9 +265,14 @@ unihtee <- function(data,
   }
 
   ## compute the confidence intervals and rescale everything
-  eif_vars <- ueif_dt[, lapply(.SD, var)]
+  if (cross_fit) {
+    unscaled_eif_vars_dt <- data.table::rbindlist(results$unscaled_eif_vars)
+    eif_vars <- unscaled_eif_vars_dt[, lapply(.SD, sum)] / n_obs
+  } else {
+    eif_vars <- ueif_dt[, lapply(.SD, var)]
+  }
   test_dt <- test_hypotheses(
-    n_obs = nrow(ueif_dt),
+    n_obs = n_obs,
     estimates = tem_vip_fit,
     var_estimates = eif_vars,
     rescale_factor = rescale_factor
@@ -451,11 +456,24 @@ cross_fit_fold <- function(fold,
     )
   }
 
-  ## return the uncentered efficient influence function, estimates and
+  ## center the efficient influence function
+  ## plugin_est_dt <- plugin_estimator(
+  ##     data = valid_data,
+  ##     confounders = confounders,
+  ##     modifiers = modifiers,
+  ##     exposure = exposure,
+  ##     outcome = outcome,
+  ##     type = risk_type,
+  ##     cond_outcome_fit = cond_outcome_fit,
+  ##     failure_hazard_fit = failure_hazard_fit,
+  ## )
+
+  ## return the centered efficient influence function, estimates and
   ## proportion of observations in the validation data
+  unscaled_eif_vars <- nrow(ueif_dt) * ueif_dt[, lapply(.SD, var)]
   return(list(
-    "ueif_dt" = ueif_dt,
+    "unscaled_eif_vars" = unscaled_eif_vars,
     "tem_vip_fit" = tem_vip_fit,
-    "prop_valid_data" = nrow(ueif_dt) / nrow(prop_score_train_data)
+    "prop_valid_data" = nrow(valid_data) / nrow(data)
   ))
 }
