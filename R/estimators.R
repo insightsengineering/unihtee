@@ -127,7 +127,7 @@ tml_estimator <- function(data,
         q_star <- estimates
         q_1_star <- exp_estimates
         q_0_star <- noexp_estimates
-        while(abs(epsilon) > 1e-10) {
+        while(abs(epsilon) > 1e-8) {
           epsilon <- stats::coef(
             stats::glm(
               data[[outcome]] ~ -1 + mod_h,
@@ -235,9 +235,11 @@ tml_estimator <- function(data,
               filtered_dt$failure_haz_noexp_est_star <-
                 filtered_dt$failure_haz_noexp_est
               epsilon <- 1
+              iter <- 1
+              max_iter <- 100
 
               ## tilt the conditional failure estimates
-              while (abs(epsilon) > 1e-10) {
+              while (abs(epsilon) > 1e-8 && iter < max_iter) {
                 epsilon <- stats::coef(
                   stats::glm(
                     filtered_dt$failure ~ -1 + mod_h,
@@ -259,6 +261,8 @@ tml_estimator <- function(data,
                   stats::qlogis(filtered_dt$failure_haz_noexp_est_star) +
                     epsilon * mod_h_0
                 )
+
+                iter <- iter + 1
               }
 
               filtered_dt[, `:=`(
@@ -326,9 +330,11 @@ tml_estimator <- function(data,
           data_mod$failure_haz_exp_est_star <- data_mod$failure_haz_exp_est
           data_mod$failure_haz_noexp_est_star <- data_mod$failure_haz_noexp_est
           epsilon <- 1
+          iter <- 1
+          max_iter <- 100
 
           ## tilt the conditional failure estimates
-          while (abs(epsilon) > 1e-10) {
+          while (abs(epsilon) > 1e-8 && iter < max_iter) {
             epsilon <- stats::coef(
               stats::glm(
                 data_mod$failure ~ -1 + mod_h,
@@ -349,6 +355,8 @@ tml_estimator <- function(data,
               stats::qlogis(data_mod$failure_haz_noexp_est_star) +
                 epsilon * mod_h_0
             )
+
+            iter <- iter + 1
           }
 
           ## compute the conditional survival under treatment and control
