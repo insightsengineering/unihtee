@@ -135,6 +135,16 @@ tml_estimator <- function(data,
               family = "quasibinomial"
             )
           )
+
+          ## bound q, just in case
+          q_star[q_star < (0 + eps)] <- 0 + eps
+          q_star[q_star > (1 - eps)] <- 1 - eps
+          q_1_star[q_1_star < (0 + eps)] <- 0 + eps
+          q_1_star[q_1_star > (1 - eps)] <- 1 - eps
+          q_0_star[q_0_star < (0 + eps)] <- 0 + eps
+          q_0_star[q_0_star > (1 - eps)] <- 1 - eps
+
+          ## update q
           q_star <- stats::plogis(
             stats::qlogis(q_star) + epsilon * mod_h
           )
@@ -247,6 +257,20 @@ tml_estimator <- function(data,
                     family = "quasibinomial"
                   )
                 )
+
+                ## bound q, just in case
+                init_fail_haz_est[init_fail_haz_est < (0 + eps)] <- 0 + eps
+                init_fail_haz_est[init_fail_haz_est > (1 - eps)] <- 1 - eps
+                filtered_dt$failure_haz_exp_est_star[
+                  filtered_dt$failure_haz_exp_est_star < (0 + eps)] <- 0 + eps
+                filtered_dt$failure_haz_exp_est_star[
+                  filtered_dt$failure_haz_exp_est_star > (1 - eps)] <- 1 - eps
+                filtered_dt$failure_haz_noexp_est_star[
+                  filtered_dt$failure_haz_noexp_est_star < (0 + eps)] <- 0 + eps
+                filtered_dt$failure_haz_noexp_est_star[
+                  filtered_dt$failure_haz_noexp_est_star > (1 - eps)] <- 1 - eps
+
+                ## update intial hazard
                 init_fail_haz_est <- stats::plogis(
                   stats::qlogis(init_fail_haz_est) + epsilon * mod_h
                 )
@@ -342,6 +366,21 @@ tml_estimator <- function(data,
                 family = "quasibinomial"
               )
             )
+            ## bound q, just in case
+            data_mod$failure_haz_est_star[
+              data_mod$failure_haz_est_star < (0 + eps)] <- 0 + eps
+            data_mod$failure_haz_est_star[
+              data_mod$failure_haz_est_star > (1 - eps)] <- 1 - eps
+            data_mod$failure_haz_exp_est_star[
+              data_mod$failure_haz_exp_est_star < (0 + eps)] <- 0 + eps
+            data_mod$failure_haz_exp_est_star[
+              data_mod$failure_haz_exp_est_star > (1 - eps)] <- 1 - eps
+            data_mod$failure_haz_noexp_est_star[
+              data_mod$failure_haz_noexp_est_star < (0 + eps)] <- 0 + eps
+            data_mod$failure_haz_noexp_est_star[
+              data_mod$failure_haz_noexp_est_star > (1 - eps)] <- 1 - eps
+
+            ## update hazard
             data_mod$failure_haz_est_star <- stats::plogis(
               stats::qlogis(data_mod$failure_haz_est) + epsilon * mod_h
             )
