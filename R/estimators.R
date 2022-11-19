@@ -127,6 +127,15 @@ tml_estimator <- function(data,
         q_star <- estimates
         q_1_star <- exp_estimates
         q_0_star <- noexp_estimates
+
+        ## bound q, just in case
+        q_star[q_star < (0 + eps)] <- 0 + eps
+        q_star[q_star > (1 - eps)] <- 1 - eps
+        q_1_star[q_1_star < (0 + eps)] <- 0 + eps
+        q_1_star[q_1_star > (1 - eps)] <- 1 - eps
+        q_0_star[q_0_star < (0 + eps)] <- 0 + eps
+        q_0_star[q_0_star > (1 - eps)] <- 1 - eps
+
         while(abs(epsilon) > 1e-8) {
           epsilon <- stats::coef(
             stats::glm(
@@ -248,6 +257,22 @@ tml_estimator <- function(data,
               iter <- 1
               max_iter <- 100
 
+              ## bound q, just in case
+              init_fail_haz_est[init_fail_haz_est < (0 + eps)] <- 0 + eps
+              init_fail_haz_est[init_fail_haz_est > (1 - eps)] <- 1 - eps
+              filtered_dt$failure_haz_exp_est_star[
+                filtered_dt$failure_haz_exp_est_star < (0 + eps)
+              ] <- 0 + eps
+              filtered_dt$failure_haz_exp_est_star[
+                filtered_dt$failure_haz_exp_est_star > (1 - eps)
+              ] <- 1 - eps
+              filtered_dt$failure_haz_noexp_est_star[
+                filtered_dt$failure_haz_noexp_est_star < (0 + eps)
+              ] <- 0 + eps
+              filtered_dt$failure_haz_noexp_est_star[
+                filtered_dt$failure_haz_noexp_est_star > (1 - eps)
+              ] <- 1 - eps
+
               ## tilt the conditional failure estimates
               while (abs(epsilon) > 1e-8 && iter < max_iter) {
                 epsilon <- stats::coef(
@@ -356,6 +381,26 @@ tml_estimator <- function(data,
           epsilon <- 1
           iter <- 1
           max_iter <- 100
+
+          ## bound q, just in case
+          data_mod$failure_haz_est_star[
+            data_mod$failure_haz_est_star < (0 + eps)
+          ] <- 0 + eps
+          data_mod$failure_haz_est_star[
+            data_mod$failure_haz_est_star > (1 - eps)
+          ] <- 1 - eps
+          data_mod$failure_haz_exp_est_star[
+            data_mod$failure_haz_exp_est_star < (0 + eps)
+          ] <- 0 + eps
+          data_mod$failure_haz_exp_est_star[
+            data_mod$failure_haz_exp_est_star > (1 - eps)
+          ] <- 1 - eps
+          data_mod$failure_haz_noexp_est_star[
+            data_mod$failure_haz_noexp_est_star < (0 + eps)
+          ] <- 0 + eps
+          data_mod$failure_haz_noexp_est_star[
+            data_mod$failure_haz_noexp_est_star > (1 - eps)
+          ] <- 1 - eps
 
           ## tilt the conditional failure estimates
           while (abs(epsilon) > 1e-8 && iter < max_iter) {
