@@ -136,7 +136,11 @@ tml_estimator <- function(data,
         q_0_star[q_0_star < (0 + eps)] <- 0 + eps
         q_0_star[q_0_star > (1 - eps)] <- 1 - eps
 
-        while(abs(epsilon) > 1e-8) {
+        ## set a number of maximum interations
+        max_iter <- 100
+        iter <- 1
+
+        while(abs(epsilon) > 1e-8 && iter < max_iter) {
           epsilon <- stats::coef(
             stats::glm(
               data[[outcome]] ~ -1 + mod_h,
@@ -163,6 +167,8 @@ tml_estimator <- function(data,
           q_1_star[q_1_star > (1 - eps)] <- 1 - eps
           q_0_star[q_0_star < (0 + eps)] <- 0 + eps
           q_0_star[q_0_star > (1 - eps)] <- 1 - eps
+
+          iter <- iter + 1
 
         }
 
