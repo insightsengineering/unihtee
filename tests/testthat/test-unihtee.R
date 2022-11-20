@@ -111,7 +111,7 @@ test_that(
 
     # generate data
     set.seed(12345)
-    dt <- generate_test_data(n_obs = 500)
+    dt <- generate_test_data(n_obs = 200)
 
     # apply unihtee
     results <- unihtee(
@@ -124,7 +124,7 @@ test_that(
       risk_type = "risk difference",
       estimator = "tmle",
       cross_fit = TRUE,
-      cond_outcome_estimator = sl3::Lrnr_ranger$new()
+      cond_outcome_estimator = sl3::Lrnr_glmnet$new()
     )
 
     # ensure that the adjusted p-value of w_3 is less than 0.05, and those of

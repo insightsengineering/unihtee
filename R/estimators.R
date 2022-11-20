@@ -74,7 +74,7 @@ tml_estimator <- function(data,
                           censoring_hazard_fit) {
 
   # constant used to truncate estimates near zero
-  eps <- 1e-10
+  eps <- .Machine$double.eps
 
   ## compute the inverse probability weights
   ## NOTE: PS estimates must be as long as long_dt in TTE settings
@@ -117,10 +117,13 @@ tml_estimator <- function(data,
       function(mod) {
 
         ## compute the tilted conditional outcome estimators
-        mod_var <- var(data[[mod]])
-        mod_h <- data[[mod]] * h_partial / mod_var
-        mod_h_1 <- data[[mod]] * h_partial_1 / mod_var
-        mod_h_0 <- data[[mod]] * h_partial_0 / mod_var
+        centered_mod <- scale(data[[mod]], scale = FALSE, center = TRUE)
+        attr(centered_mod, "scaled:center") <- NULL
+        centered_mod <- as.vector(centered_mod)
+        mod_var <- var(centered_mod)
+        mod_h <- centered_mod * h_partial / mod_var
+        mod_h_1 <- centered_mod * h_partial_1 / mod_var
+        mod_h_0 <- centered_mod * h_partial_0 / mod_var
 
         ## tilt the estimators
         epsilon <- 1
@@ -129,44 +132,49 @@ tml_estimator <- function(data,
         q_0_star <- noexp_estimates
 
         ## bound q, just in case
-        q_star[q_star < (0 + eps)] <- 0 + eps
-        q_star[q_star > (1 - eps)] <- 1 - eps
-        q_1_star[q_1_star < (0 + eps)] <- 0 + eps
-        q_1_star[q_1_star > (1 - eps)] <- 1 - eps
-        q_0_star[q_0_star < (0 + eps)] <- 0 + eps
-        q_0_star[q_0_star > (1 - eps)] <- 1 - eps
+        ## q_star[q_star < (0 + eps)] <- 0 + eps
+        ## q_star[q_star > (1 - eps)] <- 1 - eps
+        ## q_1_star[q_1_star < (0 + eps)] <- 0 + eps
+        ## q_1_star[q_1_star > (1 - eps)] <- 1 - eps
+        ## q_0_star[q_0_star < (0 + eps)] <- 0 + eps
+        ## q_0_star[q_0_star > (1 - eps)] <- 1 - eps
 
         ## set a number of maximum interations
         max_iter <- 100
         iter <- 1
 
-        while(abs(epsilon) > 1e-8 && iter < max_iter) {
+        while (abs(epsilon) > 2 * eps && iter < max_iter) {
           epsilon <- stats::coef(
             stats::glm(
               data[[outcome]] ~ -1 + mod_h,
-              offset = stats::qlogis(q_star),
-              family = "quasibinomial"
+              offset = q_star,
+              family = "gaussian"
             )
           )
 
           ## update q
-          q_star <- stats::plogis(
-            stats::qlogis(q_star) + epsilon * mod_h
-          )
-          q_1_star <- stats::plogis(
-            stats::qlogis(q_1_star) + epsilon * mod_h_1
-          )
-          q_0_star <- stats::plogis(
-            stats::qlogis(q_0_star) + epsilon * mod_h_0
-          )
+          ## q_star <- stats::plogis(
+          ##   stats::qlogis(q_star) + epsilon * mod_h
+          ## )
+          ## q_1_star <- stats::plogis(
+          ##   stats::qlogis(q_1_star) + epsilon * mod_h_1
+          ## )
+          ## q_0_star <- stats::plogis(
+          ##   stats::qlogis(q_0_star) + epsilon * mod_h_0
+          ## )
+          q_star <- q_star + epsilon * mod_h
+          q_1_star <- q_1_star + epsilon * mod_h_1
+          q_0_star <- q_0_star + epsilon * mod_h_0
 
           ## bound q, just in case
-          q_star[q_star < (0 + eps)] <- 0 + eps
-          q_star[q_star > (1 - eps)] <- 1 - eps
-          q_1_star[q_1_star < (0 + eps)] <- 0 + eps
-          q_1_star[q_1_star > (1 - eps)] <- 1 - eps
-          q_0_star[q_0_star < (0 + eps)] <- 0 + eps
-          q_0_star[q_0_star > (1 - eps)] <- 1 - eps
+          if (type == "relative risk") {
+            q_star[q_star < (0 + eps)] <- 0 + eps
+            q_star[q_star > (1 - eps)] <- 1 - eps
+            q_1_star[q_1_star < (0 + eps)] <- 0 + eps
+            q_1_star[q_1_star > (1 - eps)] <- 1 - eps
+            q_0_star[q_0_star < (0 + eps)] <- 0 + eps
+            q_0_star[q_0_star > (1 - eps)] <- 1 - eps
+          }
 
           iter <- iter + 1
 
@@ -174,9 +182,9 @@ tml_estimator <- function(data,
 
         ## compute the plugin estimate with the update cond outcome estimates
         if (type == "risk difference") {
-          stats::cov(data[[mod]], q_1_star - q_0_star) / mod_var
+          stats::cov(centered_mod, q_1_star - q_0_star) / mod_var
         } else if (type == "relative risk") {
-          stats::cov(data[[mod]], log(q_1_star) - log(q_0_star)) / mod_var
+          stats::cov(centered_mod, log(q_1_star) - log(q_0_star)) / mod_var
         }
       }
     )
@@ -246,12 +254,17 @@ tml_estimator <- function(data,
             modifiers,
             function(mod) {
 
+              ## center the modifier
+              centered_mod <- scale(filtered_dt[[mod]], scale = FALSE, center = TRUE)
+              attr(centered_mod, "scaled:center") <- NULL
+              centered_mod <- as.vector(centered_mod)
+
               ## finalize the clever covariate
-              mod_h <- filtered_dt[[mod]] * filtered_dt$partial_h /
+              mod_h <- centered_mod * filtered_dt$partial_h /
                 mod_vars[[mod]]
-              mod_h_1 <- filtered_dt[[mod]] * filtered_dt$partial_h_1 /
+              mod_h_1 <- centered_mod * filtered_dt$partial_h_1 /
                 mod_vars[[mod]]
-              mod_h_0 <- filtered_dt[[mod]] * filtered_dt$partial_h_0 /
+              mod_h_0 <- centered_mod * filtered_dt$partial_h_0 /
                 mod_vars[[mod]]
 
               ## set initial values
@@ -281,7 +294,7 @@ tml_estimator <- function(data,
               ] <- 1 - eps
 
               ## tilt the conditional failure estimates
-              while (abs(epsilon) > 1e-8 && iter < max_iter) {
+              while (abs(epsilon) > 2 * eps && iter < max_iter) {
                 epsilon <- stats::coef(
                   stats::glm(
                     filtered_dt$failure ~ -1 + mod_h,
@@ -376,10 +389,15 @@ tml_estimator <- function(data,
 
           data_mod <- data.table::copy(data)
 
+          ## center the modifier
+          centered_mod <- scale(data_mod[[mod]], scale = FALSE, center = TRUE)
+          attr(centered_mod, "scaled:center") <- NULL
+          centered_mod <- as.vector(centered_mod)
+
           ## finalize the clever covariate
-          mod_h <- data_mod[[mod]] * data_mod$partial_h / mod_vars[[mod]]
-          mod_h_1 <- data_mod[[mod]] * data_mod$partial_h_1 / mod_vars[[mod]]
-          mod_h_0 <- data_mod[[mod]] * data_mod$partial_h_0 / mod_vars[[mod]]
+          mod_h <- centered_mod * data_mod$partial_h / mod_vars[[mod]]
+          mod_h_1 <- centered_mod * data_mod$partial_h_1 / mod_vars[[mod]]
+          mod_h_0 <- centered_mod * data_mod$partial_h_0 / mod_vars[[mod]]
 
           ## set initial values
           data_mod$failure_haz_est_star <- data_mod$failure_haz_est
@@ -410,7 +428,7 @@ tml_estimator <- function(data,
           ] <- 1 - eps
 
           ## tilt the conditional failure estimates
-          while (abs(epsilon) > 1e-8 && iter < max_iter) {
+          while (abs(epsilon) > 2 * eps && iter < max_iter) {
             epsilon <- stats::coef(
               stats::glm(
                 data_mod$failure ~ -1 + mod_h,

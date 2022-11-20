@@ -7,8 +7,8 @@ test_that(
     library(sl3)
 
     # generate data
-    set.seed(84891)
-    dt <- generate_test_data(n_obs = 5000)
+    set.seed(72342)
+    dt <- generate_test_data(n_obs = 1000)
 
     # fit the propensity score
     prop_score_fit <- fit_prop_score(
@@ -23,7 +23,7 @@ test_that(
     cond_outcome_fit <- fit_cond_outcome(
       train_data = dt,
       valid_data = NULL,
-      learners = sl3::Lrnr_ranger$new(),
+      learners = sl3::Lrnr_glm_fast$new(),
       exposure = "a",
       confounders = c("w_1", "w_2", "w_3"),
       outcome = "y"
@@ -73,7 +73,7 @@ test_that(
     cond_outcome_fit <- fit_cond_outcome(
       train_data = dt,
       valid_data = NULL,
-      learners = sl3::Lrnr_ranger$new(),
+      learners = sl3::Lrnr_glm_fast$new(),
       exposure = "a",
       confounders = c("w_1", "w_2", "w_3"),
       outcome = "y"
@@ -115,13 +115,8 @@ test_that(
     library(sl3)
 
     # generate data
-    set.seed(84891)
-    dt <- generate_test_data(n_obs = 5000)
-
-    # rescale the outcome to be between 0 and 1
-    min_y <- min(dt$y)
-    max_y <- max(dt$y)
-    dt$y <- (dt$y - min_y) / (max_y - min_y)
+    set.seed(79124)
+    dt <- generate_test_data(n_obs = 1000)
 
     # fit the propensity score
     prop_score_fit <- fit_prop_score(
@@ -153,7 +148,6 @@ test_that(
       prop_score_fit = prop_score_fit,
       cond_outcome_fit = cond_outcome_fit
     )
-    tmle_fit <- tmle_fit * (max_y - min_y)
 
     # note that the true parameter values for w_1, w_3 are 0, 1
     expect_equal(as.numeric(tmle_fit), c(0, 1), tolerance = 0.1)
