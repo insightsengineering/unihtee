@@ -6,23 +6,28 @@ test_that(
     library(sl3)
 
     # generate data
-    set.seed(62341)
-    dt <- generate_test_data(n_obs = 100000, outcome_type = "binary")
+    set.seed(98125)
+    dt <- generate_test_data(n_obs = 1000, outcome_type = "binary")
 
     # fit the propensity score
     prop_score_fit <- fit_prop_score(
       train_data = dt,
       valid_data = NULL,
-      learners = sl3::Lrnr_glm_fast$new(),
+      learners = sl3::Lrnr_glmnet$new(),
       exposure = "a",
       confounders = c("w_1", "w_2", "w_3")
     )
 
     # fit the expected cond outcome
+    interactions <- list(c("a", "w_1"), c("a", "w_2"), c("a", "w_3"))
+    lrnr_inter <- sl3::Lrnr_define_interactions$new(interactions)
+    lrnr_lasso <- sl3::make_learner(
+      sl3::Pipeline, lrnr_inter, sl3::Lrnr_glmnet$new()
+    )
     cond_outcome_fit <- fit_cond_outcome(
       train_data = dt,
       valid_data = NULL,
-      learners = sl3::Lrnr_glm_fast$new(),
+      learners = lrnr_lasso,
       exposure = "a",
       confounders = c("w_1", "w_2", "w_3"),
       outcome = "y"
@@ -46,7 +51,7 @@ test_that(
     one_step_fit <- one_step_estimator(uncentered_eif_data = ueif_dt)
 
     # note that the true parameter values for w_1, w_3 are 0, 1
-    expect_equal(as.numeric(one_step_fit), c(0, 4.2), tolerance = 0.1)
+    expect_equal(as.numeric(one_step_fit), c(0, 4.26), tolerance = 0.1)
   }
 )
 
@@ -113,22 +118,27 @@ test_that(
 
     # generate data
     set.seed(84891)
-    dt <- generate_test_data(n_obs = 100000, outcome_type = "binary")
+    dt <- generate_test_data(n_obs = 1000, outcome_type = "binary")
 
     # fit the propensity score
     prop_score_fit <- fit_prop_score(
       train_data = dt,
       valid_data = NULL,
-      learners = sl3::Lrnr_glm_fast$new(),
+      learners = sl3::Lrnr_glmnet$new(),
       exposure = "a",
       confounders = c("w_1", "w_2", "w_3")
     )
 
     # fit the expected cond outcome
+    interactions <- list(c("a", "w_1"), c("a", "w_2"), c("a", "w_3"))
+    lrnr_inter <- sl3::Lrnr_define_interactions$new(interactions)
+    lrnr_lasso <- sl3::make_learner(
+      sl3::Pipeline, lrnr_inter, sl3::Lrnr_glmnet$new()
+    )
     cond_outcome_fit <- fit_cond_outcome(
       train_data = dt,
       valid_data = NULL,
-      learners = sl3::Lrnr_glm_fast$new(),
+      learners = lrnr_lasso,
       exposure = "a",
       confounders = c("w_1", "w_2", "w_3"),
       outcome = "y"
