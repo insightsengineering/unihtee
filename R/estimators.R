@@ -131,14 +131,6 @@ tml_estimator <- function(data,
         q_1_star <- exp_estimates
         q_0_star <- noexp_estimates
 
-        ## bound q, just in case
-        ## q_star[q_star < (0 + eps)] <- 0 + eps
-        ## q_star[q_star > (1 - eps)] <- 1 - eps
-        ## q_1_star[q_1_star < (0 + eps)] <- 0 + eps
-        ## q_1_star[q_1_star > (1 - eps)] <- 1 - eps
-        ## q_0_star[q_0_star < (0 + eps)] <- 0 + eps
-        ## q_0_star[q_0_star > (1 - eps)] <- 1 - eps
-
         ## set a number of maximum interations
         max_iter <- 100
         iter <- 1
@@ -152,16 +144,6 @@ tml_estimator <- function(data,
             )
           )
 
-          ## update q
-          ## q_star <- stats::plogis(
-          ##   stats::qlogis(q_star) + epsilon * mod_h
-          ## )
-          ## q_1_star <- stats::plogis(
-          ##   stats::qlogis(q_1_star) + epsilon * mod_h_1
-          ## )
-          ## q_0_star <- stats::plogis(
-          ##   stats::qlogis(q_0_star) + epsilon * mod_h_0
-          ## )
           q_star <- q_star + epsilon * mod_h
           q_1_star <- q_1_star + epsilon * mod_h_1
           q_0_star <- q_0_star + epsilon * mod_h_0
@@ -277,47 +259,25 @@ tml_estimator <- function(data,
               iter <- 1
               max_iter <- 100
 
-              ## bound q, just in case
-              init_fail_haz_est[init_fail_haz_est < (0 + eps)] <- 0 + eps
-              init_fail_haz_est[init_fail_haz_est > (1 - eps)] <- 1 - eps
-              filtered_dt$failure_haz_exp_est_star[
-                filtered_dt$failure_haz_exp_est_star < (0 + eps)
-              ] <- 0 + eps
-              filtered_dt$failure_haz_exp_est_star[
-                filtered_dt$failure_haz_exp_est_star > (1 - eps)
-              ] <- 1 - eps
-              filtered_dt$failure_haz_noexp_est_star[
-                filtered_dt$failure_haz_noexp_est_star < (0 + eps)
-              ] <- 0 + eps
-              filtered_dt$failure_haz_noexp_est_star[
-                filtered_dt$failure_haz_noexp_est_star > (1 - eps)
-              ] <- 1 - eps
-
               ## tilt the conditional failure estimates
               while (abs(epsilon) > 2 * eps && iter < max_iter) {
                 epsilon <- stats::coef(
                   stats::glm(
                     filtered_dt$failure ~ -1 + mod_h,
-                    offset = stats::qlogis(init_fail_haz_est),
-                    family = "quasibinomial"
+                    offset = init_fail_haz_est,
+                    family = "gaussian"
                   )
                 )
 
                 ## update intial hazard
-                init_fail_haz_est <- stats::plogis(
-                  stats::qlogis(init_fail_haz_est) + epsilon * mod_h
-                )
+                init_fail_haz_est <- init_fail_haz_est + epsilon * mod_h
 
                 ## compute the tilted conditional survival probabilities
                 ## differences
-                filtered_dt$failure_haz_exp_est_star <- stats::plogis(
-                  stats::qlogis(filtered_dt$failure_haz_exp_est_star) +
-                    epsilon * mod_h_1
-                )
-                filtered_dt$failure_haz_noexp_est_star <- stats::plogis(
-                  stats::qlogis(filtered_dt$failure_haz_noexp_est_star) +
-                    epsilon * mod_h_0
-                )
+                filtered_dt$failure_haz_exp_est_star <-
+                  filtered_dt$failure_haz_exp_est_star + epsilon * mod_h_1
+                filtered_dt$failure_haz_noexp_est_star <-
+                  filtered_dt$failure_haz_noexp_est_star + epsilon * mod_h_0
 
                 ## bound q, just in case
                 init_fail_haz_est[init_fail_haz_est < (0 + eps)] <- 0 + eps
