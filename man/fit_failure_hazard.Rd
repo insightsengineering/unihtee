@@ -4,7 +4,14 @@
 \alias{fit_failure_hazard}
 \title{Conditional Failure Hazard Estimator}
 \usage{
-fit_failure_hazard(train_data, valid_data, learners, confounders, exposure)
+fit_failure_hazard(
+  train_data,
+  valid_data,
+  learners,
+  confounders,
+  exposure,
+  times
+)
 }
 \arguments{
 \item{train_data}{A long \code{data.table} containing the observed data.
@@ -23,6 +30,8 @@ learners from \pkg{sl3} to estimate the propensity score model.}
 baseline covariates.}
 
 \item{exposure}{A \code{character} corresponding to the exposure variable.}
+
+\item{times}{A \code{character} giving the name corresponding to the times.}
 }
 \value{
 A named \code{list} of three elements. (1) \code{"estimates"}, the

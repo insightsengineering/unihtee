@@ -193,6 +193,7 @@ test_that(
       valid_data = NULL,
       learners = sl3:::Lrnr_glm_fast$new(),
       exposure = "a",
+      times = "time",
       confounders = c("w_1", "w_2", "w_3")
     )
 
@@ -203,6 +204,7 @@ test_that(
       learners = sl3:::Lrnr_xgboost$new(),
       exposure = "a",
       confounders = c("w_1", "w_2", "w_3"),
+      times = "time",
       censoring = "censoring"
     )
 
@@ -255,6 +257,7 @@ test_that(
       valid_data = NULL,
       learners = sl3:::Lrnr_xgboost$new(),
       exposure = "a",
+      times = "time",
       confounders = c("w_1", "w_2", "w_3")
     )
 
@@ -265,6 +268,7 @@ test_that(
       learners = sl3:::Lrnr_glm_fast$new(),
       exposure = "a",
       confounders = c("w_1", "w_2", "w_3"),
+      times = "time",
       censoring = "censoring"
     )
 
@@ -328,6 +332,7 @@ test_that(
       valid_data = NULL,
       learners = sl3:::Lrnr_xgboost$new(),
       exposure = "a",
+      times = "time",
       confounders = c("w_1", "w_2", "w_3")
     )
 
@@ -338,6 +343,7 @@ test_that(
       learners = sl3:::Lrnr_xgboost$new(),
       exposure = "a",
       confounders = c("w_1", "w_2", "w_3"),
+      times = "time",
       censoring = "censoring"
     )
 

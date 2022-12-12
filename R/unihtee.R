@@ -178,7 +178,8 @@ unihtee <- function(data,
         valid_data = NULL,
         learners = failure_hazard_estimator,
         exposure = exposure,
-        confounders = confounders
+        confounders = confounders,
+        times = outcome
       )
       censoring_hazard_fit <- fit_censoring_hazard(
         train_data = data,
@@ -186,6 +187,7 @@ unihtee <- function(data,
         learners = censoring_hazard_estimator,
         exposure = exposure,
         confounders = confounders,
+        times = outcome,
         censoring = censoring
       )
       cond_outcome_fit <- NULL
@@ -411,7 +413,8 @@ cross_fit_fold <- function(fold,
       valid_data = valid_data,
       learners = failure_hazard_estimator,
       exposure = exposure,
-      confounders = confounders
+      confounders = confounders,
+      times = outcome
     )
     censoring_hazard_fit <- fit_censoring_hazard(
       train_data = train_data,
@@ -419,6 +422,7 @@ cross_fit_fold <- function(fold,
       learners = censoring_hazard_estimator,
       exposure = exposure,
       confounders = confounders,
+      times = outcome,
       censoring = censoring
     )
     cond_outcome_fit <- NULL
@@ -456,18 +460,6 @@ cross_fit_fold <- function(fold,
       censoring_hazard_fit = censoring_hazard_fit
     )
   }
-
-  ## center the efficient influence function
-  ## plugin_est_dt <- plugin_estimator(
-  ##     data = valid_data,
-  ##     confounders = confounders,
-  ##     modifiers = modifiers,
-  ##     exposure = exposure,
-  ##     outcome = outcome,
-  ##     type = risk_type,
-  ##     cond_outcome_fit = cond_outcome_fit,
-  ##     failure_hazard_fit = failure_hazard_fit,
-  ## )
 
   ## return the centered efficient influence function, estimates and
   ## proportion of observations in the validation data

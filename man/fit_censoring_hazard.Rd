@@ -10,6 +10,7 @@ fit_censoring_hazard(
   learners,
   confounders,
   exposure,
+  times,
   censoring
 )
 }
@@ -30,6 +31,8 @@ learners from \pkg{sl3} to estimate the propensity score model.}
 baseline covariates.}
 
 \item{exposure}{A \code{character} corresponding to the exposure variable.}
+
+\item{times}{A \code{character} giving the name corresponding to the times.}
 
 \item{censoring}{A \code{character} indicating the censoring indicator.}
 }
