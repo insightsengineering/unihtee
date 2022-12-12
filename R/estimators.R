@@ -257,7 +257,7 @@ tml_estimator <- function(data,
                 filtered_dt$failure_haz_noexp_est
               epsilon <- 1
               iter <- 1
-              max_iter <- 100
+              max_iter <- 10
 
               ## tilt the conditional failure estimates
               while (abs(epsilon) > 2 * eps && iter < max_iter) {

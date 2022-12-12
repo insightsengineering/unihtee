@@ -196,6 +196,7 @@ fit_cond_outcome <- function(train_data,
 #' @param exposure A \code{character} corresponding to the exposure variable.
 #' @param confounders A \code{character} vector of column names corresponding to
 #'   baseline covariates.
+#' @param times A \code{character} giving the name corresponding to the times.
 #'
 #' @return A named \code{list} of three elements. (1) \code{"estimates"}, the
 #'   expected failure hazards for each observation at each timepoint in
@@ -216,10 +217,11 @@ fit_failure_hazard <- function(train_data,
                                valid_data,
                                learners,
                                confounders,
-                               exposure) {
+                               exposure,
+                               times) {
 
   # define the covariates
-  covariates <- c(exposure, confounders)
+  covariates <- c(times, exposure, confounders)
 
   # construct the training task
   keep_var <- "keep"
@@ -308,6 +310,7 @@ fit_failure_hazard <- function(train_data,
 #' @param exposure A \code{character} corresponding to the exposure variable.
 #' @param confounders A \code{character} vector of column names corresponding to
 #'   baseline covariates.
+#' @param times A \code{character} giving the name corresponding to the times.
 #' @param censoring A \code{character} indicating the censoring indicator.
 #'
 #' @return A named \code{list} of three elements. (1) \code{"estimates"}, the
@@ -330,10 +333,11 @@ fit_censoring_hazard <- function(train_data,
                                  learners,
                                  confounders,
                                  exposure,
+                                 times,
                                  censoring) {
 
   # define the covariates
-  covariates <- c(exposure, confounders)
+  covariates <- c(times, exposure, confounders)
 
   # construct the training task
   keep_var <- "keep"
