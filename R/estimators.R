@@ -255,7 +255,9 @@ tml_estimator <- function(data,
             function(mod) {
 
               ## center the modifier
-              centered_mod <- scale(filtered_dt[[mod]], scale = FALSE, center = TRUE)
+              centered_mod <- scale(
+                filtered_dt[[mod]], scale = FALSE, center = TRUE
+              )
               attr(centered_mod, "scaled:center") <- NULL
               centered_mod <- as.vector(centered_mod)
 
@@ -273,12 +275,13 @@ tml_estimator <- function(data,
                 filtered_dt$failure_haz_exp_est
               filtered_dt$failure_haz_noexp_est_star <-
                 filtered_dt$failure_haz_noexp_est
-              epsilon <- 1
               iter <- 1
-              max_iter <- 10
+              max_iter <- 5
+              haz_score <- Inf
+              score_stop_crit <- 1 / (nrow(filtered_dt) * log(nrow(filtered_dt)))
 
               ## tilt the conditional failure estimates
-              while (abs(epsilon) > 2 * eps && iter < max_iter) {
+              while (abs(mean(haz_score)) > score_stop_crit && iter < max_iter) {
                 epsilon <- stats::coef(
                   stats::glm(
                     filtered_dt$failure ~ -1 + mod_h,
@@ -296,6 +299,11 @@ tml_estimator <- function(data,
                   filtered_dt$failure_haz_exp_est_star + epsilon * mod_h_1
                 filtered_dt$failure_haz_noexp_est_star <-
                   filtered_dt$failure_haz_noexp_est_star + epsilon * mod_h_0
+
+                ## compute the score
+                ## NOTE: We fix the original surival functions in h to promote
+                ## numerical stability.
+                haz_score <- mod_h * (filtered_dt$failure - init_fail_haz_est)
 
                 ## bound q, just in case
                 init_fail_haz_est[init_fail_haz_est < (0 + eps)] <- 0 + eps
@@ -383,7 +391,9 @@ tml_estimator <- function(data,
           data_mod$failure_haz_noexp_est_star <- data_mod$failure_haz_noexp_est
           epsilon <- 1
           iter <- 1
-          max_iter <- 100
+          max_iter <- 5
+          haz_score <- Inf
+          score_stop_crit <- 1 / (nrow(data_mod) * log(nrow(data_mod)))
 
           ## bound q, just in case
           data_mod$failure_haz_est_star[
@@ -406,28 +416,27 @@ tml_estimator <- function(data,
           ] <- 1 - eps
 
           ## tilt the conditional failure estimates
-          while (abs(epsilon) > 2 * eps && iter < max_iter) {
+          while (abs(mean(haz_score)) > score_stop_crit && iter < max_iter) {
             epsilon <- stats::coef(
               stats::glm(
                 data_mod$failure ~ -1 + mod_h,
-                offset = stats::qlogis(data_mod$failure_haz_est_star),
-                family = "quasibinomial"
+                offset = data_mod$failure_haz_est_star,
+                family = "gaussian"
               )
             )
             ## update hazard
-            data_mod$failure_haz_est_star <- stats::plogis(
-              stats::qlogis(data_mod$failure_haz_est) + epsilon * mod_h
-            )
+            data_mod$failure_haz_est_star <- data_mod$failure_haz_est +
+              epsilon * mod_h
 
             ## compute the tilted conditional survival probabilities differences
-            data_mod$failure_haz_exp_est_star <- stats::plogis(
-              stats::qlogis(data_mod$failure_haz_exp_est_star) +
-                epsilon * mod_h_1
-            )
-            data_mod$failure_haz_noexp_est_star <- stats::plogis(
-              stats::qlogis(data_mod$failure_haz_noexp_est_star) +
-                epsilon * mod_h_0
-            )
+            data_mod$failure_haz_exp_est_star <-
+              data_mod$failure_haz_exp_est_star + epsilon * mod_h_1
+            data_mod$failure_haz_noexp_est_star <-
+              data_mod$failure_haz_noexp_est_star + epsilon * mod_h_0
+
+            ## compute the score
+            haz_score <- mod_h *
+              (data_mod$failure - data_mod$failure_haz_est_star)
 
             ## bound q, just in case
             data_mod$failure_haz_est_star[

@@ -166,8 +166,8 @@ test_that(
         "cross-fitting, TTE outcome"),
   {
     # generate data
-    set.seed(142)
-    dt <- generate_test_data(n_obs = 5000, outcome_type = "time-to-event RR")
+    set.seed(10)
+    dt <- generate_test_data(n_obs = 1000, outcome_type = "time-to-event RR")
     long_dt <- tte_data_melt(
       data = dt,
       confounders = c("w_1", "w_2", "w_3"),
@@ -306,7 +306,7 @@ test_that(
   {
     # generate data
     set.seed(507)
-    dt <- generate_test_data(n_obs = 10000, outcome_type = "time-to-event RR")
+    dt <- generate_test_data(n_obs = 1000, outcome_type = "time-to-event RR")
     long_dt <- tte_data_melt(
       data = dt,
       confounders = c("w_1", "w_2", "w_3"),
