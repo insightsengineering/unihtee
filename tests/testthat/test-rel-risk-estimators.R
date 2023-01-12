@@ -117,7 +117,7 @@ test_that(
     library(sl3)
 
     # generate data
-    set.seed(84891)
+    set.seed(623423)
     dt <- generate_test_data(n_obs = 1000, outcome_type = "binary")
 
     # fit the propensity score
@@ -156,7 +156,7 @@ test_that(
       cond_outcome_fit = cond_outcome_fit
     )
 
-    # note that the true parameter values for w_1, w_3 are 0, 1
+    # note that the true parameter values for w_1, w_3 are 0, 4.2
     expect_equal(as.numeric(tmle_fit), c(0, 4.2), tolerance = 0.1)
   }
 )

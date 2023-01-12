@@ -104,6 +104,7 @@ tml_estimator <- function(data,
       h_partial_0 <- -1 / (1 - prop_scores)
     } else if (type == "relative risk") {
       # NOTE: Make sure not to divide by zero... or take log of zero
+      # Also, q_star is not iteratively updated here to improve stability
       h_partial <- (2 * data[[exposure]] - 1) /
         ((data[[exposure]] * prop_scores +
           (1 - data[[exposure]]) * (1 - prop_scores)) * estimates)
@@ -130,13 +131,13 @@ tml_estimator <- function(data,
         mod_h_0 <- centered_mod * h_partial_0 / mod_var
 
         ## tilt the estimators
-        q_score <- 10
+        q_score <- Inf
         iter <- 1
         q_star <- estimates
         q_1_star <- exp_estimates
         q_0_star <- noexp_estimates
 
-        while (score_stop_crit < mean(q_score) && iter < max_iter) {
+        while (score_stop_crit < abs(mean(q_score)) && iter < max_iter) {
 
           ## tilt the clever covariate using the quadratic loss
           epsilon <- stats::coef(
