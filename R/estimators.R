@@ -111,6 +111,10 @@ tml_estimator <- function(data,
       h_partial_0 <- -1 / ((1 - prop_scores) * noexp_estimates)
     }
 
+    ## set the TML tilting hyperparameters
+    score_stop_crit <- 1 / nrow(data) * log(nrow(data))
+    max_iter <- 100
+
     ## compute TML estimate
     estimates <- lapply(
       modifiers,
@@ -126,16 +130,15 @@ tml_estimator <- function(data,
         mod_h_0 <- centered_mod * h_partial_0 / mod_var
 
         ## tilt the estimators
-        epsilon <- 1
+        q_score <- 10
+        iter <- 1
         q_star <- estimates
         q_1_star <- exp_estimates
         q_0_star <- noexp_estimates
 
-        ## set a number of maximum interations
-        max_iter <- 100
-        iter <- 1
+        while (score_stop_crit < mean(q_score) && iter < max_iter) {
 
-        while (abs(epsilon) > 2 * eps && iter < max_iter) {
+          ## tilt the clever covariate using the quadratic loss
           epsilon <- stats::coef(
             stats::glm(
               data[[outcome]] ~ -1 + mod_h,
@@ -144,18 +147,24 @@ tml_estimator <- function(data,
             )
           )
 
+          ## update the nuisance parameter estimates
           q_star <- q_star + epsilon * mod_h
           q_1_star <- q_1_star + epsilon * mod_h_1
           q_0_star <- q_0_star + epsilon * mod_h_0
 
-          ## bound q, just in case
-          if (type == "relative risk") {
-            q_star[q_star < (0 + eps)] <- 0 + eps
-            q_star[q_star > (1 - eps)] <- 1 - eps
-            q_1_star[q_1_star < (0 + eps)] <- 0 + eps
-            q_1_star[q_1_star > (1 - eps)] <- 1 - eps
-            q_0_star[q_0_star < (0 + eps)] <- 0 + eps
-            q_0_star[q_0_star > (1 - eps)] <- 1 - eps
+          ## compute the score
+          if (type == "risk difference") {
+            q_score <- centered_mod * (2 * data[[exposure]] - 1) /
+              (data[[exposure]] * prop_scores +
+                 (1 - data[[exposure]]) * (1 - prop_scores)) /
+              mod_var *
+              (data[[outcome]] - q_star)
+          } else if (type == "relative risk") {
+            q_score <- centered_mod * (2 * data[[exposure]] - 1) /
+              (data[[exposure]] * prop_scores +
+                 (1 - data[[exposure]]) * (1 - prop_scores)) /
+              mod_var *
+              (data[[outcome]] - q_star) / q_star
           }
 
           iter <- iter + 1
@@ -166,6 +175,14 @@ tml_estimator <- function(data,
         if (type == "risk difference") {
           stats::cov(centered_mod, q_1_star - q_0_star) / mod_var
         } else if (type == "relative risk") {
+          ## bound q, just in case
+          q_star[q_star < (0 + eps)] <- 0 + eps
+          q_star[q_star > (1 - eps)] <- 1 - eps
+          q_1_star[q_1_star < (0 + eps)] <- 0 + eps
+          q_1_star[q_1_star > (1 - eps)] <- 1 - eps
+          q_0_star[q_0_star < (0 + eps)] <- 0 + eps
+          q_0_star[q_0_star > (1 - eps)] <- 1 - eps
+
           stats::cov(centered_mod, log(q_1_star) - log(q_0_star)) / mod_var
         }
       }
