@@ -63,11 +63,9 @@ test_that(
 
     # fit the propensity score
     interactions <- list(c("w_1", "a"))
-    lrnr_interactions <- sl3::Lrnr_define_interactions$new(
-      list(c("a", "w_1"), c("a", "w_2"), c("a", "w_3"))
-    )
-    lrnr_enet <- sl3::make_learner(
-      sl3::Pipeline, lrnr_interactions, sl3::Lrnr_glmnet$new(alpha = 0.5)
+    lrnr_enet <- sl3::Lrnr_glmnet$new(
+      alpha = 0.5,
+      formula = "~w_1 * a + w_2 * a + w_3 * a"
     )
     fit <- fit_prop_score(
       train_data = train_dt,

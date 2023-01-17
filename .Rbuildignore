@@ -1,6 +1,4 @@
 .here
-^renv$
-^renv\.lock$
 ^README.Rmd
 ^LICENSE\.md$
 ^.github
