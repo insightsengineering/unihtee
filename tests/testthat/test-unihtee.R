@@ -2,7 +2,7 @@ source("testing-utils.R")
 
 test_that(
   paste(
-    "unihtee() uncovers treatment effect modifiers on the risk diff scale",
+    "unihtee() uncovers treatment effect modifiers on the absolute scale",
     "when outcomes are continuous with the one-step estimator"
   ),
   {
@@ -19,7 +19,7 @@ test_that(
       exposure = "a",
       outcome = "y",
       outcome_type = "continuous",
-      risk_type = "risk difference",
+      scale = "absolute",
       estimator = "onestep"
     )
 
@@ -37,7 +37,7 @@ test_that(
 
 test_that(
   paste(
-    "unihtee() uncovers treatment effect modifiers on the risk diff scale",
+    "unihtee() uncovers treatment effect modifiers on the absolute scale",
     "when outcomes are continuous with the cross-fitted one-step estimator"
   ),
   {
@@ -54,7 +54,7 @@ test_that(
       exposure = "a",
       outcome = "y",
       outcome_type = "continuous",
-      risk_type = "risk difference",
+      scale = "absolute",
       estimator = "onestep",
       cross_fit = TRUE,
       cond_outcome_estimator = sl3::Lrnr_xgboost$new()
@@ -69,7 +69,7 @@ test_that(
 
 test_that(
   paste(
-    "unihtee() uncovers treatment effect modifiers on the risk diff scale",
+    "unihtee() uncovers treatment effect modifiers on the absolute scale",
     "when outcomes are continuous with the TML estimator"
   ),
   {
@@ -86,7 +86,7 @@ test_that(
       exposure = "a",
       outcome = "y",
       outcome_type = "continuous",
-      risk_type = "risk difference",
+      scale = "absolute",
       estimator = "tmle",
       cond_outcome_estimator = sl3::Lrnr_ranger$new()
     )
@@ -104,7 +104,7 @@ test_that(
 
 test_that(
   paste(
-    "unihtee() uncovers treatment effect modifiers on the risk diff scale",
+    "unihtee() uncovers treatment effect modifiers on the absolute scale",
     "when outcomes are continuous with the cross-fitted TML estimator"
   ),
   {
@@ -121,7 +121,7 @@ test_that(
       exposure = "a",
       outcome = "y",
       outcome_type = "continuous",
-      risk_type = "risk difference",
+      scale = "absolute",
       estimator = "tmle",
       cross_fit = TRUE,
       cond_outcome_estimator = sl3::Lrnr_glmnet$new()
@@ -135,7 +135,7 @@ test_that(
 
 test_that(
   paste(
-    "unihtee() uncovers treatment effect modifiers on the risk diff scale",
+    "unihtee() uncovers treatment effect modifiers on the absolute scale",
     "when outcomes are binary with the one-step estimator"
   ),
   {
@@ -152,7 +152,7 @@ test_that(
       exposure = "a",
       outcome = "y",
       outcome_type = "binary",
-      risk_type = "risk difference",
+      scale = "absolute",
       estimator = "onestep"
     )
 
@@ -169,7 +169,7 @@ test_that(
 
 test_that(
   paste(
-    "unihtee() uncovers treatment effect modifiers on the risk diff scale",
+    "unihtee() uncovers treatment effect modifiers on the absolute scale",
     "when outcomes are binary with the TML estimator"
   ),
   {
@@ -186,7 +186,7 @@ test_that(
       exposure = "a",
       outcome = "y",
       outcome_type = "binary",
-      risk_type = "risk difference",
+      scale = "absolute",
       estimator = "tmle",
       cond_outcome_estimator = sl3::Lrnr_xgboost$new(),
       prop_score_estimator = sl3::Lrnr_xgboost$new()
@@ -205,7 +205,7 @@ test_that(
 
 test_that(
   paste(
-    "unihtee() uncovers treatment effect modifiers on the rel risk scale",
+    "unihtee() uncovers treatment effect modifiers on the relative scale",
     "when outcomes are binary with the one-step estimator"
   ),
   {
@@ -222,7 +222,7 @@ test_that(
       exposure = "a",
       outcome = "y",
       outcome_type = "binary",
-      risk_type = "relative risk",
+      scale = "relative",
       estimator = "onestep"
     )
 
@@ -239,7 +239,7 @@ test_that(
 
 test_that(
   paste(
-    "unihtee() uncovers treatment effect modifiers on the rel risk scale",
+    "unihtee() uncovers treatment effect modifiers on the relative scale",
     "when outcomes are binary with the cross-fitted one-step estimator"
   ),
   {
@@ -256,7 +256,7 @@ test_that(
       exposure = "a",
       outcome = "y",
       outcome_type = "binary",
-      risk_type = "relative risk",
+      scale = "relative",
       estimator = "onestep",
       cross_fit = TRUE
     )
@@ -269,7 +269,7 @@ test_that(
 
 test_that(
   paste(
-    "unihtee() uncovers treatment effect modifiers on the rel risk scale",
+    "unihtee() uncovers treatment effect modifiers on the relative scale",
     "when outcomes are binary with the TML estimator"
   ),
   {
@@ -286,7 +286,7 @@ test_that(
       exposure = "a",
       outcome = "y",
       outcome_type = "binary",
-      risk_type = "relative risk",
+      scale = "relative",
       estimator = "tmle"
     )
 
@@ -303,7 +303,7 @@ test_that(
 
 test_that(
   paste(
-    "unihtee() uncovers treatment effect modifiers on the rel risk scale",
+    "unihtee() uncovers treatment effect modifiers on the relative scale",
     "when outcomes are binary with the cross-fitted TML estimator"
   ),
   {
@@ -320,7 +320,7 @@ test_that(
       exposure = "a",
       outcome = "y",
       outcome_type = "binary",
-      risk_type = "relative risk",
+      scale = "relative",
       estimator = "tmle",
       cross_fit = TRUE
     )
@@ -333,7 +333,7 @@ test_that(
 
 test_that(
   paste(
-    "unihtee() uncovers treatment effect modifiers on the risk diff scale",
+    "unihtee() uncovers treatment effect modifiers on the absolute scale",
     "with time-to-event outcomes with the one-step estimator"
   ),
   {
@@ -352,7 +352,7 @@ test_that(
       censoring = "censoring",
       time_cutoff = 5,
       outcome_type = "time-to-event",
-      risk_type = "risk difference",
+      scale = "absolute",
       estimator = "onestep",
       prop_score_estimator = sl3::Lrnr_xgboost$new(),
       cond_outcome_estimator = NULL,
@@ -373,7 +373,7 @@ test_that(
 
 test_that(
   paste(
-    "unihtee() uncovers treatment effect modifiers on the risk diff scale",
+    "unihtee() uncovers treatment effect modifiers on the absolute scale",
     "with time-to-event outcomes with the cross-fitted one-step estimator"
   ),
   {
@@ -392,7 +392,7 @@ test_that(
       censoring = "censoring",
       time_cutoff = 5,
       outcome_type = "time-to-event",
-      risk_type = "risk difference",
+      scale = "absolute",
       estimator = "onestep",
       cross_fit = TRUE,
       prop_score_estimator = sl3::Lrnr_xgboost$new(),
@@ -409,7 +409,7 @@ test_that(
 
 test_that(
   paste(
-    "unihtee() uncovers treatment effect modifiers on the risk diff scale",
+    "unihtee() uncovers treatment effect modifiers on the absolute scale",
     "with time-to-event outcomes with the TML estimator"
   ),
   {
@@ -428,7 +428,7 @@ test_that(
       censoring = "censoring",
       time_cutoff = 5,
       outcome_type = "time-to-event",
-      risk_type = "risk difference",
+      scale = "absolute",
       estimator = "tmle",
       prop_score_estimator = sl3::Lrnr_xgboost$new(),
       cond_outcome_estimator = NULL,
@@ -449,7 +449,7 @@ test_that(
 
 test_that(
   paste(
-    "unihtee() uncovers treatment effect modifiers on the risk diff scale",
+    "unihtee() uncovers treatment effect modifiers on the absolute scale",
     "with time-to-event outcomes with the cross-fitted TML estimator"
   ),
   {
@@ -468,7 +468,7 @@ test_that(
       censoring = "censoring",
       time_cutoff = 5,
       outcome_type = "time-to-event",
-      risk_type = "risk difference",
+      scale = "absolute",
       estimator = "tmle",
       cross_fit = TRUE,
       prop_score_estimator = sl3::Lrnr_xgboost$new(),
@@ -485,7 +485,7 @@ test_that(
 
 test_that(
   paste(
-    "unihtee() uncovers treatment effect modifiers on the relative risk scale",
+    "unihtee() uncovers treatment effect modifiers on the relative scale",
     "with time-to-event outcomes with the cross-fitted TML estimator"
   ),
   {
@@ -504,7 +504,7 @@ test_that(
       censoring = "censoring",
       time_cutoff = 5,
       outcome_type = "time-to-event",
-      risk_type = "relative risk",
+      scale = "relative",
       estimator = "tmle",
       cross_fit = TRUE,
       prop_score_estimator = sl3::Lrnr_xgboost$new(),

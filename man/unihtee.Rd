@@ -13,7 +13,7 @@ unihtee(
   censoring = NULL,
   time_cutoff = NULL,
   outcome_type = c("continuous", "binary", "time-to-event"),
-  risk_type = c("risk difference", "relative risk"),
+  scale = c("absolute", "relative"),
   estimator = c("tmle", "onestep"),
   cross_fit = FALSE,
   cross_fit_folds = 5,
@@ -50,9 +50,9 @@ outcomes. Defaults to \code{NULL}.}
 \code{"continuous"}, \code{"binary"} and \code{"time-to-event"} are
 currently supported.}
 
-\item{risk_type}{A \code{character} indicating the type of treatment effect
+\item{scale}{A \code{character} indicating the type of treatment effect
 modifier variable importance parameter. Currently supports
-\code{"risk difference"} and \code{"relative risk"}.}
+\code{"absolute"} and \code{"relative"}.}
 
 \item{estimator}{A \code{character} set to either \code{"tmle"} or
 \code{"onestep"}. The former results in \code{unihtee()} to use a targeted
@@ -109,7 +109,7 @@ ordered according to ascending p-values.
 }
 \description{
 \code{unihtee()} estimates treatment effect modifiers variable
-importance parameters (TEM VIPs). These TEM VIPs are defined on the risk
-difference or relative risk scales and can be estimated using one-step or
-targeted maximum likelihood estimators.
+importance parameters (TEM VIPs). These TEM VIPs are defined on the
+absolute or relative scales and can be estimated using one-step or targeted
+maximum likelihood estimators.
 }

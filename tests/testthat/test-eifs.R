@@ -2,7 +2,7 @@ source("testing-utils.R")
 
 test_that(
   paste(
-    "uncentered_eif() minus true risk diff parameter value has a mean",
+    "uncentered_eif() minus true absolute scale parameter value has a mean",
     "of zero when propensity scores aren't known"
   ),
   {
@@ -34,7 +34,7 @@ test_that(
     # compute the uncentered eif
     eif <- uncentered_eif(
       data = dt,
-      type = "risk difference",
+      scale = "absolute",
       confounders = c("w_1", "w_2", "w_3"),
       exposure = "a",
       outcome = "y",
@@ -55,7 +55,7 @@ test_that(
 
 test_that(
   paste(
-    "uncentered_eif() minus true risk diff parameter value has a mean",
+    "uncentered_eif() minus true absolute scale parameter value has a mean",
     "of zero when propensity scores are known"
   ),
   {
@@ -78,7 +78,7 @@ test_that(
     # compute the uncentered eif
     eif <- uncentered_eif(
       data = dt,
-      type = "risk difference",
+      scale = "absolute",
       confounders = c("w_1", "w_2", "w_3"),
       exposure = "a",
       outcome = "y",
@@ -99,15 +99,15 @@ test_that(
 
 test_that(
   paste(
-    "uncentered_eif() minus true risk diff parameter value has a mean",
+    "uncentered_eif() minus true relative scale parameter value has a mean",
     "of zero when propensity scores aren't known"
   ),
   {
     library(sl3)
 
     # generate data
-    set.seed(5123)
-    dt <- generate_test_data(n_obs = 100000, outcome_type = "binary")
+    set.seed(124151)
+    dt <- generate_test_data(n_obs = 1000, outcome_type = "binary")
 
     # fit the propensity score
     prop_score_fit <- fit_prop_score(
@@ -131,7 +131,7 @@ test_that(
     # compute the uncentered eif
     eif <- uncentered_eif(
       data = dt,
-      type = "relative risk",
+      scale = "relative",
       confounders = c("w_1", "w_2", "w_3"),
       exposure = "a",
       outcome = "y",
@@ -143,7 +143,7 @@ test_that(
       censoring_hazard_fit = NULL
     )
 
-    # note that the true parameter values are approx equal to 0, 4.22 for W_1,
+    # note that the true parameter values are approx equal to 0, 4.2 for W_1,
     # W_3
     expect_equal(eif[, sapply(.SD, mean)], c("w_1" = 0, "w_3" = 4.2),
       tolerance = 0.1
@@ -153,7 +153,7 @@ test_that(
 
 test_that(
   paste(
-    "uncentered_eif() minus true risk diff parameter value has a mean",
+    "uncentered_eif() minus true relative scale parameter value has a mean",
     "of zero when propensity scores are known"
   ),
   {
@@ -176,7 +176,7 @@ test_that(
     # compute the uncentered eif
     eif <- uncentered_eif(
       data = dt,
-      type = "relative risk",
+      scale = "relative",
       confounders = c("w_1", "w_2", "w_3"),
       exposure = "a",
       outcome = "y",
@@ -198,7 +198,7 @@ test_that(
 
 test_that(
   paste(
-    "uncentered_eif() minus true risk diff parameter value has a mean",
+    "uncentered_eif() minus true absolute scale parameter value has a mean",
     "of zero for the RD TTE TEM VIP"
   ),
   {
@@ -250,7 +250,7 @@ test_that(
     # compute the uncentered eif
     eif <- uncentered_eif(
       data = long_dt,
-      type = "risk difference",
+      scale = "absolute",
       confounders = c("w_1", "w_2", "w_3"),
       exposure = "a",
       outcome = "time",
@@ -311,7 +311,7 @@ test_that(
 
 test_that(
   paste(
-    "uncentered_eif() minus true risk diff parameter value has a mean",
+    "uncentered_eif() minus true relative scale parameter value has a mean",
     "of zero for the RR TTE TEM VIP"
   ),
   {
@@ -353,7 +353,7 @@ test_that(
 
     eif <- uncentered_eif(
       data = long_dt,
-      type = "relative risk",
+      scale = "relative",
       confounders = c("w_1", "w_2", "w_3"),
       exposure = "a",
       outcome = "time",

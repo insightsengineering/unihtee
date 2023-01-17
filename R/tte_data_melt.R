@@ -1,4 +1,3 @@
-
 #' @title Time-to-Event Data Melt
 #'
 #' @description \code{tte_data_melt()} turns wide-format \code{data.table}
