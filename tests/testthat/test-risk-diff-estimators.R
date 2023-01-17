@@ -23,7 +23,7 @@ test_that(
     cond_outcome_fit <- fit_cond_outcome(
       train_data = dt,
       valid_data = NULL,
-      learners = sl3::Lrnr_glm_fast$new(),
+      learners = sl3::Lrnr_xgboost$new(),
       exposure = "a",
       confounders = c("w_1", "w_2", "w_3"),
       outcome = "y"
@@ -73,7 +73,7 @@ test_that(
     cond_outcome_fit <- fit_cond_outcome(
       train_data = dt,
       valid_data = NULL,
-      learners = sl3::Lrnr_glm_fast$new(),
+      learners = sl3::Lrnr_xgboost$new(),
       exposure = "a",
       confounders = c("w_1", "w_2", "w_3"),
       outcome = "y"
@@ -131,7 +131,7 @@ test_that(
     cond_outcome_fit <- fit_cond_outcome(
       train_data = dt,
       valid_data = NULL,
-      learners = sl3::Lrnr_ranger$new(),
+      learners = sl3::Lrnr_xgboost$new(),
       exposure = "a",
       confounders = c("w_1", "w_2", "w_3"),
       outcome = "y"

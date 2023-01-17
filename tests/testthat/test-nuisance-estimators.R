@@ -16,7 +16,9 @@ test_that(
     fit <- fit_prop_score(
       train_data = dt,
       valid_data = NULL,
-      learners = sl3::Lrnr_glm_fast$new(),
+      learners = sl3::Lrnr_glm_fast$new(
+        formula = "~ w_1 * a + w_2 * a + w_3 * a"
+      ),
       exposure = "a",
       confounders = c("w_1", "w_2", "w_3")
     )
@@ -39,7 +41,9 @@ test_that(
     fit <- fit_prop_score(
       train_data = dt,
       valid_data = NULL,
-      learners = sl3::Lrnr_glm_fast$new(),
+      learners = sl3::Lrnr_glm_fast$new(
+        formula = "~ w_1 * a + w_2 * a + w_3 * a"
+      ),
       exposure = "a",
       confounders = c("w_1", "w_2", "w_3")
     )
@@ -235,7 +239,6 @@ test_that(
   }
 )
 
-
 test_that(
   paste(
     "fit_censoring_hazard() returns vectors of potential conditional censoring",
@@ -261,7 +264,9 @@ test_that(
     fit <- fit_censoring_hazard(
       train_data = long_dt,
       valid_data = NULL,
-      learners = sl3:::Lrnr_glm_fast$new(),
+      learners = sl3:::Lrnr_glm_fast$new(
+        formula = "~ w_1 * a + w_2 * a + w_3 * a"
+      ),
       exposure = "a",
       confounders = c("w_1", "w_2", "w_3"),
       times = "time",

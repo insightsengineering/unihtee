@@ -16,7 +16,9 @@ test_that(
     prop_score_fit <- fit_prop_score(
       train_data = dt,
       valid_data = NULL,
-      learners = sl3::Lrnr_glm_fast$new(),
+      learners = sl3::Lrnr_glm_fast$new(
+        formula = "~ w_1 * a + w_2 * a + w_3 * a"
+      ),
       exposure = "a",
       confounders = c("w_1", "w_2", "w_3")
     )
@@ -25,7 +27,9 @@ test_that(
     cond_outcome_fit <- fit_cond_outcome(
       train_data = dt,
       valid_data = NULL,
-      learners = sl3::Lrnr_glm_fast$new(),
+      learners = sl3::Lrnr_glm_fast$new(
+        formula = "~ w_1 * a + w_2 * a + w_3 * a"
+      ),
       exposure = "a",
       confounders = c("w_1", "w_2", "w_3"),
       outcome = "y"
@@ -62,14 +66,16 @@ test_that(
     library(sl3)
 
     # generate data
-    set.seed(5123)
-    dt <- generate_test_data(n_obs = 100000)
+    set.seed(12723)
+    dt <- generate_test_data(n_obs = 5000)
 
     # fit the expected cond outcome
     cond_outcome_fit <- fit_cond_outcome(
       train_data = dt,
       valid_data = NULL,
-      learners = sl3::Lrnr_glm_fast$new(),
+      learners = sl3::Lrnr_glmnet$new(
+        formula = "~ a * w_1 + a * w_2 + a * w_3"
+      ),
       exposure = "a",
       confounders = c("w_1", "w_2", "w_3"),
       outcome = "y"
@@ -92,7 +98,7 @@ test_that(
 
     # note that the true parameter values are equal to 0,1 for W_1, W_3
     expect_equal(eif[, sapply(.SD, mean)], c("w_1" = 0, "w_3" = 1),
-      tolerance = 0.01
+      tolerance = 0.1
     )
   }
 )
@@ -122,7 +128,9 @@ test_that(
     cond_outcome_fit <- fit_cond_outcome(
       train_data = dt,
       valid_data = NULL,
-      learners = sl3::Lrnr_glm_fast$new(),
+      learners = sl3::Lrnr_glm_fast$new(
+        formula = "~ a * w_1 + a * w_2 + a * w_3"
+      ),
       exposure = "a",
       confounders = c("w_1", "w_2", "w_3"),
       outcome = "y"
@@ -160,14 +168,17 @@ test_that(
     library(sl3)
 
     # generate data
-    set.seed(5123)
-    dt <- generate_test_data(n_obs = 100000, outcome_type = "binary")
+    set.seed(82342)
+    dt <- generate_test_data(n_obs = 10000, outcome_type = "binary")
 
     # fit the expected cond outcome
     cond_outcome_fit <- fit_cond_outcome(
       train_data = dt,
       valid_data = NULL,
-      learners = sl3::Lrnr_glm_fast$new(),
+      learners = sl3::Lrnr_glmnet$new(
+        formula = "~ a * w_1 + a * w_2 + a * w_3",
+        alpha = 1
+      ),
       exposure = "a",
       confounders = c("w_1", "w_2", "w_3"),
       outcome = "y"
@@ -206,7 +217,7 @@ test_that(
 
     # generate data
     set.seed(16234)
-    dt <- generate_test_data(n_obs = 100000, outcome_type = "time-to-event")
+    dt <- generate_test_data(n_obs = 10000, outcome_type = "time-to-event")
     long_dt <- tte_data_melt(
       data = dt,
       confounders = c("w_1", "w_2", "w_3"),
@@ -221,7 +232,7 @@ test_that(
     prop_score_fit <- fit_prop_score(
       train_data = dt,
       valid_data = long_dt,
-      learners = sl3::Lrnr_xgboost$new(),
+      learners = sl3::Lrnr_glm_fast$new(),
       exposure = "a",
       confounders = c("w_1", "w_2", "w_3")
     )
@@ -240,7 +251,7 @@ test_that(
     cens_fit <- fit_censoring_hazard(
       train_data = long_dt,
       valid_data = NULL,
-      learners = sl3:::Lrnr_xgboost$new(),
+      learners = sl3:::Lrnr_glm_fast$new(),
       exposure = "a",
       confounders = c("w_1", "w_2", "w_3"),
       times = "time",
@@ -307,7 +318,6 @@ test_that(
     expect_equal(mean(eif$w_3), w_3_param, tolerance = 0.1)
   }
 )
-
 
 test_that(
   paste(

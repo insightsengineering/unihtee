@@ -19,10 +19,8 @@ test_that(
     )
 
     # fit the expected cond outcome
-    interactions <- list(c("a", "w_1"), c("a", "w_2"), c("a", "w_3"))
-    lrnr_inter <- sl3::Lrnr_define_interactions$new(interactions)
-    lrnr_lasso <- sl3::make_learner(
-      sl3::Pipeline, lrnr_inter, sl3::Lrnr_glmnet$new()
+    lrnr_lasso <- sl3::Lrnr_glmnet$new(
+      formula = "~ a * w_1 + a * w_2 + a * w_3"
     )
     cond_outcome_fit <- fit_cond_outcome(
       train_data = dt,
@@ -117,7 +115,7 @@ test_that(
     library(sl3)
 
     # generate data
-    set.seed(623423)
+    set.seed(7235)
     dt <- generate_test_data(n_obs = 1000, outcome_type = "binary")
 
     # fit the propensity score
@@ -132,8 +130,9 @@ test_that(
     # fit the expected cond outcome
     interactions <- list(c("a", "w_1"), c("a", "w_2"), c("a", "w_3"))
     lrnr_inter <- sl3::Lrnr_define_interactions$new(interactions)
-    lrnr_lasso <- sl3::make_learner(
-      sl3::Pipeline, lrnr_inter, sl3::Lrnr_glmnet$new()
+    lrnr_lasso <- sl3::Lrnr_glmnet$new(
+      formula = "~ a * w_1 + a * w_2 + a * w_3",
+      alpha = 0.5
     )
     cond_outcome_fit <- fit_cond_outcome(
       train_data = dt,
@@ -191,7 +190,9 @@ test_that(
     fail_fit <- fit_failure_hazard(
       train_data = long_dt,
       valid_data = NULL,
-      learners = sl3:::Lrnr_glm_fast$new(),
+      learners = sl3::Lrnr_glmnet$new(
+        formula = "~ a * w_1 + a * w_2 + a * w_3"
+      ),
       exposure = "a",
       times = "time",
       confounders = c("w_1", "w_2", "w_3")

@@ -124,7 +124,9 @@ test_that(
       scale = "absolute",
       estimator = "tmle",
       cross_fit = TRUE,
-      cond_outcome_estimator = sl3::Lrnr_glmnet$new()
+      cond_outcome_estimator = sl3::Lrnr_glmnet$new(
+        formula = "~ a * w_1 + a * w_2 + a * w_3"
+      )
     )
 
     # ensure that the adjusted p-value of w_3 is less than 0.05, and those of
