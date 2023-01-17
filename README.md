@@ -14,14 +14,13 @@
 
 `unicate` provides tools for uncovering treatment effect modifiers in
 high-dimensional data. Treatment effect modification is defined using
-variable importance parameters based on risk differences or relative
-risks. The variable importance parameters are model-agnostic, meaning
-they do not depend on specific regression pocedures (for example, the
-variable importance measures of Random Forests). Inference is performed
-about these variable importance measures using nonparametric estimators.
-Users may use one-step or targeted maximum likelihood estimators. Under
-general conditions, these estimators are double-robust, linear and
-efficient.
+variable importance parameters based on absolute and relative scales.
+The variable importance parameters are model-agnostic, meaning they do
+not depend on specific regression pocedures (for example, the variable
+importance measures of Random Forests). Inference is performed about
+these variable importance measures using nonparametric estimators. Users
+may use one-step or targeted maximum likelihood estimators. Under
+general conditions, these estimators are unbiased and efficient.
 
 ## Installation
 
@@ -40,14 +39,14 @@ remotes::install_github("insightsengineering/unihtee")
 inference about the treatment effect modification variable importance
 parameters. These parameters are defined for use with continuous, binary
 and time-to-event outcomes with binary exposure variables. Variable
-importance parameters are defined on both the risk difference and
-relative risk scales.
+importance parameters are defined on both the absolute and relative
+scales.
 
 ## Example
 
-We simulate some observational data that contains ten confounders, of
-which are two treatment effect modifiers. We then perform inference
-about the risk-difference-based variable importance parameter.
+We simulate some observational study data that contains ten confounders,
+of which are two treatment effect modifiers. We then perform inference
+about the absolute scale variable importance parameter.
 
 ``` r
 library(unihtee)
@@ -74,31 +73,31 @@ unihtee(
   exposure = "a",
   outcome = "y",
   outcome_type = "continuous",
-  risk_type = "risk difference",
+  scale = "absolute",
   estimator = "tmle"
 )
-#>     modifier     estimate        se           z      p_value    ci_lower
-#>  1:      w_3  1.108005609 0.1613233  6.86823260 6.500134e-12  0.79181204
-#>  2:      w_4 -0.839689658 0.1492369 -5.62655519 1.838440e-08 -1.13219398
-#>  3:      w_8  0.188515268 0.1137877  1.65672738 9.757461e-02 -0.03450871
-#>  4:      w_1  0.177774878 0.1160698  1.53162049 1.256161e-01 -0.04972192
-#>  5:     w_10 -0.109936815 0.1356947 -0.81017792 4.178379e-01 -0.37589834
-#>  6:      w_9  0.103756298 0.1300309  0.79793593 4.249077e-01 -0.15110420
-#>  7:      w_6  0.076346514 0.1159920  0.65820496 5.104064e-01 -0.15099782
-#>  8:      w_2 -0.082664876 0.1767372 -0.46772776 6.399793e-01 -0.42906971
-#>  9:      w_7 -0.018588007 0.1485309 -0.12514570 9.004082e-01 -0.30970862
-#> 10:      w_5  0.001748801 0.1103689  0.01584504 9.873580e-01 -0.21457433
+#>     modifier    estimate        se          z      p_value    ci_lower
+#>  1:      w_3  1.19657424 0.1613233  7.4172461 1.196820e-13  0.88038067
+#>  2:      w_4 -0.89218696 0.1492369 -5.9783268 2.254412e-09 -1.18469128
+#>  3:      w_8  0.19677508 0.1137877  1.7293170 8.375237e-02 -0.02624889
+#>  4:      w_1  0.19352745 0.1160698  1.6673368 9.544745e-02 -0.03396935
+#>  5:     w_10 -0.11398276 0.1356947 -0.8399945 4.009115e-01 -0.37994429
+#>  6:      w_9  0.10749149 0.1300309  0.8266613 4.084291e-01 -0.14736901
+#>  7:      w_6  0.07756350 0.1159920  0.6686969 5.036888e-01 -0.14978083
+#>  8:      w_2 -0.08609331 0.1767372 -0.4871262 6.261689e-01 -0.43249814
+#>  9:      w_7 -0.01905859 0.1485309 -0.1283140 8.979005e-01 -0.31017921
+#> 10:      w_5  0.00176980 0.1103689  0.0160353 9.872062e-01 -0.21455333
 #>       ci_upper  p_value_fdr
-#>  1:  1.4241992 6.500134e-11
-#>  2: -0.5471853 9.192199e-08
-#>  3:  0.4115392 3.140403e-01
-#>  4:  0.4052717 3.140403e-01
-#>  5:  0.1560247 7.081795e-01
-#>  6:  0.3586168 7.081795e-01
-#>  7:  0.3036908 7.291521e-01
-#>  8:  0.2637400 7.999741e-01
-#>  9:  0.2725326 9.873580e-01
-#> 10:  0.2180719 9.873580e-01
+#>  1:  1.5127678 1.196820e-12
+#>  2: -0.5996826 1.127206e-08
+#>  3:  0.4197991 2.386186e-01
+#>  4:  0.4210242 2.386186e-01
+#>  5:  0.1519788 6.807151e-01
+#>  6:  0.3623520 6.807151e-01
+#>  7:  0.3049078 7.195555e-01
+#>  8:  0.2603115 7.827111e-01
+#>  9:  0.2720620 9.872062e-01
+#> 10:  0.2180929 9.872062e-01
 ```
 
 ## Issues
