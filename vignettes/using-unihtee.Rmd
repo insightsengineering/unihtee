@@ -1,0 +1,87 @@
+---
+title: "Using `unihtee`"
+author: "[Philippe Boileau](https://pboileau.ca)"
+date: "`r Sys.Date()`"
+bibliography: ../inst/REFERENCES.bib
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{using-unihtee}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(dplyr)
+library(unihtee)
+```
+
+# Background
+
+Why should you use `unihtee`? How is this different from alternative methods?
+
+# `unihtee` in Action
+
+Current use cases for unihtee include ... We provide details and examples below.
+
+## Working with Continuous Outcomes
+
+Summarize the full-data and observed-data models. Present the conditional
+average treatment effect.
+
+### Absolute Scale TEM-VIP
+
+Present the TEM-VIP. Provide explanation. State identifiability conditions in
+laymans terms.
+
+State that there are two (three) estimators. Briefly cover their asymptotic
+behaviour.
+
+Simple example of one-step and TML estimators.
+
+## Working with Binary Outcomes
+
+Analogous to continuous outcome model. We can define TEM-VIPs on the absolute
+scale as in the continuous outcome setting. However, often more informative to
+do so on the relative scale.
+
+### Relative Scale TEM-VIP
+
+Present the TEM-VIP. Provide explanation. State identifiability conditions in
+laymans terms. State that this parameter can be targeted in models with positive
+continuous outcomes, too.
+
+State that there are two (three) estimators. Briefly cover their asymptotic
+behaviour.
+
+Simple example of one-step and TML estimators.
+
+## Working with Time-to-Event Outcomes
+
+Provide models. Talk about the restricted mean survival time.
+
+### Absolute Scale TEM-VIP
+
+Present the TEM-VIP. Provide explanation. State identifiability conditions in
+laymans terms.
+
+State that there are two (three) estimators. Briefly cover their asymptotic
+behaviour.
+
+Simple example of one-step and TML estimators.
+
+### Relative Scale TEM-VIP
+
+Present the TEM-VIP. Provide explanation. State identifiability conditions in
+laymans terms.
+
+State that there are two (three) estimators. Briefly cover their asymptotic
+behaviour.
+
+Simple example of one-step and TML estimators.
