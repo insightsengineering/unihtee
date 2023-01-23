@@ -2,7 +2,7 @@
 title: "Using `unihtee`"
 author: "[Philippe Boileau](https://pboileau.ca)"
 date: "`r Sys.Date()`"
-bibliography: ../inst/REFERENCES.bib
+bibliography: ../inst/references.bib
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{using-unihtee}
@@ -17,14 +17,51 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
-library(dplyr)
-library(unihtee)
-```
-
 # Background
 
-Why should you use `unihtee`? How is this different from alternative methods?
+Treatment effect modifiers (TEMs) are responsible for the disparate effects of a
+treatment on a population. They are confounders --- meaning they influence both
+the likelihood of receiving treatment and the outcome --- that modify the effect
+of treatment on the outcome. In precision medicine, these effect modifiers
+delineate patient subgroups which experience differing benefit from a given
+medical intervention. In public health, they are used to determine the effect of
+policy decisions on sub-populations. Identifying TEMs, if any exist, is required
+for a comprehensive understanding of an intervention's effect on a population.
+
+Traditional parametric modeling techniques, like generalized linear models
+(GLMs), define TEMs as the confounders with non-zero interaction terms. In
+settings characterized by time-to-event outcomes, the Cox proportional hazards
+model can similarly be used. Inference about TEMs is therefore possible under
+stringent conditions about the data-generating process. When these
+(semi)parametric methods' assumptions, like linearity of the confounder-outcome
+relationship in a linear model or proportional hazards in a Cox model, are
+violated, however, their results are invalid.
+
+More flexible approaches instead focus on estimating the conditional average
+treatment effect (CATE) using interpretable modeling techniques, like the LASSO
+or Random Forests. Again, however, these methods require restrictive assumptions
+about the data-generating process, like sparsity of treatment effect
+modification, approximately uncorrelated confounders and sample sizes that are
+much larger than the number of confounders, to reliably recover TEMs.
+
+Instead of identifying TEMs indirectly by modeling the
+confounder-treatment-outcome relationship, recent work has developed frameworks
+tailored to the task. Relying on TEM variable importance parameters (TEM-VIP),
+it is possible to assess confounders' influence on the treatment effect in
+nonparametric, algorithm-agnostic fashion that largely avoids the pitfalls of
+parametric and CATE-based methodologies. These TEM-VIPs are defined within
+nonparametric statistical models that may be augmented with causal
+interpretations, permitting formal inference about TEMs.
+
+The `unihtee` R package implements the recent proposals of Boileau 2022 and
+Boileau 2023. They propose a TEM-VIP framework whose parameters assess the
+marginal effect of each confounder on treatment effect heterogeneity, however
+the treatment effect is defined. Nonparametric estimators are provided, and
+their asymptotic properties established. In particular, these estimators are
+shown to be asymptotically linear under minimal assumptions about the
+data-generating process, and to recover treatment effect modifiers more readily
+than competing methods. These TEM-VIPs and estimators are introduced alongside
+worked examples in the following section.
 
 # `unihtee` in Action
 
@@ -35,7 +72,7 @@ Current use cases for unihtee include ... We provide details and examples below.
 Summarize the full-data and observed-data models. Present the conditional
 average treatment effect.
 
-### Absolute Scale TEM-VIP
+### Absolute TEM-VIP
 
 Present the TEM-VIP. Provide explanation. State identifiability conditions in
 laymans terms.
@@ -45,13 +82,18 @@ behaviour.
 
 Simple example of one-step and TML estimators.
 
+```{r setup, message = FALSE}
+library(dplyr)
+library(unihtee)
+```
+
 ## Working with Binary Outcomes
 
 Analogous to continuous outcome model. We can define TEM-VIPs on the absolute
 scale as in the continuous outcome setting. However, often more informative to
 do so on the relative scale.
 
-### Relative Scale TEM-VIP
+### Relative TEM-VIP
 
 Present the TEM-VIP. Provide explanation. State identifiability conditions in
 laymans terms. State that this parameter can be targeted in models with positive
@@ -66,7 +108,7 @@ Simple example of one-step and TML estimators.
 
 Provide models. Talk about the restricted mean survival time.
 
-### Absolute Scale TEM-VIP
+### Absolute TEM-VIP
 
 Present the TEM-VIP. Provide explanation. State identifiability conditions in
 laymans terms.
@@ -76,7 +118,7 @@ behaviour.
 
 Simple example of one-step and TML estimators.
 
-### Relative Scale TEM-VIP
+### Relative TEM-VIP
 
 Present the TEM-VIP. Provide explanation. State identifiability conditions in
 laymans terms.
@@ -85,3 +127,9 @@ State that there are two (three) estimators. Briefly cover their asymptotic
 behaviour.
 
 Simple example of one-step and TML estimators.
+
+# SesSion information
+
+```{r session-information}
+sessionInfo()
+```
