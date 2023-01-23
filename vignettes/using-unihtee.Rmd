@@ -39,22 +39,26 @@ violated, however, their results are invalid.
 
 More flexible approaches instead focus on estimating the conditional average
 treatment effect (CATE) using interpretable modeling techniques, like the LASSO
-or Random Forests. Again, however, these methods require restrictive assumptions
-about the data-generating process, like sparsity of treatment effect
-modification, approximately uncorrelated confounders and sample sizes that are
-much larger than the number of confounders, to reliably recover TEMs.
+[@tibshirani1996, @tian2014, @chen2017, @zhao2018, @semenova2021,
+@bahamyirou2022] or Random Forests [@breiman2001, @wager2018, @cui2022]. Again,
+however, these methods require restrictive assumptions about the data-generating
+process, like sparsity of treatment effect modification [@zhao2006],
+approximately uncorrelated confounders [@zhao2006, @esl2009] and sample sizes
+that are much larger than the number of confounders [@zhao2006], to reliably
+recover TEMs.
 
 Instead of identifying TEMs indirectly by modeling the
 confounder-treatment-outcome relationship, recent work has developed frameworks
-tailored to the task. Relying on TEM variable importance parameters (TEM-VIP),
-it is possible to assess confounders' influence on the treatment effect in
+tailored to the task [@williamson2022framework, @boileau2022, @hines2022TEVIP,
+@boileau2023]. Relying on TEM variable importance parameters (TEM-VIP), it is
+possible to assess confounders' influence on the treatment effect in
 nonparametric, algorithm-agnostic fashion that largely avoids the pitfalls of
 parametric and CATE-based methodologies. These TEM-VIPs are defined within
 nonparametric statistical models that may be augmented with causal
 interpretations, permitting formal inference about TEMs.
 
-The `unihtee` R package implements the recent proposals of Boileau 2022 and
-Boileau 2023. They propose a TEM-VIP framework whose parameters assess the
+The `unihtee` R package implements the recent proposals of @boileau2022 and
+@boileau2023. They propose a TEM-VIP framework whose parameters assess the
 marginal effect of each confounder on treatment effect heterogeneity, however
 the treatment effect is defined. Nonparametric estimators are provided, and
 their asymptotic properties established. In particular, these estimators are
