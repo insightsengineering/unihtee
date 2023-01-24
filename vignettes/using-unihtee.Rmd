@@ -17,6 +17,11 @@ knitr::opts_chunk$set(
 )
 ```
 
+```{r setup, message = FALSE}
+library(dplyr)
+library(unihtee)
+```
+
 # Background
 
 Treatment effect modifiers (TEMs) are responsible for the disparate effects of a
@@ -29,13 +34,13 @@ policy decisions on sub-populations. Identifying TEMs, if any exist, is required
 for a comprehensive understanding of an intervention's effect on a population.
 
 Traditional parametric modeling techniques, like generalized linear models
-(GLMs), define TEMs as the confounders with non-zero interaction terms. In
-settings characterized by time-to-event outcomes, the Cox proportional hazards
-model can similarly be used. Inference about TEMs is therefore possible under
-stringent conditions about the data-generating process. When these
-(semi)parametric methods' assumptions, like linearity of the confounder-outcome
-relationship in a linear model or proportional hazards in a Cox model, are
-violated, however, their results are invalid.
+(GLMs), define TEMs as the confounders with non-zero confounder-treatment
+interaction terms. In settings characterized by time-to-event outcomes, the Cox
+proportional hazards model can similarly be used. Inference about TEMs is
+therefore possible under stringent conditions about the data-generating process.
+When these (semi)parametric methods' assumptions, like linearity of the
+confounder-outcome relationship in a linear model or proportional hazards in a
+Cox model, are violated, however, their results are invalid.
 
 More flexible approaches instead focus on estimating the conditional average
 treatment effect (CATE) using interpretable modeling techniques, like the LASSO
@@ -58,9 +63,9 @@ nonparametric statistical models that may be augmented with causal
 interpretations, permitting formal inference about TEMs.
 
 The `unihtee` R package implements the recent proposals of @boileau2022 and
-@boileau2023. They propose a TEM-VIP framework whose parameters assess the
-marginal effect of each confounder on treatment effect heterogeneity, however
-the treatment effect is defined. Nonparametric estimators are provided, and
+@boileau2023. This TEM-VIP framework relies on parameters assess the marginal
+effect of each confounder on treatment effect heterogeneity, however treatment
+effect is defined. Nonparametric estimators are provided in these works, and
 their asymptotic properties established. In particular, these estimators are
 shown to be asymptotically linear under minimal assumptions about the
 data-generating process, and to recover treatment effect modifiers more readily
@@ -69,27 +74,126 @@ worked examples in the following section.
 
 # `unihtee` in Action
 
-Current use cases for unihtee include ... We provide details and examples below.
+The `unihtee` R package performs inference about TEM-VIPs in data-generating
+processes with a binary exposure variable and either continuous, binary, or
+right-censored time-to-event outcomes. No restriction is placed on the
+confounding variables, though ordinal confounders should be formatted as factors
+using `ordered()`, and categorical confounders should be one-hot encoded.
 
 ## Working with Continuous Outcomes
 
-Summarize the full-data and observed-data models. Present the conditional
-average treatment effect.
+Let there be $n$ independent and identically distributed (i.i.d.) random vectors
+${X_i}_{i=1}^n$ such that $X_i = (W_i, A_i, Y^{(0)}, Y_i^{(1)}) \sim P_{X,0} \in
+\mathcal{M}_X$. Dropping the index where possible for notational convenience for
+the remainder of the tutorial, $W$ is defined as the set of $p$ confounders, $A$
+as the binary treatment indicator, and $Y^{(0)}, Y_i^{(1)}$ the continuous
+potential outcomes [@rubin1974] produced under control and treatment conditions,
+respectively. Further, $\mathcal{M}_X$ is the full-data nonparametric model of
+all possible data-generating processes, and contains the true but unknown
+full-data data-generating process $P_{X,0}$.
+
+Now, $P_{X,0}$ is generally unknown because its random vectors are unobservable:
+only one potential outcome is ever measurable in practice. Still, $P_{X,0}$
+allows to us to readily define causal parameters on which inference may
+subsequently be performed. Examples are given in the subsections below.
+
+We instead have access to $n$ i.i.d. random observations $O=(W,A,Y) \sim P_0 \in
+\mathcal{M}$, where $W$ and $A$ are defined as in the full-data, and where $Y =
+AY^{(1)} + (1-A)Y{(0)}$. $\mathcal{M}$ is the observed-data statistical model
+containing all possible observed-data data-generating processes, including the
+true data-generating process $P_{0}$. Note too that the elements of
+$\mathcal{M}$ are fully specified by their full-data counterparts in
+$\mathcal{M}_{X}$.
+
+Having established the requisite statistical objects, let's define a
+data-generating process:
+```{r cont-dgp}
+cont_outcome_dgp <- function(n_obs) {
+
+  # confounders
+  w_1 <- rnorm(n = n_obs)
+  w_2 <- rnorm(n = n_obs)
+  w_3 <- rnorm(n = n_obs)
+  w_4 <- rnorm(n = n_obs)
+  w_5 <- rnorm(n = n_obs)
+
+  # treatment
+  prop_score <- plogis(w_1 + w_2)
+  a <- sapply(prop_score, function(x) rbinom(1, 1, prob = x))
+
+  # potential outcomes
+  y_1 <- rnorm(n = n_obs, mean = w_1 + 2 * w_2 + 2 * w_3 + 0.5 * a, sd = 0.1)
+  y_0 <- rnorm(n = n_obs, mean = w_1 + w_2, sd = 0.1)
+
+  # outcome
+  y <- a * y_1 + (1 - a) * y_0
+
+  # assemble the observations in a tibble
+  tibble(
+    w_1 = w_1,
+    w_2 = w_2,
+    w_3 = w_3,
+    a = a,
+    y = y
+  )
+}
+```
+
+It's clear from the definition of the potential outcomes that `w_2` and `w_3`
+are treatment effect modifiers: they interact with the treatment indicator `a`.
+A TEM-VIP for quantifying the strength of the treatment effect modification is
+outlined next.
 
 ### Absolute TEM-VIP
 
-Present the TEM-VIP. Provide explanation. State identifiability conditions in
-laymans terms.
+Indexing $W$ by $j=1,\ldots,p$, and assuming without
+loss of generality that
+$\mathbb{E}_{P_{X,0}}[W_j] = 0, \mathbb{E}_{P_{X,0}}[W_j^2] > 0$, we can define
+our first TEM-VIP for the $j^\text{th}$ confounder as follows:
 
-State that there are two (three) estimators. Briefly cover their asymptotic
-behaviour.
+$$
+\Psi^F_j(P_{X,0}) =
+\frac{\mathbb{E}_{P_{X,0}}[(Y^{(1)}-Y^{(0)})W_j]}{\mathbb{E}_{P_{X,0}}[W_j^2]}
+=\frac{\mathbb{E}_{P_{X,0}}[(\mathbb{E}_{P_{X,0}}[Y^{(1)}|W]-
+  \mathbb{E}_{P_{X,0}}[Y^{(0)}|W])W_j]}
+  {\mathbb{E}_{P_{X,0}}[W_j^2]} \;.
+$$
+
+This call this parameter the absolute TEM-VIP. Assuming the expectation of
+$\mathbb{E}_{P_{X,0}}[Y^{(1)}|W]- \mathbb{E}_{P_{X,0}}[Y^{(0)}|W]$ conditional
+on $W_j$ is linear in $W_j$, $\Psi^F_j(P_{X,0})$ is the simple linear regression
+coefficient produced by regressing the difference in expected potential outcomes
+against confounder $W_j$. Even when this relationship is nonlinear, as is almost
+surely the case in most applications, $\Psi^F_j(P_{X,0})$ corresponds to the
+correlation between the difference in potential outcomes and the $j^\text{th}$
+confounder, re-normalized to be on the same scale as the potential outcomes.
+
+Of course, as stated earlier, we don't generally have access to the $X$s
+required to perform inference about the above parameter. Luckily, under the
+identification conditions outlined in @boileau2022 and @boileau2023 --- namely,
+that there is no unmeasured confounding and no positivity violations --- we can
+perform inference about the equivalent observed-data parameter:
+
+$$
+\Psi_j(P_0)
+=\frac{\mathbb{E}_{P_0}[(\mathbb{E}_{P_{0}}[Y|A=1,W]-
+  \mathbb{E}_{P_0}[Y|A=0,W])W_j]}{\mathbb{E}_{P_0}[W_j^2]} 
+= \Psi^F_j(P_{X,0})\;.
+$$
+
+@boileau2022 and @boileau2023 derive two nonparametric estimators of this
+parameter: the one-step and targeted maximum likelihood (TML) estimators. Both
+require the estimation of two nuisance parameters: the propensity score and the
+expected outcome conditioned on the treatment and confounders. These estimators
+are double robust: only one nuisance parameter is required to be consistently
+estimated to ensure that the one-step and TML estimators are consistent. If both
+nuisance parameters converge to their true values at a fast enough rate, then
+the one-step and TML estimators are asymptotically normal. This permits
+hypothesis testing about $\Psi_j(P_0)$ using Wald-type confidence intervals.
+Further details on these estimators and their asymptotic properties are provided
+in @boileau2022 and @boileau2023.
 
 Simple example of one-step and TML estimators.
-
-```{r setup, message = FALSE}
-library(dplyr)
-library(unihtee)
-```
 
 ## Working with Binary Outcomes
 
@@ -132,7 +236,7 @@ behaviour.
 
 Simple example of one-step and TML estimators.
 
-# SesSion information
+# Session information
 
 ```{r session-information}
 sessionInfo()
