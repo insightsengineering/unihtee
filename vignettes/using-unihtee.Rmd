@@ -19,6 +19,7 @@ knitr::opts_chunk$set(
 
 ```{r setup, message = FALSE}
 library(dplyr)
+library(sl3)
 library(unihtee)
 ```
 
@@ -133,6 +134,8 @@ cont_outcome_dgp <- function(n_obs) {
     w_1 = w_1,
     w_2 = w_2,
     w_3 = w_3,
+    w_4 = w_4,
+    w_5 = w_5,
     a = a,
     y = y
   )
@@ -193,7 +196,58 @@ hypothesis testing about $\Psi_j(P_0)$ using Wald-type confidence intervals.
 Further details on these estimators and their asymptotic properties are provided
 in @boileau2022 and @boileau2023.
 
-Simple example of one-step and TML estimators.
+Having defined the parameter and briefly discussed the estimators, we apply
+`unicate()` to recover the treatment effect modifiers, as defined by the
+absolute TEM-VIP. Both the one-step and TML estimators are showcased. The LASSO
+regression of @tibshirani1996 is used to estimate the nuisance parameters.
+
+```{r abs-tem-vip}
+set.seed(514)
+
+# simulate a random sample
+sample_df <- cont_outcome_dgp(n_obs = 500)
+
+# one-step estimator
+unihtee(
+  data = sample_df,
+  confounders = c("w_1", "w_2", "w_3", "w_4", "w_5"),
+  modifiers =  c("w_1", "w_2", "w_3", "w_4", "w_5"),
+  exposure = "a",
+  outcome = "y",
+  outcome_type = "continuous",
+  scale = "absolute",
+  estimator = "onestep",
+  cond_outcome_estimator = sl3::Lrnr_glmnet$new(
+    family = "gaussian",
+    formula = "~ a * w_1 + a * w_2 + a * w_3 + a * w_4 + a * w_5"
+  ),
+  prop_score_estimator = sl3::Lrnr_glmnet$new(family = "binomial")
+)
+
+# TML estimator
+unihtee(
+  data = sample_df,
+  confounders = c("w_1", "w_2", "w_3", "w_4", "w_5"),
+  modifiers =  c("w_1", "w_2", "w_3", "w_4", "w_5"),
+  exposure = "a",
+  outcome = "y",
+  outcome_type = "continuous",
+  scale = "absolute",
+  estimator = "tmle",
+  cond_outcome_estimator = sl3::Lrnr_glmnet$new(
+    family = "gaussian",
+    formula = "~ a * w_1 + a * w_2 + a * w_3 + a * w_4 + a * w_5"
+  ),
+  prop_score_estimator = sl3::Lrnr_glmnet$new(family = "binomial")
+)
+```
+
+`unicate()` outputs a table of results summarizing the TEM-VIP inference
+procedure for each potential treatment effect modifier. This table ordered by
+the nominal p-value of the inference procedure. Both the one-step and TML
+estimators correctly identify the TEM-VIP of `w_2` and `w_3` as being non-zero
+based on the false discovery rate adjusted p-values. Each estimator's point
+estimates are also close to their true parameter values.
 
 ## Working with Binary Outcomes
 
