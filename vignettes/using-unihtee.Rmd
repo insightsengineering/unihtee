@@ -422,8 +422,9 @@ counterpart is defined analogously as $S_0(t|A,W) = P_{P_0}[T > t |A, W]$.
 Finally, we define a time-to-event data-generating process with nine equidistant
 time points and three potential confounders, `w_1`, `w_2`, and `w_3`. Of these
 confounders, only `w_1` is a treatment effect modifier. Note that `unihtee()`
-requires a "wide" data format when working time-to-event outcome data. An
-example is provided following this code chunk.
+requires a "wide" data format when working time-to-event outcome data. That is,
+each observation is represented by a single row in the data. An example is
+provided following this code chunk.
 
 ```{r tte-dgp}
 # define hazard functions
@@ -541,13 +542,82 @@ tte_outcome_dgp(10)
 
 ### Additive TEM-VIP
 
-Present the TEM-VIP. Provide explanation. State identifiability conditions in
-laymans terms.
+@boileau2023 Propose an additive TEM-VIP based on the restricted mean survival
+time at some pre-specified time $t$. Again assuming without loss of generality
+that the $\mathbb{E}_{P_{X,0}}[W_j] = 0$ and that the confounders have variance
+bounded away from zero, this TEM-VIP is defined as
+$$
+\Psi_j^F(P_{X,0};t) = \frac{\mathbb{E}_{P_{X,0}}\left[W_j
+  \int_0^t \{ S_{P_{X,0}}(u|1, W) - S_{P_{X,0}}(u|0, W) \} du \right]}
+  {\mathbb{E}_{P_{X,0}}[W_j^2]} \; .
+$$
 
-State that there are two (three) estimators. Briefly cover their asymptotic
-behaviour.
+"$\Psi$" is re-used to highlight that this is an additive TEM-VIP. As in the
+continuous outcome scenario, this parameter captures the correlation between the
+conditional difference in the restricted mean survival time and the
+$j^\text{th}$ confounder, re-normalized to be on the same scale as the outcome.
+Put another way, this parameter identifies confounders driving the largest
+difference in truncated survival times across treatment conditions.
 
-Simple example of one-step and TML estimators.
+As before, this full-data parameter is equal to the following observed-data
+parameter under the assumptions of (1) no unmeasured confounding, (2) censoring
+mechanism positivity, and (3) treatment assignment positivity:
+$$
+\Psi_j(P_0;t) = \frac{\mathbb{E}_{P_0}\left[W_j
+  \int_0^t \{ S_0(u|1, W) - S_0(u|0, W) \} du \right]}
+  {\mathbb{E}_{P_0}[W_j^2]} \; .
+$$
+
+As in the continuous and binary outcome scenarios, @boileau2023 derived two
+estimators of this additive effect parameter: a one-step estimator and a TML
+estimator. Both rely on the accurate estimation of three nuisance parameters:
+the conditional event hazard function, the conditional censoring hazard
+function, and the propensity score. If either the conditional event hazard
+function or the conditional censoring hazard function and the propensity score
+are consistently estimated, then these nonparametric estimators are consistent.
+Further, if all of these nuisance parameters are converge to their true values
+at a rate of $n^{-1/4}$, then these estimators are asymptotically normally
+distributed. This permits Gaussian-based hypothesis testing through the use of
+Wald-type confidence intervals. See @boileau2023 for more details.
+
+```{r tte-additive-tem-vip}
+# simulate a random sample
+sample_df <- tte_outcome_dgp(n_obs = 250)
+
+# one-step estimator
+unihtee(
+  data = sample_df,
+  confounders = c("w_1", "w_2", "w_3"),
+  modifiers = c("w_1", "w_2", "w_3"),
+  exposure = "a",
+  outcome = "time",
+  censoring = "censoring_indicator",
+  time_cutoff = 8,
+  outcome_type = "time-to-event",
+  scale = "absolute",
+  estimator = "onestep",
+  prop_score_estimator = sl3::Lrnr_glmnet$new(),
+  failure_hazard_estimator = sl3::Lrnr_xgboost$new(),
+  censoring_hazard_estimator = sl3::Lrnr_glmnet$new()
+)
+
+# TML estimator
+unihtee(
+  data = sample_df,
+  confounders = c("w_1", "w_2", "w_3"),
+  modifiers = c("w_1", "w_2", "w_3"),
+  exposure = "a",
+  outcome = "time",
+  censoring = "censoring_indicator",
+  time_cutoff = 8,
+  outcome_type = "time-to-event",
+  scale = "absolute",
+  estimator = "tmle",
+  prop_score_estimator = sl3::Lrnr_glmnet$new(),
+  failure_hazard_estimator = sl3::Lrnr_xgboost$new(),
+  censoring_hazard_estimator = sl3::Lrnr_glmnet$new()
+)
+```
 
 ### Relative TEM-VIP
 
@@ -557,7 +627,54 @@ laymans terms.
 State that there are two (three) estimators. Briefly cover their asymptotic
 behaviour.
 
-Simple example of one-step and TML estimators.
+```{r tte-relative-tem-vip}
+# simulate a random sample
+sample_df <- tte_outcome_dgp(n_obs = 1000)
+
+# one-step estimator
+unihtee(
+  data = sample_df,
+  confounders = c("w_1", "w_2", "w_3"),
+  modifiers = c("w_1", "w_2", "w_3"),
+  exposure = "a",
+  outcome = "time",
+  censoring = "censoring_indicator",
+  time_cutoff = 5,
+  outcome_type = "time-to-event",
+  scale = "relative",
+  estimator = "onestep",
+  prop_score_estimator = sl3::Lrnr_glmnet$new(),
+  failure_hazard_estimator = sl3::Lrnr_xgboost$new(),
+  censoring_hazard_estimator = sl3::Lrnr_glmnet$new(),
+  cross_fit = TRUE
+)
+
+# TML estimator
+unihtee(
+  data = sample_df,
+  confounders = c("w_1", "w_2", "w_3"),
+  modifiers = c("w_1", "w_2", "w_3"),
+  exposure = "a",
+  outcome = "time",
+  censoring = "censoring_indicator",
+  time_cutoff = 5,
+  outcome_type = "time-to-event",
+  scale = "relative",
+  estimator = "tmle",
+  prop_score_estimator = sl3::Lrnr_glmnet$new(),
+  failure_hazard_estimator = sl3::Lrnr_xgboost$new(),
+  censoring_hazard_estimator = sl3::Lrnr_glmnet$new(),
+  cross_fit = TRUE
+)
+```
+
+# Additional Functionality
+
+## Working with Randomized Experiment Data
+
+## Cross-Fitting
+
+## `sl3` Integration: Using Super Learners
 
 # Session information
 
