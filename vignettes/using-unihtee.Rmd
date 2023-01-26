@@ -261,8 +261,8 @@ and confounders. With that said, a relative TEM-VIP is generally more sensitive
 and informative in these scenarios. We propose such a parameter in the following
 section.
 
-Before that, however, we define a data-generating process with a treatment
-effect modifier:
+Before that, however, we define a data-generating process with two treatment
+effect modifiers:
 
 ```{r binary-dgp}
 bin_outcome_dgp <- function(n_obs) {
@@ -305,7 +305,7 @@ treatment variable, `a`.
 Again assuming that the confounders are centered at zero with non-zero variance,
 the relative TEM-VIP for the $j^\text{th}$ confounder is
 $$
-\Gamma^F_j(P_{X,0}) =
+\Gamma^F_j(P_{X,0})
 =\frac{\mathbb{E}_{P_{X,0}}[(\log\mathbb{E}_{P_{X,0}}[Y^{(1)}|W]-
   \log\mathbb{E}_{P_{X,0}}[Y^{(0)}|W])W_j]}
   {\mathbb{E}_{P_{X,0}}[W_j^2]} \;.
@@ -394,7 +394,150 @@ smaller samples.
 
 ## Working with Time-to-Event Outcomes
 
-Provide models. Talk about the restricted mean survival time.
+`unihtee` also provides functionality for estimating TEM-VIPs for data with
+right-censored time-to-event outcomes. We detail the assumed full-data and
+observed-data models here, then introduce an additive and a relative TEM-VIP in
+subsequent sections.
+
+Consider $n$ i.i.d. random vectors $X = (W, A, C^{(0)}, C^{(1)}, T^{(0)},
+T^{(1)}) \sim P_{X,0} \in \mathcal{M}_X$. $W, A, P_{X,0},$ and $\mathcal{M}_X$
+are defined as in the continuous and binary outcome models. $C^{(0)}$ and
+$C^{(1)}$ correspond to the censoring times that would be observed under the
+control and treatment conditions, respectively. Similarly, $T^{(0)}$ and
+$T^{(1)}$ are the event times that would be observed under either treatment
+assignment.
+
+Again, $P_{X,0}$ is generally unobservable. We instead have access to random
+observations $O = (W, A, \Delta, T) \sim P_0 \in \mathcal{M}$, where $\Delta$ is
+a censoring indicator and $T = A(\Delta C^{(1)} + (1-\Delta)T^{(1)}) +
+(1-A)(\Delta C^{(0)} + (1-\Delta) T^{(0)})$. $W, A, P_0,$ and $\mathcal{M}$ are
+defined as in the previous observed-data models.
+
+Now, it's worth introducing the full-data and observed-data conditional survival
+functions since both TEM-VIPs introduced in this section rely on them. The
+full-data survival function is defined as $S_{P_{X,0}}(t|A,W) =
+\mathbb{P}_{P_{X,0}}[T^{(A)} > t | W]$. This parameter's observed-data
+counterpart is defined analogously as $S_0(t|A,W) = P_{P_0}[T > t |A, W]$.
+
+Finally, we define a time-to-event data-generating process with nine equidistant
+time points and three potential confounders, `w_1`, `w_2`, and `w_3`. Of these
+confounders, only `w_1` is a treatment effect modifier. Note that `unihtee()`
+requires a "wide" data format when working time-to-event outcome data. An
+example is provided following this code chunk.
+
+```{r tte-dgp}
+# define hazard functions
+cond_cens_hazard <- function(time, a, w_1, w_2, w_3) {
+  (time < 9) / (1 + exp(4 + 0.2 * (w_1 + w_2) - a))
+}
+cond_surv_hazard <- function(time, a, w_1, w_2, w_3) {
+  (time < 9) / (1 + exp(2 + 3 * a * w_1)) + (time == 9)
+}
+
+# failure time simulator
+failure_time_sim <- function(n_obs, a, w_1, w_2, w_3) {
+  sapply(
+    seq_len(n_obs),
+    function(obs) {
+      failure_time <- NA
+      for (t in 1:9) {
+        prob <- cond_surv_hazard(t, a, w_1[obs], w_2[obs], w_3[obs])
+        status <- rbinom(1, 1, prob)
+        if (status == 1) {
+          failure_time <- t
+          break
+        }
+      }
+      return(failure_time)
+    }
+  )
+}
+
+# censoring time simulator
+censor_time_sim <- function(n_obs, a, w_1, w_2, w_3) {
+  sapply(
+    seq_len(n_obs),
+    function(obs) {
+      censor_time <- NA
+      for (t in 1:9) {
+        prob <- cond_cens_hazard(t, a, w_1[obs], w_2[obs], w_3[obs])
+        status <- rbinom(1, 1, prob)
+        if (status == 1) {
+          censor_time <- t
+          break
+        }
+      }
+      if (is.na(censor_time)) censor_time <- 10
+      return(censor_time)
+    }
+  )
+}
+
+# time-to-event outcome data-generating process
+tte_outcome_dgp <- function(n_obs) {
+
+  # confounders
+  w_1 <- rnorm(n = n_obs)
+  w_2 <- rnorm(n = n_obs)
+  w_3 <- rnorm(n = n_obs)
+
+  # treatment
+  prop_score <- plogis(-1 - w_1 + w_2 - w_3)
+  a <- rbinom(n_obs, 1, prob = prop_score)
+
+  # generate the failure events for t = 1 to 9
+  failure_time_1 <- failure_time_sim(n_obs, 1, w_1, w_2, w_3)
+  failure_time_0 <- failure_time_sim(n_obs, 0, w_1, w_2, w_3)
+
+  # generate the censoring events for t = 1 to 9
+  censor_time_1 <- censor_time_sim(n_obs, 1, w_1, w_2, w_3)
+  censor_time_0 <- censor_time_sim(n_obs, 0, w_1, w_2, w_3)
+
+  # compile the failure and censoring times
+  failure_time <- sapply(
+    seq_len(n_obs),
+    function(obs) {
+      if (a[obs] == 1) failure_time_1[obs] else failure_time_0[obs]
+    }
+  )
+  censor_time <- sapply(
+    seq_len(n_obs),
+    function(obs) {
+      if (a[obs] == 1) censor_time_1[obs] else censor_time_0[obs]
+    }
+  )
+  
+  # determine the observed time-to-event and censoring indicator
+  time <- sapply(
+    seq_len(n_obs),
+    function(obs) {
+      if (censor_time[obs] < failure_time[obs]) {
+        censor_time[obs]
+      } else {
+        failure_time[obs]
+      }
+    }
+  )
+  censoring_indicator <- sapply(
+    seq_len(n_obs),
+    function(obs) if (time[obs] == censor_time[obs]) 1 else 0
+  )
+  
+  # assemble the tibble
+  tibble(
+    w_1 = w_1,
+    w_2 = w_2,
+    w_3 = w_3,
+    a = a,
+    time = time,
+    censoring_indicator = censoring_indicator
+  )
+}
+```
+
+```{r tte-data-example}
+tte_outcome_dgp(10)
+```
 
 ### Additive TEM-VIP
 
