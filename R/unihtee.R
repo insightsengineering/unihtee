@@ -2,8 +2,8 @@ utils::globalVariables(c("..to_keep", ".SD", ".I", "p_value"))
 #' @title Univariate Heterogeneous Treatment Effect Modifier Estimator
 #'
 #' @description \code{unihtee()} estimates treatment effect modifiers variable
-#'   importance parameters (TEM VIPs). These TEM VIPs are defined on the
-#'   absolute or relative scales and can be estimated using one-step or targeted
+#'   importance parameters (TEM-VIPs). These TEM-VIPs are defined on the
+#'   additive or relative effects and can be estimated using one-step or targeted
 #'   maximum likelihood estimators.
 #'
 #' @param data A \code{data.table} containing the observed data.
@@ -22,12 +22,12 @@ utils::globalVariables(c("..to_keep", ".SD", ".I", "p_value"))
 #' @param outcome_type A \code{character} indicating the outcome type.
 #'   \code{"continuous"}, \code{"binary"} and \code{"time-to-event"} are
 #'   currently supported.
-#' @param scale A \code{character} indicating the type of treatment effect
+#' @param effect A \code{character} indicating the type of treatment effect
 #'   modifier variable importance parameter. Currently supports
-#'   \code{"absolute"} and \code{"relative"}.
+#'   \code{"additive"} and \code{"relative"}.
 #' @param estimator A \code{character} set to either \code{"tmle"} or
 #'   \code{"onestep"}. The former results in \code{unihtee()} to use a targeted
-#'   maximum likelihood estimators to estimate the deisred TEM VIP, while the
+#'   maximum likelihood estimators to estimate the deisred TEM-VIP, while the
 #'   latter uses a one step estimator.
 #' @param cross_fit A \code{logical} determining whether cross-fitting should be
 #'   used. Defaults to \code{FALSE}.
@@ -81,7 +81,7 @@ unihtee <- function(data,
                     censoring = NULL,
                     time_cutoff = NULL,
                     outcome_type = c("continuous", "binary", "time-to-event"),
-                    scale = c("absolute", "relative"),
+                    effect = c("additive", "relative"),
                     estimator = c("tmle", "onestep"),
                     cross_fit = FALSE,
                     cross_fit_folds = 5,
@@ -93,7 +93,7 @@ unihtee <- function(data,
                     parallel = FALSE) {
 
   ## specify the TEM VIP type
-  param_scale <- match.arg(scale)
+  param_effect <- match.arg(effect)
 
   ## specify the outcome type
   outcome_type <- match.arg(outcome_type)
@@ -196,7 +196,7 @@ unihtee <- function(data,
     ## compute the efficient influence function
     ueif_dt <- uncentered_eif(
       data = data,
-      scale = param_scale,
+      effect = param_effect,
       confounders = confounders,
       exposure = exposure,
       outcome = outcome,
@@ -218,7 +218,7 @@ unihtee <- function(data,
         modifiers = modifiers,
         exposure = exposure,
         outcome = outcome,
-        scale = param_scale,
+        effect = param_effect,
         prop_score_fit = prop_score_fit,
         cond_outcome_fit = cond_outcome_fit,
         failure_hazard_fit = failure_hazard_fit,
@@ -247,7 +247,7 @@ unihtee <- function(data,
       outcome = outcome,
       censoring = censoring,
       outcome_type = outcome_type,
-      scale = param_scale,
+      effect = param_effect,
       estimator = estimator,
       cond_outcome_estimator = cond_outcome_estimator,
       prop_score_estimator = prop_score_estimator,
@@ -308,12 +308,12 @@ unihtee <- function(data,
 #' @param outcome_type A \code{character} indicating the outcome type.
 #'   \code{"continuous"}, \code{"binary"} and \code{"time-to-event"} are
 #'   currently supported.
-#' @param scale A \code{character} indicating the type of treatment effect
+#' @param effect A \code{character} indicating the type of treatment effect
 #'   modifier variable importance parameter. Currently supports
-#'   \code{"absolute"} and \code{"relative"}.
+#'   \code{"additive"} and \code{"relative"}.
 #' @param estimator A \code{character} set to either \code{"tmle"} or
 #'   \code{"onestep"}. The former results in \code{unihtee()} to use a targeted
-#'   maximum likelihood estimators to estimate the deisred TEM VIP, while the
+#'   maximum likelihood estimators to estimate the deisred TEM-VIP, while the
 #'   latter uses a one step estimator.
 #' @param cond_outcome_estimator A \code{\link[sl3]{Stack}}, or other learner
 #'   class (inheriting from \code{\link[sl3]{Lrnr_base}}), containing a set of
@@ -360,7 +360,7 @@ cross_fit_fold <- function(fold,
                            outcome,
                            censoring,
                            outcome_type,
-                           scale,
+                           effect,
                            estimator,
                            cond_outcome_estimator,
                            prop_score_estimator,
@@ -431,7 +431,7 @@ cross_fit_fold <- function(fold,
   ## compute the efficient influence function
   ueif_dt <- uncentered_eif(
     data = valid_data,
-    scale = scale,
+    effect = effect,
     confounders = confounders,
     exposure = exposure,
     outcome = outcome,
@@ -453,7 +453,7 @@ cross_fit_fold <- function(fold,
       modifiers = modifiers,
       exposure = exposure,
       outcome = outcome,
-      scale = scale,
+      effect = effect,
       prop_score_fit = prop_score_fit,
       cond_outcome_fit = cond_outcome_fit,
       failure_hazard_fit = failure_hazard_fit,

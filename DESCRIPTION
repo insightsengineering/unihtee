@@ -17,6 +17,8 @@ Imports:
     origami
 Suggests:
     here,
+    dplyr,
+    Rsolnp,
     glmnet,
     speedglm,
     ranger,

@@ -13,7 +13,7 @@ cross_fit_fold(
   outcome,
   censoring,
   outcome_type,
-  scale,
+  effect,
   estimator,
   cond_outcome_estimator,
   prop_score_estimator,
@@ -45,13 +45,13 @@ variable. Only used with time-to-event outcomes. Defaults to \code{NULL}.}
 \code{"continuous"}, \code{"binary"} and \code{"time-to-event"} are
 currently supported.}
 
-\item{scale}{A \code{character} indicating the type of treatment effect
+\item{effect}{A \code{character} indicating the type of treatment effect
 modifier variable importance parameter. Currently supports
-\code{"absolute"} and \code{"relative"}.}
+\code{"additive"} and \code{"relative"}.}
 
 \item{estimator}{A \code{character} set to either \code{"tmle"} or
 \code{"onestep"}. The former results in \code{unihtee()} to use a targeted
-maximum likelihood estimators to estimate the deisred TEM VIP, while the
+maximum likelihood estimators to estimate the deisred TEM-VIP, while the
 latter uses a one step estimator.}
 
 \item{cond_outcome_estimator}{A \code{\link[sl3]{Stack}}, or other learner

@@ -34,7 +34,7 @@ test_that(
     # compute the uncentered eif
     ueif_dt <- uncentered_eif(
       data = dt,
-      scale = "relative",
+      effect = "relative",
       confounders = c("w_1", "w_2", "w_3"),
       exposure = "a",
       outcome = "y",
@@ -84,7 +84,7 @@ test_that(
     # compute the uncentered eif
     ueif_dt <- uncentered_eif(
       data = dt,
-      scale = "relative",
+      effect = "relative",
       confounders = c("w_1", "w_2", "w_3"),
       exposure = "a",
       outcome = "y",
@@ -146,7 +146,7 @@ test_that(
     # compute the TML estimate
     tmle_fit <- tml_estimator(
       data = dt,
-      scale = "relative",
+      effect = "relative",
       confounders = c("w_1", "w_2", "w_3"),
       exposure = "a",
       outcome = "y",
@@ -211,7 +211,7 @@ test_that(
 
     eif <- uncentered_eif(
       data = long_dt,
-      scale = "relative",
+      effect = "relative",
       confounders = c("w_1", "w_2", "w_3"),
       exposure = "a",
       outcome = "time",
@@ -275,7 +275,7 @@ test_that(
 
     eif <- uncentered_eif(
       data = long_dt,
-      scale = "relative",
+      effect = "relative",
       confounders = c("w_1", "w_2", "w_3"),
       exposure = "a",
       outcome = "time",
@@ -355,7 +355,7 @@ test_that(
       modifiers = c("w_1", "w_2", "w_3"),
       exposure = "a",
       outcome = "time",
-      scale = "relative",
+      effect = "relative",
       prop_score_values = NULL,
       prop_score_fit = prop_score_fit,
       cond_outcome_fit = NULL,

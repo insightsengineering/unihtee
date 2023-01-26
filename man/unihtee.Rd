@@ -13,7 +13,7 @@ unihtee(
   censoring = NULL,
   time_cutoff = NULL,
   outcome_type = c("continuous", "binary", "time-to-event"),
-  scale = c("absolute", "relative"),
+  effect = c("additive", "relative"),
   estimator = c("tmle", "onestep"),
   cross_fit = FALSE,
   cross_fit_folds = 5,
@@ -50,13 +50,13 @@ outcomes. Defaults to \code{NULL}.}
 \code{"continuous"}, \code{"binary"} and \code{"time-to-event"} are
 currently supported.}
 
-\item{scale}{A \code{character} indicating the type of treatment effect
+\item{effect}{A \code{character} indicating the type of treatment effect
 modifier variable importance parameter. Currently supports
-\code{"absolute"} and \code{"relative"}.}
+\code{"additive"} and \code{"relative"}.}
 
 \item{estimator}{A \code{character} set to either \code{"tmle"} or
 \code{"onestep"}. The former results in \code{unihtee()} to use a targeted
-maximum likelihood estimators to estimate the deisred TEM VIP, while the
+maximum likelihood estimators to estimate the deisred TEM-VIP, while the
 latter uses a one step estimator.}
 
 \item{cross_fit}{A \code{logical} determining whether cross-fitting should be
@@ -109,7 +109,7 @@ ordered according to ascending p-values.
 }
 \description{
 \code{unihtee()} estimates treatment effect modifiers variable
-importance parameters (TEM VIPs). These TEM VIPs are defined on the
-absolute or relative scales and can be estimated using one-step or targeted
+importance parameters (TEM-VIPs). These TEM-VIPs are defined on the
+additive or relative effects and can be estimated using one-step or targeted
 maximum likelihood estimators.
 }

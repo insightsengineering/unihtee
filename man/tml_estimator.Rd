@@ -10,7 +10,7 @@ tml_estimator(
   modifiers,
   exposure,
   outcome,
-  scale,
+  effect,
   prop_score_fit,
   prop_score_values = NULL,
   cond_outcome_fit,
@@ -33,9 +33,9 @@ the suspected effect modifiers. This vector must be a subset of
 
 \item{outcome}{A \code{character} corresponding to the outcome variable.}
 
-\item{scale}{A \code{character} indicating the type of treatment effect
+\item{effect}{A \code{character} indicating the type of treatment effect
 modifier variable importance parameter. Currently supports
-\code{"absolute"} and \code{"relative"}.}
+\code{"additive"} and \code{"relative"}.}
 
 \item{prop_score_fit}{A \code{list} output by the
 \code{\link{fit_prop_score}()} function.}

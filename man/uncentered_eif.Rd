@@ -6,7 +6,7 @@
 \usage{
 uncentered_eif(
   data,
-  scale,
+  effect,
   confounders,
   exposure,
   outcome,
@@ -22,9 +22,9 @@ uncentered_eif(
 \item{data}{A \code{data.table} containing the observed data.
 \code{train_data} is formatted by \code{\link{unihtee}()}.}
 
-\item{scale}{A \code{character} indicating the type of treatment effect
+\item{effect}{A \code{character} indicating the type of treatment effect
 modifier variable importance parameter. Currently supports
-\code{"absolute"} and \code{"relative"}.}
+\code{"additive"} and \code{"relative"}.}
 
 \item{confounders}{A \code{character} vector of column names corresponding to
 baseline covariates.}

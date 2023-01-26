@@ -40,9 +40,9 @@ one_step_estimator <- function(uncentered_eif_data) {
 #' @param modifiers A \code{character} vector of columns names corresponding to
 #'   the suspected effect modifiers. This vector must be a subset of
 #'   \code{confounders}.
-#' @param scale A \code{character} indicating the type of treatment effect
+#' @param effect A \code{character} indicating the type of treatment effect
 #'   modifier variable importance parameter. Currently supports
-#'   \code{"absolute"} and \code{"relative"}.
+#'   \code{"additive"} and \code{"relative"}.
 #' @param prop_score_fit A \code{list} output by the
 #'   \code{\link{fit_prop_score}()} function.
 #' @param prop_score_values A \code{numeric} vector corresponding to the (known)
@@ -66,7 +66,7 @@ tml_estimator <- function(data,
                           modifiers,
                           exposure,
                           outcome,
-                          scale,
+                          effect,
                           prop_score_fit,
                           prop_score_values = NULL,
                           cond_outcome_fit,
@@ -89,20 +89,20 @@ tml_estimator <- function(data,
     estimates <- cond_outcome_fit$estimates
     exp_estimates <- cond_outcome_fit$exp_estimates
     noexp_estimates <- cond_outcome_fit$noexp_estimates
-    if (scale == "relative") {
+    if (effect == "relative") {
       estimates[estimates < eps] <- eps
       exp_estimates[exp_estimates < eps] <- eps
       noexp_estimates[noexp_estimates < eps] <- eps
     }
 
     # compute that partial clever covariate
-    if (scale == "absolute") {
+    if (effect == "additive") {
       h_partial <- (2 * data[[exposure]] - 1) /
         (data[[exposure]] * prop_scores +
          (1 - data[[exposure]]) * (1 - prop_scores))
       h_partial_1 <- 1 / prop_scores
       h_partial_0 <- -1 / (1 - prop_scores)
-    } else if (scale == "relative") {
+    } else if (effect == "relative") {
       # NOTE: Make sure not to divide by zero... or take log of zero
       # Also, q_star is not iteratively updated here to improve stability
       h_partial <- (2 * data[[exposure]] - 1) /
@@ -154,13 +154,13 @@ tml_estimator <- function(data,
           q_0_star <- q_0_star + epsilon * mod_h_0
 
           ## compute the score
-          if (scale == "absolute") {
+          if (effect == "additive") {
             q_score <- centered_mod * (2 * data[[exposure]] - 1) /
               (data[[exposure]] * prop_scores +
                  (1 - data[[exposure]]) * (1 - prop_scores)) /
               mod_var *
               (data[[outcome]] - q_star)
-          } else if (scale == "relative") {
+          } else if (effect == "relative") {
             q_score <- centered_mod * (2 * data[[exposure]] - 1) /
               (data[[exposure]] * prop_scores +
                  (1 - data[[exposure]]) * (1 - prop_scores)) /
@@ -173,9 +173,9 @@ tml_estimator <- function(data,
         }
 
         ## compute the plugin estimate with the update cond outcome estimates
-        if (scale == "absolute") {
+        if (effect == "additive") {
           stats::cov(centered_mod, q_1_star - q_0_star) / mod_var
-        } else if (scale == "relative") {
+        } else if (effect == "relative") {
           ## bound q, just in case
           q_star[q_star < (0 + eps)] <- 0 + eps
           q_star[q_star > (1 - eps)] <- 1 - eps
@@ -222,8 +222,8 @@ tml_estimator <- function(data,
     data[, int_weight := as.numeric(get(outcome)) - as.numeric(prev_time),
          by = "id"]
 
-    ## absolute TEM VIP
-    if (scale == "absolute") {
+    ## additive TEM VIP
+    if (effect == "additive") {
       ## compute the partial clever covariate at each timepoint
       data[, inner_integrand := keep * ipws / (cens_est_lag * surv_est),
            by = "id"]
@@ -361,7 +361,7 @@ tml_estimator <- function(data,
         }
       )
 
-    } else if (scale == "relative") {
+    } else if (effect == "relative") {
       ## compute the clever covariate
       data[, `:=`(
         partial_h = keep * ipws / (cens_est_lag * surv_est),

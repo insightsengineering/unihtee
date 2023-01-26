@@ -2,7 +2,7 @@ source("testing-utils.R")
 
 test_that(
   paste(
-    "uncentered_eif() minus true absolute scale parameter value has a mean",
+    "uncentered_eif() minus true additive effect parameter value has a mean",
     "of zero when propensity scores aren't known"
   ),
   {
@@ -38,7 +38,7 @@ test_that(
     # compute the uncentered eif
     eif <- uncentered_eif(
       data = dt,
-      scale = "absolute",
+      effect = "additive",
       confounders = c("w_1", "w_2", "w_3"),
       exposure = "a",
       outcome = "y",
@@ -59,7 +59,7 @@ test_that(
 
 test_that(
   paste(
-    "uncentered_eif() minus true absolute scale parameter value has a mean",
+    "uncentered_eif() minus true additive effect parameter value has a mean",
     "of zero when propensity scores are known"
   ),
   {
@@ -84,7 +84,7 @@ test_that(
     # compute the uncentered eif
     eif <- uncentered_eif(
       data = dt,
-      scale = "absolute",
+      effect = "additive",
       confounders = c("w_1", "w_2", "w_3"),
       exposure = "a",
       outcome = "y",
@@ -105,7 +105,7 @@ test_that(
 
 test_that(
   paste(
-    "uncentered_eif() minus true relative scale parameter value has a mean",
+    "uncentered_eif() minus true relative effect parameter value has a mean",
     "of zero when propensity scores aren't known"
   ),
   {
@@ -139,7 +139,7 @@ test_that(
     # compute the uncentered eif
     eif <- uncentered_eif(
       data = dt,
-      scale = "relative",
+      effect = "relative",
       confounders = c("w_1", "w_2", "w_3"),
       exposure = "a",
       outcome = "y",
@@ -161,7 +161,7 @@ test_that(
 
 test_that(
   paste(
-    "uncentered_eif() minus true relative scale parameter value has a mean",
+    "uncentered_eif() minus true relative effect parameter value has a mean",
     "of zero when propensity scores are known"
   ),
   {
@@ -187,7 +187,7 @@ test_that(
     # compute the uncentered eif
     eif <- uncentered_eif(
       data = dt,
-      scale = "relative",
+      effect = "relative",
       confounders = c("w_1", "w_2", "w_3"),
       exposure = "a",
       outcome = "y",
@@ -209,7 +209,7 @@ test_that(
 
 test_that(
   paste(
-    "uncentered_eif() minus true absolute scale parameter value has a mean",
+    "uncentered_eif() minus true additive effect parameter value has a mean",
     "of zero for the RD TTE TEM VIP"
   ),
   {
@@ -261,7 +261,7 @@ test_that(
     # compute the uncentered eif
     eif <- uncentered_eif(
       data = long_dt,
-      scale = "absolute",
+      effect = "additive",
       confounders = c("w_1", "w_2", "w_3"),
       exposure = "a",
       outcome = "time",
@@ -321,7 +321,7 @@ test_that(
 
 test_that(
   paste(
-    "uncentered_eif() minus true relative scale parameter value has a mean",
+    "uncentered_eif() minus true relative effect parameter value has a mean",
     "of zero for the RR TTE TEM VIP"
   ),
   {
@@ -363,7 +363,7 @@ test_that(
 
     eif <- uncentered_eif(
       data = long_dt,
-      scale = "relative",
+      effect = "relative",
       confounders = c("w_1", "w_2", "w_3"),
       exposure = "a",
       outcome = "time",
