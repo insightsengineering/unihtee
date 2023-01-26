@@ -45,17 +45,17 @@ Cox model, are violated, however, their results are invalid.
 
 More flexible approaches instead focus on estimating the conditional average
 treatment effect (CATE) using interpretable modeling techniques, like the LASSO
-[@tibshirani1996, @tian2014, @chen2017, @zhao2018, @semenova2021,
-@bahamyirou2022] or Random Forests [@breiman2001, @wager2018, @cui2022]. Again,
+[@tibshirani1996; @tian2014; @chen2017; @zhao2018; @semenova2021;
+@bahamyirou2022] or Random Forests [@breiman2001; @wager2018; @cui2022]. Again,
 however, these methods require restrictive assumptions about the data-generating
 process, like sparsity of treatment effect modification [@zhao2006],
-approximately uncorrelated confounders [@zhao2006, @esl2009] and sample sizes
+approximately uncorrelated confounders [@zhao2006; @esl2009] and sample sizes
 that are much larger than the number of confounders [@zhao2006], to reliably
 recover TEMs.
 
 Instead of identifying TEMs indirectly by modeling the
 confounder-treatment-outcome relationship, recent work has developed frameworks
-tailored to the task [@williamson2022framework, @boileau2022, @hines2022TEVIP,
+tailored to the task [@williamson2022framework; @boileau2022; @hines2022TEVIP;
 @boileau2023]. Relying on TEM variable importance parameters (TEM-VIP), it is
 possible to assess confounders' influence on the treatment effect in
 nonparametric, algorithm-agnostic fashion that largely avoids the pitfalls of
@@ -120,7 +120,7 @@ cont_outcome_dgp <- function(n_obs) {
 
   # treatment
   prop_score <- plogis(w_1 + w_2)
-  a <- sapply(prop_score, function(x) rbinom(1, 1, prob = x))
+  a <- rbinom(n_obs, 1, prob = prop_score)
 
   # potential outcomes
   y_1 <- rnorm(n = n_obs, mean = w_1 + 2 * w_2 + 2 * w_3 + 0.5 * a, sd = 0.1)
@@ -147,7 +147,7 @@ are treatment effect modifiers: they interact with the treatment indicator `a`.
 A TEM-VIP for quantifying the strength of the treatment effect modification is
 outlined next.
 
-### Absolute TEM-VIP
+### Additive TEM-VIP
 
 Indexing $W$ by $j=1,\ldots,p$, and assuming without
 loss of generality that
@@ -162,7 +162,7 @@ $$
   {\mathbb{E}_{P_{X,0}}[W_j^2]} \;.
 $$
 
-This call this parameter the absolute TEM-VIP. Assuming the expectation of
+This parameter is called the additive TEM-VIP. Assuming the expectation of
 $\mathbb{E}_{P_{X,0}}[Y^{(1)}|W]- \mathbb{E}_{P_{X,0}}[Y^{(0)}|W]$ conditional
 on $W_j$ is linear in $W_j$, $\Psi^F_j(P_{X,0})$ is the simple linear regression
 coefficient produced by regressing the difference in expected potential outcomes
@@ -171,11 +171,11 @@ surely the case in most applications, $\Psi^F_j(P_{X,0})$ corresponds to the
 correlation between the difference in potential outcomes and the $j^\text{th}$
 confounder, re-normalized to be on the same scale as the potential outcomes.
 
-Of course, as stated earlier, we don't generally have access to the $X$s
-required to perform inference about the above parameter. Luckily, under the
-identification conditions outlined in @boileau2022 and @boileau2023 --- namely,
-that there is no unmeasured confounding and no positivity violations --- we can
-perform inference about the equivalent observed-data parameter:
+Of course, as stated earlier, we don't generally have access to the full-data
+random vectors required to perform inference about the above parameter. Luckily,
+under the identification conditions outlined in @boileau2022 and @boileau2023
+--- namely, that there is no unmeasured confounding and no positivity violations
+--- we can perform inference about the equivalent observed-data parameter:
 
 $$
 \Psi_j(P_0)
@@ -198,10 +198,10 @@ in @boileau2022 and @boileau2023.
 
 Having defined the parameter and briefly discussed the estimators, we apply
 `unicate()` to recover the treatment effect modifiers, as defined by the
-absolute TEM-VIP. Both the one-step and TML estimators are showcased. The LASSO
+additive TEM-VIP. Both the one-step and TML estimators are showcased. The LASSO
 regression of @tibshirani1996 is used to estimate the nuisance parameters.
 
-```{r abs-tem-vip}
+```{r additive-tem-vip}
 set.seed(514)
 
 # simulate a random sample
@@ -249,28 +249,154 @@ estimators correctly identify the TEM-VIP of `w_2` and `w_3` as being non-zero
 based on the false discovery rate adjusted p-values. Each estimator's point
 estimates are also close to their true parameter values.
 
+
 ## Working with Binary Outcomes
 
-Analogous to continuous outcome model. We can define TEM-VIPs on the absolute
-scale as in the continuous outcome setting. However, often more informative to
-do so on the relative scale.
+In the binary outcome setting, the full-data and observed-data models and
+data-generating processes are identical to those of the continuous outcome
+setting, save that the outcome is binary. That means the additive TEM-VIP can be
+used as is with binary-outcome data --- the only practical difference is the
+choice of estimator used for the expected outcome conditional on the treatment
+and confounders. With that said, a relative TEM-VIP is generally more sensitive
+and informative in these scenarios. We propose such a parameter in the following
+section.
+
+Before that, however, we define a data-generating process with a treatment
+effect modifier:
+
+```{r binary-dgp}
+bin_outcome_dgp <- function(n_obs) {
+
+  # confounders
+  w_1 <- rpois(n = n_obs, lambda = 3)
+  w_2 <- rnorm(n = n_obs)
+  w_3 <- rbinom(n = n_obs, size = 1, prob = 0.5)
+
+  # treatment
+  prop_score <- plogis(-0.5 + 0.25 * w_1 + w_2 + 0.5 * w_3)
+  a <- rbinom(n_obs, 1, prob = prop_score)
+
+  # potential outcomes
+  y_prob_1 <- plogis(-1 - 3 * w_3)
+  y_prob_0 <- plogis(1 + 2 * w_2)
+  y_1 <- rbinom(n_obs, 1, prob = y_prob_1)
+  y_0 <- rbinom(n_obs, 1, prob = y_prob_0)
+
+  # outcome
+  y <- a * y_1 + (1 - a) * y_0
+
+  # assemble the observations in a tibble
+  tibble(
+    w_1 = w_1,
+    w_2 = w_2,
+    w_3 = w_3,
+    a = a,
+    y = y
+  )
+}
+```
+
+Here, `w_2` and `w_3` are a treatment effect modifier. They interact with the
+treatment variable, `a`.
+
 
 ### Relative TEM-VIP
 
-Present the TEM-VIP. Provide explanation. State identifiability conditions in
-laymans terms. State that this parameter can be targeted in models with positive
-continuous outcomes, too.
+Again assuming that the confounders are centered at zero with non-zero variance,
+the relative TEM-VIP for the $j^\text{th}$ confounder is
+$$
+\Gamma^F_j(P_{X,0}) =
+=\frac{\mathbb{E}_{P_{X,0}}[(\log\mathbb{E}_{P_{X,0}}[Y^{(1)}|W]-
+  \log\mathbb{E}_{P_{X,0}}[Y^{(0)}|W])W_j]}
+  {\mathbb{E}_{P_{X,0}}[W_j^2]} \;.
+$$
 
-State that there are two (three) estimators. Briefly cover their asymptotic
-behaviour.
+Assuming that the expectation of the log ratio of the expected conditional
+potential outcomes conditional on $W_j$ is linear in $W_j$,
+$\Gamma^F_j(P_{X,0})$ is the simple linear regression coefficient obtained by
+regressing the log ratio of the expected conditional potential outcomes on
+$W_j$. As with $\Psi^F_j(P_{X,0})$, this parameter can be interpreted as
+standardized correlation coefficient of the log ratio of expected potential
+outcomes and the $j^\text{th}$ confounder.
 
-Simple example of one-step and TML estimators.
+We highlight that this TEM-VIP isn't restricted to data-generating processes
+with binary outcomes; it may also be used when the outcome is non-negative,
+continuous or discrete random variable.
+
+Again, much like $\Psi^F_j(P_{X,0})$, $\Gamma^F_j(P_{X,0})$ isn't generally ever
+observed since it is a parameter of the full-data model. Under the conditions of
+no unmeasured confounding and in the absence of positivity violations, however,
+an equivalent parameter can be estimated from the observed-data:
+
+$$
+\Gamma_j(P_0)
+=\frac{\mathbb{E}_{P_0}[(\log\mathbb{E}_{P_{0}}[Y|A=1,W]-
+  \log\mathbb{E}_{P_0}[Y|A=0,W])W_j]}{\mathbb{E}_{P_0}[W_j^2]} 
+= \Gamma^F_j(P_{X,0})\;.
+$$
+
+Nonparametric one-step and TML estimators of this parameter are derived by
+@boileau2023 and implemented in the `unicate` package. Just like $\Psi_j(P_0)$,
+inference about this parameter depends on the estimation of the propensity score
+and the expected outcome conditional on treatment indicator and confounders.
+These estimators are consistent if both nuisance parameters are consistently
+estimated, and are asymptotically normal if both converge to their true values
+at rate of $n^{-1/4}$. The latter permits hypothesis testing based on the
+Gaussian. Additional details are provided by @boileau2023.
+
+We now apply these estimators to a random sample generated by
+`bin_outcome_dgp()`. The nuisance parameters are estimated using Random Forests
+implemented in `ranger` package [@breiman2001; @ranger]. Note too that these
+estimators are fit using cross-fitting [@zheng2011cross; @cherno2017].
+
+```{r relative-tem-vip}
+# simulate a random sample
+sample_df <- bin_outcome_dgp(n_obs = 500)
+
+# one-step estimator
+unihtee(
+  data = sample_df,
+  confounders = c("w_1", "w_2", "w_3"),
+  modifiers =  c("w_1", "w_2", "w_3"),
+  exposure = "a",
+  outcome = "y",
+  outcome_type = "binary",
+  scale = "relative",
+  estimator = "onestep",
+  cond_outcome_estimator = sl3::Lrnr_ranger$new(),
+  prop_score_estimator = sl3::Lrnr_ranger$new(),
+  cross_fit = TRUE
+)
+
+# TML estimator
+unihtee(
+  data = sample_df,
+  confounders = c("w_1", "w_2", "w_3"),
+  modifiers =  c("w_1", "w_2", "w_3"),
+  exposure = "a",
+  outcome = "y",
+  outcome_type = "binary",
+  scale = "relative",
+  estimator = "tmle",
+  cond_outcome_estimator = sl3::Lrnr_ranger$new(),
+  prop_score_estimator = sl3::Lrnr_ranger$new(),
+  cross_fit = TRUE
+)
+```
+
+Both estimators correctly identify `w_2` and `w_3` as treatment effect
+modifiers, as defined by the relative TEM-VIP. Note that the TML estimators'
+estimates of `w_2` and `w_3` is noticeably smaller than that produced by the
+one-step estimator; @boileau2023 have shown in a simulation study of this
+estimator that the TML estimator exhibits larger finite-sample bias than the
+one-step estimator. We therefore recommend using the one-step estimator in
+smaller samples.
 
 ## Working with Time-to-Event Outcomes
 
 Provide models. Talk about the restricted mean survival time.
 
-### Absolute TEM-VIP
+### Additive TEM-VIP
 
 Present the TEM-VIP. Provide explanation. State identifiability conditions in
 laymans terms.
