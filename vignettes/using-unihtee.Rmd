@@ -22,6 +22,7 @@ knitr::opts_chunk$set(
 ```{r setup, message = FALSE}
 library(dplyr)
 library(sl3)
+library(Rsolnp)
 library(unihtee)
 ```
 
@@ -762,9 +763,118 @@ Users may employ the cross-fitted version of any estimator implemented in
 cross-validation is currently supported. The number of folds defaults to five,
 though this can be modified using the `cross_fit_folds` argument. Examples are
 provided in the binary outcome and time-to-event outcome relative TEM-VIP
-sections of this vignette.
+sections of this vignette, as well as in the subsection on Super Learners that
+follows.
 
 ## `sl3` Integration: Using Super Learners
+
+`unihtee` uses the estimators implemented in the `sl3` [@coyle2021sl3-pkg] to
+estimate nuisance parameters. While individual estimators may be used, as is
+done in the examples above, `sl3`'s main contribution are facilities for
+constructing Super Learners [@vdl2007]. Super Learners are ensemble algorithms,
+meaning they are the convex combination of individual supervised learning
+algorithms. These individual algorithms are combined on the basis of a
+user-defined risk, and this combination is asymptotically optimal with respect
+to said risk under minimal conditions about the data-generating process. A
+complete review on Super Learners and `sl3` is outside the scope of this
+vignette. We invite the interested reader to the tutorials available on the
+`sl3` package's [website](https://tlverse.org/sl3/) and in Chapter 6 of the
+[`tlverse` handbook](https://tlverse.org/tlverse-handbook/sl3.html)
+[@tlverse-sl3].
+
+Employing Super Learners to estimate nuisance parameters decreases the risk of
+model-misspecification --- assuming, of course, that a diverse collection
+individual learning algorithms is considered. In turn, there is an increased
+likelihood that the resulting one-step and TML estimators are asymptotically
+normal.
+
+We revisit our continuous outcome example, this time using Super Learners to
+estimate the propensity score and the conditional expected outcomes. Both Super
+Learners are composed of penalized GLMs and Random Forests. The
+propensity score's Super Learner uses the log loss to form the convex
+combination of individual learning algorithms, while the conditional expected
+outcomes' uses the squared error loss. Additionally, we employ 2-fold
+cross-fitting.
+
+```{r additive-tem-vip-w-sl}
+# simulate a random sample
+sample_df <- cont_outcome_dgp(n_obs = 500)
+
+# define the Super Learner for the propensity score
+sl_bin <- Lrnr_sl$new(
+  learners = list(
+    Lrnr_glmnet$new(family = "binomial", alpha = 0),
+    Lrnr_glmnet$new(family = "binomial", alpha = 0),
+    Lrnr_glmnet$new(family = "binomial", alpha = 0.5),
+    Lrnr_ranger$new()
+  ),
+  metalearner = make_learner(
+    Lrnr_solnp, metalearner_logistic_binomial,
+    loss_squared_error
+  )
+)
+
+# define the Super Learner for the conditional expected outcomes
+sl_cont <- Lrnr_sl$new(
+  learners = list(
+    Lrnr_glmnet$new(
+      family = "gaussian",
+      formula = "~ a * w_1 + a * w_2 + a * w_3 + a * w_4 + a * w_5"
+    ),
+    Lrnr_glmnet$new(
+      family = "gaussian",
+      alpha = 0,
+      formula = "~ a * w_1 + a * w_2 + a * w_3 + a * w_4 + a * w_5"
+    ),
+    Lrnr_glmnet$new(
+      family = "gaussian",
+      alpha = 0.5,
+      formula = "~ a * w_1 + a * w_2 + a * w_3 + a * w_4 + a * w_5"
+    ),
+    Lrnr_ranger$new()
+  ),
+  metalearner = make_learner(
+    Lrnr_solnp, metalearner_linear, sl3::loss_squared_error
+  )
+)
+
+# one-step estimator
+unihtee(
+  data = sample_df,
+  confounders = c("w_1", "w_2", "w_3", "w_4", "w_5"),
+  modifiers =  c("w_1", "w_2", "w_3", "w_4", "w_5"),
+  exposure = "a",
+  outcome = "y",
+  outcome_type = "continuous",
+  scale = "absolute",
+  estimator = "onestep",
+  cond_outcome_estimator = sl_cont,
+  prop_score_estimator = sl_bin,
+  cross_fit = TRUE,
+  cross_fit_folds = 2
+)
+
+# TML estimator
+unihtee(
+  data = sample_df,
+  confounders = c("w_1", "w_2", "w_3", "w_4", "w_5"),
+  modifiers =  c("w_1", "w_2", "w_3", "w_4", "w_5"),
+  exposure = "a",
+  outcome = "y",
+  outcome_type = "continuous",
+  scale = "absolute",
+  estimator = "tmle",
+  cond_outcome_estimator = sl_cont,
+  prop_score_estimator = sl_bin,
+  cross_fit = TRUE,
+  cross_fit_folds = 2
+)
+```
+
+Though this procedure is more robust, the resulting estimates and hypothesis
+tests are largely similar to those of the previous continuous outcome, additive
+TEM-VIP example.
+
 
 # Session information
 
