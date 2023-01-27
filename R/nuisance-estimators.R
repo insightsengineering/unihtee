@@ -63,8 +63,9 @@ fit_prop_score <- function(train_data,
 
   ## bound the propensity score estimates to avoid practical positivity
   ## violations
-  prop_score_est[prop_score_est < 0.001] <- 0.001
-  prop_score_est[prop_score_est > 0.999] <- 0.999
+  truncation <- 1 / min(sqrt(nrow(train_data)), 1000)
+  prop_score_est[prop_score_est < truncation] <- truncation
+  prop_score_est[prop_score_est > (1 - truncation)] <- (1 - truncation)
 
   return(list(
     "estimates" = prop_score_est,
