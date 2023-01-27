@@ -47,7 +47,7 @@ currently supported.}
 
 \item{effect}{A \code{character} indicating the type of treatment effect
 modifier variable importance parameter. Currently supports
-\code{"additive"} and \code{"relative"}.}
+\code{"absolute"} and \code{"relative"}.}
 
 \item{estimator}{A \code{character} set to either \code{"tmle"} or
 \code{"onestep"}. The former results in \code{unihtee()} to use a targeted

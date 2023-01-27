@@ -2,7 +2,7 @@ source("testing-utils.R")
 
 test_that(
   paste(
-    "uncentered_eif() minus true additive effect parameter value has a mean",
+    "uncentered_eif() minus true absolute effect parameter value has a mean",
     "of zero when propensity scores aren't known"
   ),
   {
@@ -38,7 +38,7 @@ test_that(
     # compute the uncentered eif
     eif <- uncentered_eif(
       data = dt,
-      effect = "additive",
+      effect = "absolute",
       confounders = c("w_1", "w_2", "w_3"),
       exposure = "a",
       outcome = "y",
@@ -59,7 +59,7 @@ test_that(
 
 test_that(
   paste(
-    "uncentered_eif() minus true additive effect parameter value has a mean",
+    "uncentered_eif() minus true absolute effect parameter value has a mean",
     "of zero when propensity scores are known"
   ),
   {
@@ -84,7 +84,7 @@ test_that(
     # compute the uncentered eif
     eif <- uncentered_eif(
       data = dt,
-      effect = "additive",
+      effect = "absolute",
       confounders = c("w_1", "w_2", "w_3"),
       exposure = "a",
       outcome = "y",
@@ -209,7 +209,7 @@ test_that(
 
 test_that(
   paste(
-    "uncentered_eif() minus true additive effect parameter value has a mean",
+    "uncentered_eif() minus true absolute effect parameter value has a mean",
     "of zero for the RD TTE TEM VIP"
   ),
   {
@@ -261,7 +261,7 @@ test_that(
     # compute the uncentered eif
     eif <- uncentered_eif(
       data = long_dt,
-      effect = "additive",
+      effect = "absolute",
       confounders = c("w_1", "w_2", "w_3"),
       exposure = "a",
       outcome = "time",

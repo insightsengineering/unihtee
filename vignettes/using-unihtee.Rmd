@@ -150,7 +150,7 @@ are treatment effect modifiers: they interact with the treatment indicator `a`.
 A TEM-VIP for quantifying the strength of the treatment effect modification is
 outlined next.
 
-### Additive TEM-VIP
+### Absolute TEM-VIP
 
 Indexing $W$ by $j=1,\ldots,p$, and assuming without
 loss of generality that
@@ -165,7 +165,7 @@ $$
   {\mathbb{E}_{P_{X,0}}[W_j^2]} \;.
 $$
 
-This parameter is called the additive TEM-VIP. Assuming the expectation of
+This parameter is called the absolute TEM-VIP. Assuming the expectation of
 $\mathbb{E}_{P_{X,0}}[Y^{(1)}|W]- \mathbb{E}_{P_{X,0}}[Y^{(0)}|W]$ conditional
 on $W_j$ is linear in $W_j$, $\Psi^F_j(P_{X,0})$ is the simple linear regression
 coefficient produced by regressing the difference in expected potential outcomes
@@ -201,10 +201,10 @@ in @boileau2022 and @boileau2023.
 
 Having defined the parameter and briefly discussed the estimators, we apply
 `unicate()` to recover the treatment effect modifiers, as defined by the
-additive TEM-VIP. Both the one-step and TML estimators are showcased. The LASSO
+absolute TEM-VIP. Both the one-step and TML estimators are showcased. The LASSO
 regression of @tibshirani1996 is used to estimate the nuisance parameters.
 
-```{r additive-tem-vip}
+```{r absolute-tem-vip}
 set.seed(514)
 
 # simulate a random sample
@@ -218,7 +218,7 @@ unihtee(
   exposure = "a",
   outcome = "y",
   outcome_type = "continuous",
-  effect = "additive",
+  effect = "absolute",
   estimator = "onestep",
   cond_outcome_estimator = sl3::Lrnr_glmnet$new(
     family = "gaussian",
@@ -235,7 +235,7 @@ unihtee(
   exposure = "a",
   outcome = "y",
   outcome_type = "continuous",
-  effect = "additive",
+  effect = "absolute",
   estimator = "tmle",
   cond_outcome_estimator = sl3::Lrnr_glmnet$new(
     family = "gaussian",
@@ -262,7 +262,7 @@ increase in this confounder leads to an increase of $\approx 2.04$ and $\approx
 
 In the binary outcome setting, the full-data and observed-data models and
 data-generating processes are identical to those of the continuous outcome
-setting, save that the outcome is binary. That means the additive TEM-VIP can be
+setting, save that the outcome is binary. That means the absolute TEM-VIP can be
 used as is with binary-outcome data --- the only practical difference is the
 choice of estimator used for the expected outcome conditional on the treatment
 and confounders. With that said, a relative TEM-VIP is generally more sensitive
@@ -407,7 +407,7 @@ units, respectively.
 
 `unihtee` also provides functionality for estimating TEM-VIPs for data with
 right-censored time-to-event outcomes. We detail the assumed full-data and
-observed-data models here, then introduce an additive and a relative TEM-VIP in
+observed-data models here, then introduce an absolute and a relative TEM-VIP in
 subsequent sections.
 
 Consider $n$ i.i.d. random vectors $X = (W, A, C^{(0)}, C^{(1)}, T^{(0)},
@@ -551,9 +551,9 @@ tte_outcome_dgp <- function(n_obs) {
 tte_outcome_dgp(10)
 ```
 
-### Additive TEM-VIP
+### Absolute TEM-VIP
 
-@boileau2023 Propose an additive TEM-VIP based on the restricted mean survival
+@boileau2023 Propose an absolute TEM-VIP based on the restricted mean survival
 time at some pre-specified time $t$. Again assuming without loss of generality
 that the $\mathbb{E}_{P_{X,0}}[W_j] = 0$ and that the confounders have variance
 bounded away from zero, this TEM-VIP is defined as
@@ -563,7 +563,7 @@ $$
   {\mathbb{E}_{P_{X,0}}[W_j^2]} \; .
 $$
 
-"$\Psi$" is re-used to highlight that this is an additive TEM-VIP. As in the
+"$\Psi$" is re-used to highlight that this is an absolute TEM-VIP. As in the
 continuous outcome scenario, this parameter captures the correlation between the
 conditional difference in the restricted mean survival time and the
 $j^\text{th}$ confounder, re-normalized to be on the same scale as the outcome.
@@ -580,7 +580,7 @@ $$
 $$
 
 As in the continuous and binary outcome scenarios, @boileau2023 derived two
-estimators of this additive effect parameter: a one-step estimator and a TML
+estimators of this absolute effect parameter: a one-step estimator and a TML
 estimator. Both rely on the accurate estimation of three nuisance parameters:
 the conditional event hazard function, the conditional censoring hazard
 function, and the propensity score. If either the conditional event hazard
@@ -597,7 +597,7 @@ regressions are used to estimate the propensity scores and censoring hazard
 functions, and, as demonstration of these methods' flexibility, estimate the
 failure hazard function with XGBoost [@chen2016].
 
-```{r tte-additive-tem-vip}
+```{r tte-absolute-tem-vip}
 # simulate a random sample
 sample_df <- tte_outcome_dgp(n_obs = 250)
 
@@ -611,7 +611,7 @@ unihtee(
   censoring = "censoring_indicator",
   time_cutoff = 8,
   outcome_type = "time-to-event",
-  effect = "additive",
+  effect = "absolute",
   estimator = "onestep",
   prop_score_estimator = sl3::Lrnr_glmnet$new(),
   failure_hazard_estimator = sl3::Lrnr_xgboost$new(),
@@ -628,7 +628,7 @@ unihtee(
   censoring = "censoring_indicator",
   time_cutoff = 8,
   outcome_type = "time-to-event",
-  effect = "additive",
+  effect = "absolute",
   estimator = "tmle",
   prop_score_estimator = sl3::Lrnr_glmnet$new(),
   failure_hazard_estimator = sl3::Lrnr_xgboost$new(),
@@ -676,7 +676,7 @@ converge to their true values at a fast-enough rate [@boileau2023].
 We apply the nonparametric estimators of @boileau2023 to a random sample
 generated by `tte_outcome_dgp()`, taking as target of inference
 $\Gamma_j(P_0; 5)$. The nuisance parameters are estimated using the same
-strategy employed in prior additive TEM-VIP example.
+strategy employed in prior absolute TEM-VIP example.
 
 ```{r tte-relative-tem-vip}
 # simulate a random sample
@@ -738,7 +738,7 @@ should be saved data object passed to `unihtee()`, and the name of the variable
 containing these scores should be indicated in the `propensity_score_values`
 argument.
 
-Providing the known propensity scores to the additive TEM-VIP estimators
+Providing the known propensity scores to the absolute TEM-VIP estimators
 produces some desirable results. In the continuous and binary outcome settings,
 providing known treatment assignment probabilities guarantees that the
 estimators are asymptotically linear, even when the expected conditional outcome
@@ -796,7 +796,7 @@ combination of individual learning algorithms, while the conditional expected
 outcomes' uses the squared error loss. Additionally, we employ 2-fold
 cross-fitting.
 
-```{r additive-tem-vip-w-sl}
+```{r absolute-tem-vip-w-sl}
 # simulate a random sample
 sample_df <- cont_outcome_dgp(n_obs = 500)
 
@@ -846,7 +846,7 @@ unihtee(
   exposure = "a",
   outcome = "y",
   outcome_type = "continuous",
-  effect = "additive",
+  effect = "absolute",
   estimator = "onestep",
   cond_outcome_estimator = sl_cont,
   prop_score_estimator = sl_bin,
@@ -862,7 +862,7 @@ unihtee(
   exposure = "a",
   outcome = "y",
   outcome_type = "continuous",
-  effect = "additive",
+  effect = "absolute",
   estimator = "tmle",
   cond_outcome_estimator = sl_cont,
   prop_score_estimator = sl_bin,
@@ -872,7 +872,7 @@ unihtee(
 ```
 
 Though this procedure is more robust, the resulting estimates and hypothesis
-tests are largely similar to those of the previous continuous outcome, additive
+tests are largely similar to those of the previous continuous outcome, absolute
 TEM-VIP example.
 
 

@@ -18,7 +18,7 @@ utils::globalVariables(
 #'   \code{train_data} is formatted by \code{\link{unihtee}()}.
 #' @param effect A \code{character} indicating the type of treatment effect
 #'   modifier variable importance parameter. Currently supports
-#'   \code{"additive"} and \code{"relative"}.
+#'   \code{"absolute"} and \code{"relative"}.
 #' @param confounders A \code{character} vector of column names corresponding to
 #'   baseline covariates.
 #' @param exposure A \code{character} corresponding to the exposure variable.
@@ -76,7 +76,7 @@ uncentered_eif <- function(data,
     cond_outcome_resid <- data[[outcome]] - cond_outcome_fit$estimates
 
     ## compute augmented inverse probability weights outcomes
-    if (effect == "additive") {
+    if (effect == "absolute") {
       aipws <- ipws * cond_outcome_resid + cond_outcome_fit$exp_estimates -
         cond_outcome_fit$noexp_estimates
     } else if (effect == "relative") {
@@ -114,7 +114,7 @@ uncentered_eif <- function(data,
          by = "id"]
     data[, int_weight := as.numeric(get(outcome)) - as.numeric(prev_time),
          by = "id"]
-    if (effect == "additive") {
+    if (effect == "absolute") {
       data[, inner_integrand := int_weight * keep * ipws /
                (cens_est_lag * surv_est) * (failure - failure_haz_est),
            by = "id"

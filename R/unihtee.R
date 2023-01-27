@@ -3,7 +3,7 @@ utils::globalVariables(c("..to_keep", ".SD", ".I", "p_value"))
 #'
 #' @description \code{unihtee()} estimates treatment effect modifiers variable
 #'   importance parameters (TEM-VIPs). These TEM-VIPs are defined on the
-#'   additive or relative effects and can be estimated using one-step or targeted
+#'   absolute or relative effects and can be estimated using one-step or targeted
 #'   maximum likelihood estimators.
 #'
 #' @param data A \code{data.table} containing the observed data.
@@ -24,7 +24,7 @@ utils::globalVariables(c("..to_keep", ".SD", ".I", "p_value"))
 #'   currently supported.
 #' @param effect A \code{character} indicating the type of treatment effect
 #'   modifier variable importance parameter. Currently supports
-#'   \code{"additive"} and \code{"relative"}.
+#'   \code{"absolute"} and \code{"relative"}.
 #' @param estimator A \code{character} set to either \code{"tmle"} or
 #'   \code{"onestep"}. The former results in \code{unihtee()} to use a targeted
 #'   maximum likelihood estimators to estimate the deisred TEM-VIP, while the
@@ -81,7 +81,7 @@ unihtee <- function(data,
                     censoring = NULL,
                     time_cutoff = NULL,
                     outcome_type = c("continuous", "binary", "time-to-event"),
-                    effect = c("additive", "relative"),
+                    effect = c("absolute", "relative"),
                     estimator = c("tmle", "onestep"),
                     cross_fit = FALSE,
                     cross_fit_folds = 5,
@@ -310,7 +310,7 @@ unihtee <- function(data,
 #'   currently supported.
 #' @param effect A \code{character} indicating the type of treatment effect
 #'   modifier variable importance parameter. Currently supports
-#'   \code{"additive"} and \code{"relative"}.
+#'   \code{"absolute"} and \code{"relative"}.
 #' @param estimator A \code{character} set to either \code{"tmle"} or
 #'   \code{"onestep"}. The former results in \code{unihtee()} to use a targeted
 #'   maximum likelihood estimators to estimate the deisred TEM-VIP, while the

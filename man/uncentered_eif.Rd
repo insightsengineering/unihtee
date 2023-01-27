@@ -24,7 +24,7 @@ uncentered_eif(
 
 \item{effect}{A \code{character} indicating the type of treatment effect
 modifier variable importance parameter. Currently supports
-\code{"additive"} and \code{"relative"}.}
+\code{"absolute"} and \code{"relative"}.}
 
 \item{confounders}{A \code{character} vector of column names corresponding to
 baseline covariates.}

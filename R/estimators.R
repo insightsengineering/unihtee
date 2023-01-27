@@ -42,7 +42,7 @@ one_step_estimator <- function(uncentered_eif_data) {
 #'   \code{confounders}.
 #' @param effect A \code{character} indicating the type of treatment effect
 #'   modifier variable importance parameter. Currently supports
-#'   \code{"additive"} and \code{"relative"}.
+#'   \code{"absolute"} and \code{"relative"}.
 #' @param prop_score_fit A \code{list} output by the
 #'   \code{\link{fit_prop_score}()} function.
 #' @param prop_score_values A \code{numeric} vector corresponding to the (known)
@@ -96,7 +96,7 @@ tml_estimator <- function(data,
     }
 
     # compute that partial clever covariate
-    if (effect == "additive") {
+    if (effect == "absolute") {
       h_partial <- (2 * data[[exposure]] - 1) /
         (data[[exposure]] * prop_scores +
          (1 - data[[exposure]]) * (1 - prop_scores))
@@ -154,7 +154,7 @@ tml_estimator <- function(data,
           q_0_star <- q_0_star + epsilon * mod_h_0
 
           ## compute the score
-          if (effect == "additive") {
+          if (effect == "absolute") {
             q_score <- centered_mod * (2 * data[[exposure]] - 1) /
               (data[[exposure]] * prop_scores +
                  (1 - data[[exposure]]) * (1 - prop_scores)) /
@@ -173,7 +173,7 @@ tml_estimator <- function(data,
         }
 
         ## compute the plugin estimate with the update cond outcome estimates
-        if (effect == "additive") {
+        if (effect == "absolute") {
           stats::cov(centered_mod, q_1_star - q_0_star) / mod_var
         } else if (effect == "relative") {
           ## bound q, just in case
@@ -222,8 +222,8 @@ tml_estimator <- function(data,
     data[, int_weight := as.numeric(get(outcome)) - as.numeric(prev_time),
          by = "id"]
 
-    ## additive TEM VIP
-    if (effect == "additive") {
+    ## absolute TEM VIP
+    if (effect == "absolute") {
       ## compute the partial clever covariate at each timepoint
       data[, inner_integrand := keep * ipws / (cens_est_lag * surv_est),
            by = "id"]

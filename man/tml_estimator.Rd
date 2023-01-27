@@ -35,7 +35,7 @@ the suspected effect modifiers. This vector must be a subset of
 
 \item{effect}{A \code{character} indicating the type of treatment effect
 modifier variable importance parameter. Currently supports
-\code{"additive"} and \code{"relative"}.}
+\code{"absolute"} and \code{"relative"}.}
 
 \item{prop_score_fit}{A \code{list} output by the
 \code{\link{fit_prop_score}()} function.}

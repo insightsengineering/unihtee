@@ -13,7 +13,7 @@ unihtee(
   censoring = NULL,
   time_cutoff = NULL,
   outcome_type = c("continuous", "binary", "time-to-event"),
-  effect = c("additive", "relative"),
+  effect = c("absolute", "relative"),
   estimator = c("tmle", "onestep"),
   cross_fit = FALSE,
   cross_fit_folds = 5,
@@ -52,7 +52,7 @@ currently supported.}
 
 \item{effect}{A \code{character} indicating the type of treatment effect
 modifier variable importance parameter. Currently supports
-\code{"additive"} and \code{"relative"}.}
+\code{"absolute"} and \code{"relative"}.}
 
 \item{estimator}{A \code{character} set to either \code{"tmle"} or
 \code{"onestep"}. The former results in \code{unihtee()} to use a targeted
@@ -110,6 +110,6 @@ ordered according to ascending p-values.
 \description{
 \code{unihtee()} estimates treatment effect modifiers variable
 importance parameters (TEM-VIPs). These TEM-VIPs are defined on the
-additive or relative effects and can be estimated using one-step or targeted
+absolute or relative effects and can be estimated using one-step or targeted
 maximum likelihood estimators.
 }
