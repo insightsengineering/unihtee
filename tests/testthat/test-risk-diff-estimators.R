@@ -313,7 +313,9 @@ test_that(
     one_step_fit <- one_step_estimator(uncentered_eif_data = ueif_dt)
 
     # note that the true parameter values for w_1, w_3 are approx 1.7, 0, 0
-    expect_equal(as.numeric(one_step_fit), c(1.7, 0, 0), tolerance = 0.1)
+    expect_equal(one_step_fit$w_1, 1.7, tolerance = 0.1)
+    expect_equal(one_step_fit$w_2, 0, tolerance = 0.1)
+    expect_equal(one_step_fit$w_3, 0, tolerance = 0.1)
   }
 )
 
@@ -324,7 +326,7 @@ test_that(
     library(sl3)
 
     # generate data
-    set.seed(72341)
+    set.seed(84891)
     dt <- generate_test_data(n_obs = 5000, outcome_type = "time-to-event")
     long_dt <- tte_data_melt(
       data = dt,
@@ -349,7 +351,7 @@ test_that(
     fail_fit <- fit_failure_hazard(
       train_data = long_dt,
       valid_data = NULL,
-      learners = sl3:::Lrnr_xgboost$new(),
+      learners = sl3::Lrnr_xgboost$new(),
       exposure = "a",
       times = "time",
       confounders = c("w_1", "w_2", "w_3")
@@ -359,7 +361,7 @@ test_that(
     cens_fit <- fit_censoring_hazard(
       train_data = long_dt,
       valid_data = NULL,
-      learners = sl3:::Lrnr_xgboost$new(),
+      learners = sl3:::Lrnr_glmnet$new(),
       exposure = "a",
       confounders = c("w_1", "w_2", "w_3"),
       times = "time",

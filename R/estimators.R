@@ -3,8 +3,8 @@ utils::globalVariables(
     "cens_est_lag", "surv_exp_est", "surv_noexp_est", "surv_exp_est_star",
     "surv_noexp_est_star", "prev_time", "int_weight", "inner_integrand",
     "surv_time_cutoff", "partial_h", "partial_h_1", "partial_h_0",
-    "failure_haz_exp_est", "failure_haz_noexp_est", "failure_haz_exp_est_star",
-    "failure_haz_noexp_est_star")
+    "failure_haz_est_star", "failure_haz_exp_est", "failure_haz_noexp_est",
+    "failure_haz_exp_est_star", "failure_haz_noexp_est_star")
 )
 #' @title One Step Estimator
 #'
@@ -250,6 +250,10 @@ tml_estimator <- function(data,
       data[, inner_integrand := keep * ipws / (cens_est_lag * surv_est),
            by = "id"]
 
+      ## set parameters for update step
+      max_iter <- 10
+      tilt_tol <- 5
+
       ## compute the partial clever covariates at each timepoint
       the_times <- sort(unique(data[[outcome]]))
       survival_preds <- lapply(
@@ -267,9 +271,9 @@ tml_estimator <- function(data,
           filtered_dt[, `:=`(
             partial_h = inner_integrand * surv_time_cutoff,
             partial_h_1 = -surv_time_cutoff * keep /
-              (cens_est_lag * surv_est * prop_scores),
-            partial_h_0 = surv_time_cutoff * keep /
-              (cens_est_lag * surv_est * (1 - prop_scores))
+              (cens_est_lag * surv_est),
+            partial_h_0 = -surv_time_cutoff * keep /
+              (cens_est_lag * surv_est)
           )]
 
           tilted_survivals <- lapply(
@@ -292,60 +296,113 @@ tml_estimator <- function(data,
                 mod_vars[[mod]]
 
               ## set initial values
-              init_fail_haz_est <- filtered_dt$failure_haz_est
-              filtered_dt$failure_haz_exp_est_star <-
-                filtered_dt$failure_haz_exp_est
-              filtered_dt$failure_haz_noexp_est_star <-
-                filtered_dt$failure_haz_noexp_est
+              fail_haz_est <- filtered_dt$failure_haz_est
+              fail_haz_1_est <- filtered_dt$failure_haz_exp_est
+              fail_haz_0_est <- filtered_dt$failure_haz_noexp_est
               iter <- 1
-              max_iter <- 5
               haz_score <- Inf
-              score_stop_crit <- 1 / (nrow(filtered_dt) * log(nrow(filtered_dt)))
+              score_stop_crit <- 1 /
+                (nrow(filtered_dt) * log(nrow(filtered_dt)))
 
               ## tilt the conditional failure estimates
-              while (abs(mean(haz_score)) > score_stop_crit && iter < max_iter) {
-                epsilon <- stats::coef(
-                  stats::glm(
-                    filtered_dt$failure ~ -1 + mod_h,
-                    offset = init_fail_haz_est,
-                    family = "gaussian"
-                  )
+              while (abs(mean(haz_score)) > score_stop_crit &&
+                       iter < max_iter) {
+
+                ## transform expected conditional outcomes for tilting
+                fail_haz_est_logit <- stats::qlogis(
+                  bound_precision(fail_haz_est)
+                )
+                fail_haz_1_est_logit <- stats::qlogis(
+                  bound_precision(fail_haz_1_est)
+                )
+                fail_haz_0_est_logit <- stats::qlogis(
+                  bound_precision(fail_haz_0_est)
                 )
 
-                ## update intial hazard
-                init_fail_haz_est <- init_fail_haz_est + epsilon * mod_h
+                ## tilt the clever covariate of failure hazard under treatment
+                suppressWarnings(
+                 fail_haz_1_tilt_fit <- stats::glm(
+                    filtered_dt$failure ~ -1 + mod_h_1,
+                    offset = fail_haz_est_logit,
+                    weights = filtered_dt$keep * filtered_dt[[exposure]] /
+                      filtered_dt$prop_scores,
+                    family = "binomial"
+                  )
+                 )
+                if (is.na(stats::coef(fail_haz_1_tilt_fit))) {
+                  fail_haz_1_tilt_fit$coefficients <- 0
+                } else if (!fail_haz_1_tilt_fit$converged ||
+                            abs(max(stats::coef(fail_haz_1_tilt_fit)))
+                           > tilt_tol) {
+                  fail_haz_1_tilt_fit$coefficients <- 0
+                }
+                epsilon_1 <- unname(stats::coef(fail_haz_1_tilt_fit))
 
-                ## compute the tilted conditional survival probabilities
-                ## differences
-                filtered_dt$failure_haz_exp_est_star <-
-                  filtered_dt$failure_haz_exp_est_star + epsilon * mod_h_1
-                filtered_dt$failure_haz_noexp_est_star <-
-                  filtered_dt$failure_haz_noexp_est_star + epsilon * mod_h_0
+                ## tilt the clever covariate of failure hazard under control
+                suppressWarnings(
+                 fail_haz_0_tilt_fit <- stats::glm(
+                    filtered_dt$failure ~ -1 + mod_h_0,
+                    offset = fail_haz_est_logit,
+                    weights = filtered_dt$keep * (1 - filtered_dt[[exposure]]) /
+                      (1 - filtered_dt$prop_scores),
+                    family = "binomial"
+                  )
+                 )
+                if (is.na(stats::coef(fail_haz_0_tilt_fit))) {
+                  fail_haz_0_tilt_fit$coefficients <- 0
+                } else if (!fail_haz_0_tilt_fit$converged ||
+                            abs(max(stats::coef(fail_haz_0_tilt_fit)))
+                           > tilt_tol) {
+                  fail_haz_0_tilt_fit$coefficients <- 0
+                }
+                epsilon_0 <- unname(stats::coef(fail_haz_0_tilt_fit))
+
+
+                ## update the nuisance parameter estimates
+                fail_haz_1_est <- bound_precision(
+                  stats::plogis(fail_haz_1_est_logit + epsilon_1 * mod_h_1)
+                )
+                fail_haz_0_est <- bound_precision(
+                  stats::plogis(fail_haz_0_est_logit + epsilon_0 * mod_h_0)
+                )
+                fail_haz_est <- filtered_dt[[exposure]] * fail_haz_1_est +
+                  (1 - filtered_dt[[exposure]]) * fail_haz_0_est
+
+                ## update the clever covariate
+                filtered_dt$failure_haz_est_star <- fail_haz_est
+                filtered_dt$failure_haz_exp_est_star <- fail_haz_1_est
+                filtered_dt$failure_haz_noexp_est_star <- fail_haz_0_est
+                filtered_dt[, `:=`(
+                  surv_est = cumprod(1 - failure_haz_est_star),
+                  surv_exp_est_star = cumprod(1 - failure_haz_exp_est_star),
+                  surv_noexp_est_star = cumprod(1 - failure_haz_noexp_est_star)
+                ), by = "id"]
+                filtered_dt[,
+                  inner_integrand := keep * ipws / (cens_est_lag * surv_est),
+                by = "id"]
+                ## the time cutoff
+                filtered_dt[, surv_time_cutoff := min(surv_est)]
+                ## compute the partial clever covariates
+                filtered_dt[, `:=`(
+                  partial_h = inner_integrand * surv_time_cutoff,
+                  partial_h_1 = -surv_time_cutoff * keep /
+                    (cens_est_lag * surv_est),
+                  partial_h_0 = surv_time_cutoff * keep /
+                    (cens_est_lag * surv_est)
+                )]
+                mod_h <- centered_mod * filtered_dt$partial_h /
+                  mod_vars[[mod]]
+                mod_h_1 <- centered_mod * filtered_dt$partial_h_1 /
+                  mod_vars[[mod]]
+                mod_h_0 <- centered_mod * filtered_dt$partial_h_0 /
+                  mod_vars[[mod]]
 
                 ## compute the score
-                ## NOTE: We fix the original surival functions in h to promote
-                ## numerical stability.
-                haz_score <- mod_h * (filtered_dt$failure - init_fail_haz_est)
-
-                ## bound q, just in case
-                init_fail_haz_est[init_fail_haz_est < (0 + eps)] <- 0 + eps
-                init_fail_haz_est[init_fail_haz_est > (1 - eps)] <- 1 - eps
-                filtered_dt$failure_haz_exp_est_star[
-                  filtered_dt$failure_haz_exp_est_star < (0 + eps)] <- 0 + eps
-                filtered_dt$failure_haz_exp_est_star[
-                  filtered_dt$failure_haz_exp_est_star > (1 - eps)] <- 1 - eps
-                filtered_dt$failure_haz_noexp_est_star[
-                  filtered_dt$failure_haz_noexp_est_star < (0 + eps)] <- 0 + eps
-                filtered_dt$failure_haz_noexp_est_star[
-                  filtered_dt$failure_haz_noexp_est_star > (1 - eps)] <- 1 - eps
+                haz_score <- mod_h * (filtered_dt$failure - fail_haz_est)
 
                 iter <- iter + 1
               }
 
-              filtered_dt[, `:=`(
-                surv_exp_est_star = cumprod(1 - failure_haz_exp_est_star),
-                surv_noexp_est_star = cumprod(1 - failure_haz_noexp_est_star)
-              ), by = "id"]
               filtered_dt <- filtered_dt[filtered_dt[, .I[.N], by = "id"]$V1]
               filtered_dt <- filtered_dt[, `:=`(
                 weighted_surv_diff = int_weight *
