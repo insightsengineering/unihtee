@@ -130,15 +130,9 @@ tml_estimator <- function(data,
         while (score_stop_crit < abs(mean(q_score)) && iter < max_iter) {
 
           ## transform expected conditional outcomes for tilting
-          q_star_logit <- q_star %>%
-            bound_precision() %>%
-            stats::qlogis()
-          q_1_star_logit <- q_1_star %>%
-            bound_precision() %>%
-            stats::qlogis()
-          q_0_star_logit <- q_0_star %>%
-            bound_precision() %>%
-            stats::qlogis()
+          q_star_logit <- stats::qlogis(bound_precision(q_star))
+          q_1_star_logit <- stats::qlogis(bound_precision(q_1_star))
+          q_0_star_logit <- stats::qlogis(bound_precision(q_0_star))
 
           ## tilt the clever covariate using the log loss for q_1
           suppressWarnings(
@@ -203,12 +197,6 @@ tml_estimator <- function(data,
                  (1 - data[[exposure]]) * (1 - prop_scores)) /
               mod_var * (data[[outcome]] - q_star) / q_star
           }
-
-          print(mean(q_score))
-          print(paste("min q:", min(q_star)))
-          print(paste("max q:", max(q_star)))
-          print(paste("1:", epsilon_1))
-          print(paste("0:", epsilon_0))
 
           iter <- iter + 1
 
@@ -522,7 +510,7 @@ tml_estimator <- function(data,
 #' Bounds extreme values to a specified tolerance level, for use with sensitive
 #' quantities that must be transformed, e.g., via \code{\link[stats]{qlogis}}.
 #'
-#' @param vals A \code{numeric} vector of values in the unit interval [0, 1].
+#' @param vals A \code{numeric} vector of values in the unit interval \[0, 1\].
 #' @param tol A \code{numeric} indicating the tolerance limit to which extreme
 #'  values should be truncated. Realizations of \code{val} less than \code{tol}
 #'  are truncated to \code{tol} while those greater than (1 - \code{tol}) are
@@ -530,7 +518,7 @@ tml_estimator <- function(data,
 #'
 #' @importFrom assertthat assert_that
 #'
-#' @author Nima s. Hejazi
+#' @author Nima S. Hejazi
 #'
 #' @keywords internal
 bound_precision <- function(vals, tol = 1e-6) {

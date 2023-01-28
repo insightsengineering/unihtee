@@ -14,7 +14,8 @@ Encoding: UTF-8
 Imports:
     data.table,
     sl3,
-    origami
+    origami,
+    assertthat
 Suggests:
     here,
     dplyr,

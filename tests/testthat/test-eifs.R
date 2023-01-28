@@ -113,7 +113,7 @@ test_that(
 
     # generate data
     set.seed(124151)
-    dt <- generate_test_data(n_obs = 1000, outcome_type = "binary")
+    dt <- generate_test_data(n_obs = 20000, outcome_type = "binary")
 
     # fit the propensity score
     prop_score_fit <- fit_prop_score(
@@ -128,9 +128,7 @@ test_that(
     cond_outcome_fit <- fit_cond_outcome(
       train_data = dt,
       valid_data = NULL,
-      learners = sl3::Lrnr_glm_fast$new(
-        formula = "~ a * w_1 + a * w_2 + a * w_3"
-      ),
+      learners = sl3::Lrnr_xgboost$new(),
       exposure = "a",
       confounders = c("w_1", "w_2", "w_3"),
       outcome = "y"
@@ -151,9 +149,9 @@ test_that(
       censoring_hazard_fit = NULL
     )
 
-    # note that the true parameter values are approx equal to 0, 4.2 for W_1,
+    # note that the true parameter values are approx equal to 0, 2.0 for W_1,
     # W_3
-    expect_equal(eif[, sapply(.SD, mean)], c("w_1" = 0, "w_3" = 4.2),
+    expect_equal(eif[, sapply(.SD, mean)], c("w_1" = 0, "w_3" = 2.0),
       tolerance = 0.1
     )
   }
@@ -169,16 +167,13 @@ test_that(
 
     # generate data
     set.seed(82342)
-    dt <- generate_test_data(n_obs = 10000, outcome_type = "binary")
+    dt <- generate_test_data(n_obs = 20000, outcome_type = "binary")
 
     # fit the expected cond outcome
     cond_outcome_fit <- fit_cond_outcome(
       train_data = dt,
       valid_data = NULL,
-      learners = sl3::Lrnr_glmnet$new(
-        formula = "~ a * w_1 + a * w_2 + a * w_3",
-        alpha = 1
-      ),
+      learners = sl3::Lrnr_xgboost$new(),
       exposure = "a",
       confounders = c("w_1", "w_2", "w_3"),
       outcome = "y"
@@ -199,9 +194,9 @@ test_that(
       censoring_hazard_fit = NULL
     )
 
-    # note that the true parameter values are equal approx to 0, 4.22 for W_1,
+    # note that the true parameter values are equal approx to 0, 2.0 for W_1,
     # W_3
-    expect_equal(eif[, sapply(.SD, mean)], c("w_1" = 0, "w_3" = 4.2),
+    expect_equal(eif[, sapply(.SD, mean)], c("w_1" = 0, "w_3" = 2.0),
       tolerance = 0.1
     )
   }

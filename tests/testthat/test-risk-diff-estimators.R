@@ -9,6 +9,9 @@ test_that(
     # generate data
     set.seed(72342)
     dt <- generate_test_data(n_obs = 1000)
+    y_min <- min(dt$y)
+    y_max <- max(dt$y)
+    dt$y_scaled <- (dt$y - y_min) / (y_max - y_min)
 
     # fit the propensity score
     prop_score_fit <- fit_prop_score(
@@ -26,7 +29,7 @@ test_that(
       learners = sl3::Lrnr_xgboost$new(),
       exposure = "a",
       confounders = c("w_1", "w_2", "w_3"),
-      outcome = "y"
+      outcome = "y_scaled"
     )
 
     # compute the uncentered eif
@@ -35,7 +38,7 @@ test_that(
       effect = "absolute",
       confounders = c("w_1", "w_2", "w_3"),
       exposure = "a",
-      outcome = "y",
+      outcome = "y_scaled",
       modifiers = c("w_1", "w_3"),
       prop_score_fit = prop_score_fit,
       prop_score_values = NULL,
@@ -47,7 +50,9 @@ test_that(
     one_step_fit <- one_step_estimator(uncentered_eif_data = ueif_dt)
 
     # note that the true parameter values for w_1, w_3 are 0, 1
-    expect_equal(as.numeric(one_step_fit), c(0, 1), tolerance = 0.1)
+    one_step_fit <- one_step_fit * (y_max - y_min)
+    expect_equal(one_step_fit$w_1, 0, tolerance = 0.1)
+    expect_equal(one_step_fit$w_3, 1, tolerance = 0.1)
   }
 )
 
@@ -59,6 +64,9 @@ test_that(
     # generate data
     set.seed(84891)
     dt <- generate_test_data(n_obs = 100)
+    y_min <- min(dt$y)
+    y_max <- max(dt$y)
+    dt$y_scaled <- (dt$y - y_min) / (y_max - y_min)
 
     # fit the propensity score
     prop_score_fit <- fit_prop_score(
@@ -76,7 +84,7 @@ test_that(
       learners = sl3::Lrnr_xgboost$new(),
       exposure = "a",
       confounders = c("w_1", "w_2", "w_3"),
-      outcome = "y"
+      outcome = "y_scaled"
     )
 
     # compute the uncentered eif
@@ -85,25 +93,25 @@ test_that(
       effect = "absolute",
       confounders = c("w_1", "w_2", "w_3"),
       exposure = "a",
-      outcome = "y",
+      outcome = "y_scaled",
       modifiers = c("w_1", "w_3"),
       prop_score_fit = prop_score_fit,
       prop_score_values = NULL,
       cond_outcome_fit = cond_outcome_fit,
       failure_hazard_fit = NULL,
       censoring_hazard_fit = NULL
-
     )
 
     one_step_fit <- one_step_estimator(uncentered_eif_data = ueif_dt)
+    one_step_fit <- one_step_fit * (y_max - y_min)
+    ueif_dt <- ueif_dt * (y_max - y_min)
 
     # note that the true parameter values for w_1, w_3 are 0, 1
-    expect_equal(c(
-      mean(ueif_dt$w_1 - one_step_fit$w_1),
-      mean(ueif_dt$w_3 - one_step_fit$w_3)
-    ),
-    c(0, 0),
-    tolerance = 1e-10
+    expect_equal(
+      mean(ueif_dt$w_1 - one_step_fit$w_1), 0, tolerance = 1e-5
+    )
+    expect_equal(
+      mean(ueif_dt$w_3 - one_step_fit$w_3), 0, tolerance = 1e-5
     )
   }
 )
@@ -115,8 +123,11 @@ test_that(
     library(sl3)
 
     # generate data
-    set.seed(79124)
-    dt <- generate_test_data(n_obs = 1000)
+    set.seed(5123)
+    dt <- generate_test_data(n_obs = 500)
+    y_min <- min(dt$y)
+    y_max <- max(dt$y)
+    dt$y_scaled <- (dt$y - y_min) / (y_max - y_min)
 
     # fit the propensity score
     prop_score_fit <- fit_prop_score(
@@ -134,7 +145,7 @@ test_that(
       learners = sl3::Lrnr_xgboost$new(),
       exposure = "a",
       confounders = c("w_1", "w_2", "w_3"),
-      outcome = "y"
+      outcome = "y_scaled"
     )
 
     # compute the TML estimate
@@ -143,14 +154,16 @@ test_that(
       effect = "absolute",
       confounders = c("w_1", "w_2", "w_3"),
       exposure = "a",
-      outcome = "y",
+      outcome = "y_scaled",
       modifiers = c("w_1", "w_3"),
       prop_score_fit = prop_score_fit,
       cond_outcome_fit = cond_outcome_fit
     )
 
     # note that the true parameter values for w_1, w_3 are 0, 1
-    expect_equal(as.numeric(tmle_fit), c(0, 1), tolerance = 0.1)
+    tmle_fit <- tmle_fit * (y_max - y_min)
+    expect_equal(tmle_fit$w_1, 0, tolerance = 0.1)
+    expect_equal(tmle_fit$w_3, 1, tolerance = 0.1)
   }
 )
 

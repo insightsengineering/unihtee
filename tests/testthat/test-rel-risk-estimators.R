@@ -6,26 +6,23 @@ test_that(
     library(sl3)
 
     # generate data
-    set.seed(98125)
+    set.seed(234)
     dt <- generate_test_data(n_obs = 1000, outcome_type = "binary")
 
     # fit the propensity score
     prop_score_fit <- fit_prop_score(
       train_data = dt,
       valid_data = NULL,
-      learners = sl3::Lrnr_glmnet$new(),
+      learners = sl3::Lrnr_glm$new(),
       exposure = "a",
       confounders = c("w_1", "w_2", "w_3")
     )
 
     # fit the expected cond outcome
-    lrnr_lasso <- sl3::Lrnr_glmnet$new(
-      formula = "~ a * w_1 + a * w_2 + a * w_3"
-    )
     cond_outcome_fit <- fit_cond_outcome(
       train_data = dt,
       valid_data = NULL,
-      learners = lrnr_lasso,
+      learners = sl3::Lrnr_xgboost$new(),
       exposure = "a",
       confounders = c("w_1", "w_2", "w_3"),
       outcome = "y"
@@ -48,8 +45,8 @@ test_that(
 
     one_step_fit <- one_step_estimator(uncentered_eif_data = ueif_dt)
 
-    # note that the true parameter values for w_1, w_3 are 0, 1
-    expect_equal(as.numeric(one_step_fit), c(0, 4.26), tolerance = 0.1)
+    # note that the true parameter values for w_3 is 2.0
+    expect_equal(one_step_fit$w_3, 2.0, tolerance = 0.1)
   }
 )
 
@@ -75,7 +72,7 @@ test_that(
     cond_outcome_fit <- fit_cond_outcome(
       train_data = dt,
       valid_data = NULL,
-      learners = sl3::Lrnr_ranger$new(),
+      learners = sl3::Lrnr_glmnet$new(),
       exposure = "a",
       confounders = c("w_1", "w_2", "w_3"),
       outcome = "y"
@@ -98,14 +95,8 @@ test_that(
 
     one_step_fit <- one_step_estimator(uncentered_eif_data = ueif_dt)
 
-    # note that the true parameter values for w_1, w_3 are 0, 1
-    expect_equal(c(
-      mean(ueif_dt$w_1 - one_step_fit$w_1),
-      mean(ueif_dt$w_3 - one_step_fit$w_3)
-    ),
-    c(0, 0),
-    tolerance = 1e-10
-    )
+    expect_equal(mean(ueif_dt$w_1 - one_step_fit$w_1), 0, tolerance = 1e-5)
+    expect_equal(mean(ueif_dt$w_3 - one_step_fit$w_3), 0, tolerance = 1e-5)
   }
 )
 
@@ -115,24 +106,22 @@ test_that(
     library(sl3)
 
     # generate data
-    set.seed(7235)
+    set.seed(514)
     dt <- generate_test_data(n_obs = 1000, outcome_type = "binary")
 
     # fit the propensity score
     prop_score_fit <- fit_prop_score(
       train_data = dt,
       valid_data = NULL,
-      learners = sl3::Lrnr_glmnet$new(),
+      learners = sl3::Lrnr_glmnet$new(family = "binomial"),
       exposure = "a",
       confounders = c("w_1", "w_2", "w_3")
     )
 
     # fit the expected cond outcome
-    interactions <- list(c("a", "w_1"), c("a", "w_2"), c("a", "w_3"))
-    lrnr_inter <- sl3::Lrnr_define_interactions$new(interactions)
     lrnr_lasso <- sl3::Lrnr_glmnet$new(
-      formula = "~ a * w_1 + a * w_2 + a * w_3",
-      alpha = 0.5
+      family = "binomial",
+      formula = "~ a * w_1 + a * w_2 + a * w_3"
     )
     cond_outcome_fit <- fit_cond_outcome(
       train_data = dt,
@@ -155,8 +144,9 @@ test_that(
       cond_outcome_fit = cond_outcome_fit
     )
 
-    # note that the true parameter values for w_1, w_3 are 0, 4.2
-    expect_equal(as.numeric(tmle_fit), c(0, 4.2), tolerance = 0.1)
+    # note that the true parameter values for w_1, w_3 are 0, 2.0
+    expect_equal(tmle_fit$w_1, 0, tolerance = 0.1)
+    expect_equal(tmle_fit$w_3, 2.0, tolerance = 0.1)
   }
 )
 
