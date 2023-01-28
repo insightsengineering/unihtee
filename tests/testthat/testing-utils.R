@@ -11,7 +11,7 @@ generate_test_data <- function(n_obs = 200, outcome_type = "continuous") {
 
   # exposure
   prop_score <- plogis(w_1 + w_2)
-  a <- sapply(prop_score, function(x) rbinom(1, 1, prob = x))
+  a <- rbinom(n_obs, 1, prop_score)
 
   # DGP type
   if (outcome_type %in% c("continuous", "binary")) {
@@ -20,10 +20,10 @@ generate_test_data <- function(n_obs = 200, outcome_type = "continuous") {
       y_1 <- rnorm(n = n_obs, mean = w_1 + w_2 + w_3 + 1, sd = 0.1)
       y_0 <- rnorm(n = n_obs, mean = w_1 + w_2, sd = 0.1)
     } else if (outcome_type == "binary") {
-      resp_prob_1 <- plogis(2 + 10 * w_3)
-      resp_prob_0 <- plogis(1)
-      y_1 <- sapply(resp_prob_1, function(x) rbinom(1, 1, x))
-      y_0 <- sapply(resp_prob_0, function(x) rbinom(1, 1, x))
+      resp_prob_1 <- plogis(-1 + 2 * w_3)
+      resp_prob_0 <- plogis(1 - 2 * w_3)
+      y_1 <- rbinom(n_obs, 1, resp_prob_1)
+      y_0 <- rbinom(n_obs, 1, resp_prob_0)
     }
 
     # outcome
