@@ -493,8 +493,10 @@ test_that(
   ),
   {
 
+    library(earth)
+
     # generate data
-    set.seed(97461)
+    set.seed(6234)
     dt <- generate_test_data(n_obs = 1000, outcome_type = "time-to-event")
 
     # apply unihtee
@@ -510,10 +512,13 @@ test_that(
       effect = "relative",
       estimator = "tmle",
       cross_fit = TRUE,
-      prop_score_estimator = sl3::Lrnr_xgboost$new(),
+      prop_score_estimator = sl3::Lrnr_glm$new(),
       cond_outcome_estimator = NULL,
-      failure_hazard_estimator = sl3::Lrnr_xgboost$new(),
-      censoring_hazard_estimator = sl3::Lrnr_xgboost$new()
+      failure_hazard_estimator = sl3::Lrnr_earth$new(
+        formula = "~ a * w_1 + w_2 + w_3",
+        glm = list(family = "binomial")
+      ),
+      censoring_hazard_estimator = sl3::Lrnr_glm$new()
     )
 
     # ensure that the adjusted p-value of w_1 is less than 0.05, and those of

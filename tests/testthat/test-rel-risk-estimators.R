@@ -295,9 +295,12 @@ test_that(
   paste("tml_estimator() produces accurate estimates without",
         "cross-fitting, TTE outcome"),
   {
+
+    library(earth)
+
     # generate data
-    set.seed(507)
-    dt <- generate_test_data(n_obs = 1000, outcome_type = "time-to-event RR")
+    set.seed(72342)
+    dt <- generate_test_data(n_obs = 2000, outcome_type = "time-to-event RR")
     long_dt <- tte_data_melt(
       data = dt,
       confounders = c("w_1", "w_2", "w_3"),
@@ -312,7 +315,7 @@ test_that(
     prop_score_fit <- fit_prop_score(
       train_data = dt,
       valid_data = long_dt,
-      learners = sl3::Lrnr_glm_fast$new(),
+      learners = sl3::Lrnr_glm$new(),
       exposure = "a",
       confounders = c("w_1", "w_2", "w_3")
     )
@@ -321,7 +324,10 @@ test_that(
     fail_fit <- fit_failure_hazard(
       train_data = long_dt,
       valid_data = NULL,
-      learners = sl3:::Lrnr_xgboost$new(),
+      learners = sl3:::Lrnr_earth$new(
+        formula = "~ a * w_1 + w_2 + w_3",
+        glm = list(family = "binomial")
+      ),
       exposure = "a",
       times = "time",
       confounders = c("w_1", "w_2", "w_3")
@@ -331,7 +337,7 @@ test_that(
     cens_fit <- fit_censoring_hazard(
       train_data = long_dt,
       valid_data = NULL,
-      learners = sl3:::Lrnr_xgboost$new(),
+      learners = sl3:::Lrnr_glm$new(),
       exposure = "a",
       confounders = c("w_1", "w_2", "w_3"),
       times = "time",

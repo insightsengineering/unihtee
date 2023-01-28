@@ -24,6 +24,7 @@ Suggests:
     speedglm,
     ranger,
     xgboost,
+    earth,
     future,
     testthat (>= 3.0.0),
     knitr,
