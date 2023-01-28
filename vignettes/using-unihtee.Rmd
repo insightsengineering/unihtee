@@ -23,6 +23,10 @@ knitr::opts_chunk$set(
 library(dplyr)
 library(sl3)
 library(Rsolnp)
+library(glmnet)
+library(xgboost)
+library(ranger)
+library(earth)
 library(unihtee)
 ```
 
@@ -252,10 +256,10 @@ estimators correctly identify the TEM-VIP of `w_2` and `w_3` as being non-zero
 based on the false discovery rate adjusted p-values. Each estimator's point
 estimates are also close to their true parameter values; for every unit increase
 in `w_2`, the one-step and TML estimators suggest that the average treatment
-effect increases by $\approx 0.88$ and $\approx 1.02$ units, respectively.
+effect increases by $\approx 0.88$ and $\approx 0.86$ units, respectively.
 Similarly for `w_3`, the one-step and TML estimators indicate that a unit
 increase in this confounder leads to an increase of $\approx 2.04$ and $\approx
-1.94$ in the average treatment effect, respectively.
+1.98$ in the average treatment effect, respectively.
 
 
 ## Working with Binary Outcomes
@@ -393,15 +397,13 @@ unihtee(
 ```
 
 Both estimators correctly identify `w_2` and `w_3` as treatment effect
-modifiers, as defined by the relative TEM-VIP. Note that the TML estimators'
-estimates of `w_2` and `w_3` is noticeably smaller than that produced by the
-one-step estimator; @boileau2023 have shown in a simulation study of this
-estimator that the TML estimator exhibits larger finite-sample bias than the
-one-step estimator. We therefore recommend using the one-step estimator in
-smaller samples. Hence, the one-step estimator's results suggest that for every
-unit increase in `w_2` and `w_3`, the log ratio of the conditional expected
-potential outcomes is expected to decrease by $\approx 1.06$ and $\approx 3.00$
-units, respectively.
+modifiers, as defined by the relative TEM-VIP. The one-step estimator's results
+suggest that for every unit increase in `w_2` and `w_3`, the log ratio of the
+conditional expected potential outcomes is expected to decrease by $\approx
+1.06$ and $\approx 3.00$ units, respectively. For the TML estimator, the log
+ration of the conditional expected outcomes is expected to decrease by $\approx
+1.36$ and $\approx 3.45$ for every unit increase in `w_2` and `w_3`,
+respectively.
 
 ## Working with Time-to-Event Outcomes
 
@@ -637,7 +639,7 @@ unihtee(
 ```
 
 These results suggest every unit increase in `w_1` results in an increase of
-$\approx 1.65$ --- according to the one-step estimator --- or $\approx 1.61$ ---
+$\approx 1.65$ --- according to the one-step estimator --- or $\approx 1.25$ ---
 according to the TML estimator --- time units for the difference in mean
 survival times, truncated at time eight.
 
@@ -723,7 +725,7 @@ Again, both the one-step and TML estimators successfully discern the treatment
 effect modifier from the other potential confounders when using a false
 discovery rate cutoff of $5\%$. These results indicate that a unit increase in
 `w_1` results in an increase of the log ratio of conditional survivals equal to
-either $\approx 3.32$ or $\approx 3.66$, depending on whether one uses the
+either $\approx 3.29$ or $\approx 3.28$, depending on whether one uses the
 one-step estimator or the TML estimator.
 
 
@@ -790,11 +792,11 @@ normal.
 
 We revisit our continuous outcome example, this time using Super Learners to
 estimate the propensity score and the conditional expected outcomes. Both Super
-Learners are composed of penalized GLMs and Random Forests. The
-propensity score's Super Learner uses the log loss to form the convex
-combination of individual learning algorithms, while the conditional expected
-outcomes' uses the squared error loss. Additionally, we employ 2-fold
-cross-fitting.
+Learners are composed of penalized GLMs, multivariate adaptive regression
+splines [@friedman1991], and Random Forests. The propensity score's Super
+Learner uses the log loss to form the convex combination of individual learning
+algorithms, while the conditional expected outcomes' uses the squared error
+loss. Additionally, we employ 2-fold cross-fitting.
 
 ```{r absolute-tem-vip-w-sl}
 # simulate a random sample
@@ -806,6 +808,7 @@ sl_bin <- Lrnr_sl$new(
     Lrnr_glmnet$new(family = "binomial", alpha = 0),
     Lrnr_glmnet$new(family = "binomial", alpha = 0),
     Lrnr_glmnet$new(family = "binomial", alpha = 0.5),
+    Lrnr_earth$new(glm = list(family = "binomial")),
     Lrnr_ranger$new()
   ),
   metalearner = make_learner(
@@ -829,6 +832,18 @@ sl_cont <- Lrnr_sl$new(
     Lrnr_glmnet$new(
       family = "gaussian",
       alpha = 0.5,
+      formula = "~ a * w_1 + a * w_2 + a * w_3 + a * w_4 + a * w_5"
+    ),
+    Lrnr_earth$new(
+      glm = list(family = "gaussian"),
+      degree = 1
+    ),
+    Lrnr_earth$new(
+      glm = list(family = "gaussian"),
+      degree = 2
+    ),
+    Lrnr_earth$new(
+      glm = list(family = "gaussian"),
       formula = "~ a * w_1 + a * w_2 + a * w_3 + a * w_4 + a * w_5"
     ),
     Lrnr_ranger$new()
@@ -872,8 +887,7 @@ unihtee(
 ```
 
 Though this procedure is more robust, the resulting estimates and hypothesis
-tests are largely similar to those of the previous continuous outcome, absolute
-TEM-VIP example.
+tests are to those of the previous continuous outcome, absolute TEM-VIP example.
 
 
 # Session information
