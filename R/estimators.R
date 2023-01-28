@@ -96,25 +96,13 @@ tml_estimator <- function(data,
     }
 
     # compute that partial clever covariate
-    if (effect == "absolute") {
-      h_partial <- (2 * data[[exposure]] - 1) /
-        (data[[exposure]] * prop_scores +
-         (1 - data[[exposure]]) * (1 - prop_scores))
-      h_partial_1 <- 1 / prop_scores
-      h_partial_0 <- -1 / (1 - prop_scores)
-    } else if (effect == "relative") {
-      # NOTE: Make sure not to divide by zero... or take log of zero
-      # Also, q_star is not iteratively updated here to improve stability
-      h_partial <- (2 * data[[exposure]] - 1) /
-        ((data[[exposure]] * prop_scores +
-          (1 - data[[exposure]]) * (1 - prop_scores)) * estimates)
-      h_partial_1 <- 1 / (prop_scores * exp_estimates)
-      h_partial_0 <- -1 / ((1 - prop_scores) * noexp_estimates)
-    }
+    h_partial_1 <- data[[exposure]] / prop_scores
+    h_partial_0 <- (1 - data[[exposure]]) / (1 - prop_scores)
 
     ## set the TML tilting hyperparameters
     score_stop_crit <- 1 / nrow(data) * log(nrow(data))
-    max_iter <- 100
+    tilt_tol <- 5
+    max_iter <- 10
 
     ## compute TML estimate
     estimates <- lapply(
@@ -126,9 +114,6 @@ tml_estimator <- function(data,
         attr(centered_mod, "scaled:center") <- NULL
         centered_mod <- as.vector(centered_mod)
         mod_var <- var(centered_mod)
-        mod_h <- centered_mod * h_partial / mod_var
-        mod_h_1 <- centered_mod * h_partial_1 / mod_var
-        mod_h_0 <- centered_mod * h_partial_0 / mod_var
 
         ## tilt the estimators
         q_score <- Inf
@@ -136,37 +121,94 @@ tml_estimator <- function(data,
         q_star <- estimates
         q_1_star <- exp_estimates
         q_0_star <- noexp_estimates
+        if (effect == "absolute") {
+          scaled_mod <- centered_mod / mod_var
+        } else if (effect == "relative") {
+          scaled_mod <- centered_mod / (mod_var * q_star)
+        }
 
         while (score_stop_crit < abs(mean(q_score)) && iter < max_iter) {
 
-          ## tilt the clever covariate using the quadratic loss
-          epsilon <- stats::coef(
-            stats::glm(
-              data[[outcome]] ~ -1 + mod_h,
-              offset = q_star,
-              family = "gaussian"
+          ## transform expected conditional outcomes for tilting
+          q_star_logit <- q_star %>%
+            bound_precision() %>%
+            stats::qlogis()
+          q_1_star_logit <- q_1_star %>%
+            bound_precision() %>%
+            stats::qlogis()
+          q_0_star_logit <- q_0_star %>%
+            bound_precision() %>%
+            stats::qlogis()
+
+          ## tilt the clever covariate using the log loss for q_1
+          suppressWarnings(
+            q_1_tilt_fit <- stats::glm(
+              data[[outcome]] ~ -1 + scaled_mod,
+              offset = q_star_logit,
+              weights = h_partial_1,
+              family = "binomial",
+              start = 0
             )
           )
+          if (is.na(stats::coef(q_1_tilt_fit))) {
+            q_1_tilt_fit$coefficients <- 0
+          } else if (!q_1_tilt_fit$converged ||
+                       abs(max(stats::coef(q_1_tilt_fit))) > tilt_tol) {
+            q_1_tilt_fit$coefficients <- 0
+          }
+          epsilon_1 <- unname(stats::coef(q_1_tilt_fit))
+
+          ## tilt the clever covariate using the log loss for q_0
+          suppressWarnings(
+            q_0_tilt_fit <- stats::glm(
+              data[[outcome]] ~ -1 + scaled_mod,
+              offset = q_star_logit,
+              weights = h_partial_0,
+              family = "binomial",
+              start = 0
+            )
+          )
+          if (is.na(stats::coef(q_0_tilt_fit))) {
+            q_0_tilt_fit$coefficients <- 0
+          } else if (!q_0_tilt_fit$converged ||
+                       abs(max(stats::coef(q_0_tilt_fit))) > tilt_tol) {
+            q_0_tilt_fit$coefficients <- 0
+          }
+          epsilon_0 <- unname(stats::coef(q_0_tilt_fit))
 
           ## update the nuisance parameter estimates
-          q_star <- q_star + epsilon * mod_h
-          q_1_star <- q_1_star + epsilon * mod_h_1
-          q_0_star <- q_0_star + epsilon * mod_h_0
+          q_1_star <- stats::plogis(q_1_star_logit + epsilon_1 * scaled_mod)
+          q_0_star <- stats::plogis(q_0_star_logit + epsilon_0 * scaled_mod)
+          q_star <- data[[exposure]] * q_1_star +
+            (1 - data[[exposure]]) * q_0_star
+
+          ## update the relative TEM-VIP's clever covariate
+          if (effect == "relative") {
+            ## bound q, just in case
+            q_star <- bound_precision(q_star)
+            q_1_star <- bound_precision(q_1_star)
+            q_0_star <- bound_precision(q_0_star)
+            scaled_mod <- centered_mod / (mod_var * q_star)
+          }
 
           ## compute the score
           if (effect == "absolute") {
             q_score <- centered_mod * (2 * data[[exposure]] - 1) /
               (data[[exposure]] * prop_scores +
                  (1 - data[[exposure]]) * (1 - prop_scores)) /
-              mod_var *
-              (data[[outcome]] - q_star)
+              mod_var * (data[[outcome]] - q_star)
           } else if (effect == "relative") {
             q_score <- centered_mod * (2 * data[[exposure]] - 1) /
               (data[[exposure]] * prop_scores +
                  (1 - data[[exposure]]) * (1 - prop_scores)) /
-              mod_var *
-              (data[[outcome]] - q_star) / q_star
+              mod_var * (data[[outcome]] - q_star) / q_star
           }
+
+          print(mean(q_score))
+          print(paste("min q:", min(q_star)))
+          print(paste("max q:", max(q_star)))
+          print(paste("1:", epsilon_1))
+          print(paste("0:", epsilon_0))
 
           iter <- iter + 1
 
@@ -176,14 +218,6 @@ tml_estimator <- function(data,
         if (effect == "absolute") {
           stats::cov(centered_mod, q_1_star - q_0_star) / mod_var
         } else if (effect == "relative") {
-          ## bound q, just in case
-          q_star[q_star < (0 + eps)] <- 0 + eps
-          q_star[q_star > (1 - eps)] <- 1 - eps
-          q_1_star[q_1_star < (0 + eps)] <- 0 + eps
-          q_1_star[q_1_star > (1 - eps)] <- 1 - eps
-          q_0_star[q_0_star < (0 + eps)] <- 0 + eps
-          q_0_star[q_0_star > (1 - eps)] <- 1 - eps
-
           stats::cov(centered_mod, log(q_1_star) - log(q_0_star)) / mod_var
         }
       }
@@ -478,4 +512,29 @@ tml_estimator <- function(data,
   names(estimates) <- modifiers
   tmle_dt <- data.table::as.data.table(estimates)
   return(tmle_dt)
+}
+
+
+###############################################################################
+
+#' Bounding to numerical precision
+#'
+#' Bounds extreme values to a specified tolerance level, for use with sensitive
+#' quantities that must be transformed, e.g., via \code{\link[stats]{qlogis}}.
+#'
+#' @param vals A \code{numeric} vector of values in the unit interval [0, 1].
+#' @param tol A \code{numeric} indicating the tolerance limit to which extreme
+#'  values should be truncated. Realizations of \code{val} less than \code{tol}
+#'  are truncated to \code{tol} while those greater than (1 - \code{tol}) are
+#'  truncated to (1 - \code{tol}).
+#'
+#' @importFrom assertthat assert_that
+#'
+#' @author Nima s. Hejazi
+#'
+#' @keywords internal
+bound_precision <- function(vals, tol = 1e-6) {
+  vals[vals < tol] <- tol
+  vals[vals > 1 - tol] <- 1 - tol
+  return(vals)
 }

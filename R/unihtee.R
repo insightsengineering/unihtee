@@ -113,7 +113,7 @@ unihtee <- function(data,
 
   ## scale the outcome to be between 0 and 1 if outcome is continuous
   ## NOTE: Can remove this if using linear update
-  if (outcome_type == "never") {
+  if (outcome_type == "continuous") {
     min_out <- min(data[[outcome]])
     max_out <- max(data[[outcome]])
     rescale_factor <- max_out - min_out
