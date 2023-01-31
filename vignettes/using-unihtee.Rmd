@@ -402,7 +402,7 @@ suggest that for every unit increase in `w_2` and `w_3`, the log ratio of the
 conditional expected potential outcomes is expected to decrease by $\approx
 1.06$ and $\approx 3.00$ units, respectively. For the TML estimator, the log
 ration of the conditional expected outcomes is expected to decrease by $\approx
-1.36$ and $\approx 3.45$ for every unit increase in `w_2` and `w_3`,
+1.39$ and $\approx 3.52$ for every unit increase in `w_2` and `w_3`,
 respectively.
 
 ## Working with Time-to-Event Outcomes
@@ -639,7 +639,7 @@ unihtee(
 ```
 
 These results suggest every unit increase in `w_1` results in an increase of
-$\approx 1.65$ --- according to the one-step estimator --- or $\approx 1.25$ ---
+$\approx 1.66$ --- according to the one-step estimator --- or $\approx 1.25$ ---
 according to the TML estimator --- time units for the difference in mean
 survival times, truncated at time eight.
 

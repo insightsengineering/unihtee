@@ -124,7 +124,10 @@ tml_estimator <- function(data,
         if (effect == "absolute") {
           scaled_mod <- centered_mod / mod_var
         } else if (effect == "relative") {
-          scaled_mod <- centered_mod / (mod_var * q_star)
+          bounded_q_star <- q_star
+          ## NOTE: avoid div by zero
+          bounded_q_star[bounded_q_star < 0.1] <- 0.1
+          scaled_mod <- centered_mod / (mod_var * bounded_q_star)
         }
 
         while (score_stop_crit < abs(mean(q_score)) && iter < max_iter) {
@@ -182,7 +185,10 @@ tml_estimator <- function(data,
             q_star <- bound_precision(q_star)
             q_1_star <- bound_precision(q_1_star)
             q_0_star <- bound_precision(q_0_star)
-            scaled_mod <- centered_mod / (mod_var * q_star)
+            ## NOTE: avoid div by zero
+            bounded_q_star <- q_star
+            bounded_q_star[bounded_q_star < 0.1] <- 0.1
+            scaled_mod <- centered_mod / (mod_var * bounded_q_star)
           }
 
           ## compute the score
@@ -195,7 +201,7 @@ tml_estimator <- function(data,
             q_score <- centered_mod * (2 * data[[exposure]] - 1) /
               (data[[exposure]] * prop_scores +
                  (1 - data[[exposure]]) * (1 - prop_scores)) /
-              mod_var * (data[[outcome]] - q_star) / q_star
+              mod_var * (data[[outcome]] - q_star) / bounded_q_star
           }
 
           iter <- iter + 1
