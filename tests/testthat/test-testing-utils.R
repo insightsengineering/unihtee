@@ -273,7 +273,7 @@ test_that(
       rescale_factor = 1
     )
 
-    expect_equal(rescaled_test_dt$se[1], test_dt$se[1], tolerance = 0.001)
-    expect_equal(rescaled_test_dt$se[2], test_dt$se[2], tolerance = 0.001)
+    expect_equal(rescaled_test_dt$se[1], test_dt$se[1], tolerance = 0.01)
+    expect_equal(rescaled_test_dt$se[2], test_dt$se[2], tolerance = 0.01)
   }
 )

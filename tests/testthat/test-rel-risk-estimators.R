@@ -107,7 +107,7 @@ test_that(
 
     # generate data
     set.seed(514)
-    dt <- generate_test_data(n_obs = 1000, outcome_type = "binary")
+    dt <- generate_test_data(n_obs = 5000, outcome_type = "binary")
 
     # fit the propensity score
     prop_score_fit <- fit_prop_score(
@@ -156,7 +156,7 @@ test_that(
   {
     # generate data
     set.seed(10)
-    dt <- generate_test_data(n_obs = 1000, outcome_type = "time-to-event RR")
+    dt <- generate_test_data(n_obs = 5000, outcome_type = "time-to-event RR")
     long_dt <- tte_data_melt(
       data = dt,
       confounders = c("w_1", "w_2", "w_3"),
