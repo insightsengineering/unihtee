@@ -155,7 +155,7 @@ test_that(
         "cross-fitting, TTE outcome"),
   {
     # generate data
-    set.seed(10)
+    set.seed(426723)
     dt <- generate_test_data(n_obs = 5000, outcome_type = "time-to-event RR")
     long_dt <- tte_data_melt(
       data = dt,
@@ -171,7 +171,7 @@ test_that(
     prop_score_fit <- fit_prop_score(
       train_data = dt,
       valid_data = long_dt,
-      learners = sl3::Lrnr_glm_fast$new(),
+      learners = sl3::Lrnr_glm$new(),
       exposure = "a",
       confounders = c("w_1", "w_2", "w_3")
     )
@@ -180,8 +180,9 @@ test_that(
     fail_fit <- fit_failure_hazard(
       train_data = long_dt,
       valid_data = NULL,
-      learners = sl3::Lrnr_glmnet$new(
-        formula = "~ a * w_1 + a * w_2 + a * w_3"
+      learners = sl3:::Lrnr_earth$new(
+        formula = "~ a * w_1 + w_2 + w_3",
+        glm = list(family = "binomial")
       ),
       exposure = "a",
       times = "time",
@@ -192,7 +193,7 @@ test_that(
     cens_fit <- fit_censoring_hazard(
       train_data = long_dt,
       valid_data = NULL,
-      learners = sl3:::Lrnr_xgboost$new(),
+      learners = sl3:::Lrnr_glm$new(),
       exposure = "a",
       confounders = c("w_1", "w_2", "w_3"),
       times = "time",
