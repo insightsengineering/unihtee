@@ -17,7 +17,7 @@ test_that(
       train_data = dt,
       valid_data = NULL,
       learners = sl3::Lrnr_glm_fast$new(
-        formula = "~ w_1 * a + w_2 * a + w_3 * a"
+        formula = "~ w_1 + w_2 + w_3"
       ),
       exposure = "a",
       confounders = c("w_1", "w_2", "w_3")
