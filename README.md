@@ -8,13 +8,17 @@
 **Author:** [Philippe Boileau](https://pboileau.ca/)
 
 <!-- badges: start -->
+
+[![Project Status: Active – The project has reached a stable, usable
+state and is being actively
+developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 <!-- badges: end -->
 
 ------------------------------------------------------------------------
 
 `unicate` provides tools for uncovering treatment effect modifiers in
 high-dimensional data. Treatment effect modification is defined using
-variable importance parameters based on absolute and relative scales.
+variable importance parameters based on absolute and relative effects.
 The variable importance parameters are model-agnostic, meaning they do
 not depend on specific regression pocedures (for example, the variable
 importance measures of Random Forests). Inference is performed about
@@ -40,13 +44,14 @@ inference about the treatment effect modification variable importance
 parameters. These parameters are defined for use with continuous, binary
 and time-to-event outcomes with binary exposure variables. Variable
 importance parameters are defined on both the absolute and relative
-scales.
+effect scales.
 
 ## Example
 
 We simulate some observational study data that contains ten confounders,
 of which are two treatment effect modifiers. We then perform inference
-about the absolute scale variable importance parameter.
+about the absolute treatment effect modifier variable importance
+parameter.
 
 ``` r
 library(unihtee)
@@ -73,31 +78,31 @@ unihtee(
   exposure = "a",
   outcome = "y",
   outcome_type = "continuous",
-  scale = "absolute",
+  effect = "absolute",
   estimator = "tmle"
 )
-#>     modifier    estimate        se          z      p_value    ci_lower
-#>  1:      w_3  1.19657424 0.1613233  7.4172461 1.196820e-13  0.88038067
-#>  2:      w_4 -0.89218696 0.1492369 -5.9783268 2.254412e-09 -1.18469128
-#>  3:      w_8  0.19677508 0.1137877  1.7293170 8.375237e-02 -0.02624889
-#>  4:      w_1  0.19352745 0.1160698  1.6673368 9.544745e-02 -0.03396935
-#>  5:     w_10 -0.11398276 0.1356947 -0.8399945 4.009115e-01 -0.37994429
-#>  6:      w_9  0.10749149 0.1300309  0.8266613 4.084291e-01 -0.14736901
-#>  7:      w_6  0.07756350 0.1159920  0.6686969 5.036888e-01 -0.14978083
-#>  8:      w_2 -0.08609331 0.1767372 -0.4871262 6.261689e-01 -0.43249814
-#>  9:      w_7 -0.01905859 0.1485309 -0.1283140 8.979005e-01 -0.31017921
-#> 10:      w_5  0.00176980 0.1103689  0.0160353 9.872062e-01 -0.21455333
+#>     modifier     estimate        se           z      p_value    ci_lower
+#>  1:      w_3  1.044592804 0.1613285  6.47494319 9.484769e-11  0.72838896
+#>  2:      w_4 -0.869002514 0.1492388 -5.82289742 5.783606e-09 -1.16151066
+#>  3:      w_8  0.137803254 0.1137965  1.21096238 2.259098e-01 -0.08523784
+#>  4:      w_1  0.115258422 0.1160997  0.99275414 3.208298e-01 -0.11229692
+#>  5:      w_9  0.124150185 0.1300374  0.95472664 3.397160e-01 -0.13072315
+#>  6:     w_10 -0.097928234 0.1356976 -0.72166517 4.705004e-01 -0.36389554
+#>  7:      w_6  0.054845105 0.1159964  0.47281713 6.363437e-01 -0.17250792
+#>  8:      w_2 -0.064478504 0.1767632 -0.36477331 7.152806e-01 -0.41093441
+#>  9:      w_7 -0.014704981 0.1485331 -0.09900136 9.211372e-01 -0.30582989
+#> 10:      w_5  0.001500152 0.1103752  0.01359138 9.891560e-01 -0.21483526
 #>       ci_upper  p_value_fdr
-#>  1:  1.5127678 1.196820e-12
-#>  2: -0.5996826 1.127206e-08
-#>  3:  0.4197991 2.386186e-01
-#>  4:  0.4210242 2.386186e-01
-#>  5:  0.1519788 6.807151e-01
-#>  6:  0.3623520 6.807151e-01
-#>  7:  0.3049078 7.195555e-01
-#>  8:  0.2603115 7.827111e-01
-#>  9:  0.2720620 9.872062e-01
-#> 10:  0.2180929 9.872062e-01
+#>  1:  1.3607966 9.484769e-10
+#>  2: -0.5764944 2.891803e-08
+#>  3:  0.3608444 6.794319e-01
+#>  4:  0.3428138 6.794319e-01
+#>  5:  0.3790235 6.794319e-01
+#>  6:  0.1680391 7.841673e-01
+#>  7:  0.2821981 8.941008e-01
+#>  8:  0.2819774 8.941008e-01
+#>  9:  0.2764199 9.891560e-01
+#> 10:  0.2178356 9.891560e-01
 ```
 
 ## Issues

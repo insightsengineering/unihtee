@@ -20,13 +20,14 @@ knitr::opts_chunk$set(
 __Author:__ [Philippe Boileau](https://pboileau.ca/)
 
 <!-- badges: start -->
+[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 <!-- badges: end -->
 
 ---
 
 `unicate` provides tools for uncovering treatment effect modifiers in
 high-dimensional data. Treatment effect modification is defined using variable
-importance parameters based on absolute and relative scales. The variable
+importance parameters based on absolute and relative effects. The variable
 importance parameters are model-agnostic, meaning they do not depend on specific
 regression pocedures (for example, the variable importance measures of Random
 Forests). Inference is performed about these variable importance measures using
@@ -51,13 +52,13 @@ remotes::install_github("insightsengineering/unihtee")
 inference about the treatment effect modification variable importance
 parameters. These parameters are defined for use with continuous, binary and
 time-to-event outcomes with binary exposure variables. Variable importance
-parameters are defined on both the absolute and relative scales.
+parameters are defined on both the absolute and relative effect scales.
 
 ## Example
 
 We simulate some observational study data that contains ten confounders, of
 which are two treatment effect modifiers. We then perform inference about the
-absolute scale variable importance parameter.
+absolute treatment effect modifier variable importance parameter.
 
 ```{r example}
 library(unihtee)
@@ -84,7 +85,7 @@ unihtee(
   exposure = "a",
   outcome = "y",
   outcome_type = "continuous",
-  scale = "absolute",
+  effect = "absolute",
   estimator = "tmle"
 )
 ```
