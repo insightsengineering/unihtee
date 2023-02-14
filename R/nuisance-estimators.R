@@ -200,13 +200,13 @@ fit_cond_outcome <- function(train_data,
 #' @param times A \code{character} giving the name corresponding to the times.
 #'
 #' @return A named \code{list} of three elements. (1) \code{"estimates"}, the
-#'   expected failure hazards for each observation at each timepoint in
+#'   expected failure hazards for each observation at each time point in
 #'   \code{valid_data}, if specified, or \code{train_data} otherwise. (2)
 #'   \code{"exp_estimates"}, the expected conditional failure hazards for each
-#'   observation at each timepoint in \code{valid_data}, if specified, or
+#'   observation at each time point in \code{valid_data}, if specified, or
 #'   \code{train_data} otherwise, had these observations been exposed. (3)
 #'   \code{"noexp_estimates"}, the expected conditional failure hazards for each
-#'   observation at each timepoint in \code{valid_data}, if specified, or
+#'   observation at each time point in \code{valid_data}, if specified, or
 #'   \code{train_data} otherwise, had these observations not been exposed.
 #'
 #' @importFrom sl3 sl3_Task
@@ -315,13 +315,13 @@ fit_failure_hazard <- function(train_data,
 #' @param censoring A \code{character} indicating the censoring indicator.
 #'
 #' @return A named \code{list} of three elements. (1) \code{"estimates"}, the
-#'   expected censoring hazards for each observation at each timepoint in
+#'   expected censoring hazards for each observation at each time point in
 #'   \code{valid_data}, if specified, or \code{train_data} otherwise. (2)
 #'   \code{"exp_estimates"}, the expected conditional censoring hazards for each
-#'   observation at each timepoint in \code{valid_data}, if specified, or
+#'   observation at each time point in \code{valid_data}, if specified, or
 #'   \code{train_data} otherwise, had these observations been exposed. (3)
 #'   \code{"noexp_estimates"}, the expected conditional censoring hazards for
-#'   each observation at each timepoint in \code{valid_data}, if specified, or
+#'   each observation at each time point in \code{valid_data}, if specified, or
 #'   \code{train_data} otherwise, had these observations not been exposed.
 #'
 #' @importFrom sl3 sl3_Task

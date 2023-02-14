@@ -35,13 +35,13 @@ baseline covariates.}
 }
 \value{
 A named \code{list} of three elements. (1) \code{"estimates"}, the
-expected failure hazards for each observation at each timepoint in
+expected failure hazards for each observation at each time point in
 \code{valid_data}, if specified, or \code{train_data} otherwise. (2)
 \code{"exp_estimates"}, the expected conditional failure hazards for each
-observation at each timepoint in \code{valid_data}, if specified, or
+observation at each time point in \code{valid_data}, if specified, or
 \code{train_data} otherwise, had these observations been exposed. (3)
 \code{"noexp_estimates"}, the expected conditional failure hazards for each
-observation at each timepoint in \code{valid_data}, if specified, or
+observation at each time point in \code{valid_data}, if specified, or
 \code{train_data} otherwise, had these observations not been exposed.
 }
 \description{

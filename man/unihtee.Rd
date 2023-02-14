@@ -42,7 +42,7 @@ the suspected effect modifiers. This vector must be a subset of
 \item{censoring}{A \code{character} indicating the right censoring indicator
 variable. Only used with time-to-event outcomes. Defaults to \code{NULL}.}
 
-\item{time_cutoff}{A \code{numeric} representing the timepoint at which to
+\item{time_cutoff}{A \code{numeric} representing the time point at which to
 evaluate the time-to-event parameter. Only used with time-to-event
 outcomes. Defaults to \code{NULL}.}
 
@@ -56,7 +56,7 @@ modifier variable importance parameter. Currently supports
 
 \item{estimator}{A \code{character} set to either \code{"tmle"} or
 \code{"onestep"}. The former results in \code{unihtee()} to use a targeted
-maximum likelihood estimators to estimate the deisred TEM-VIP, while the
+maximum likelihood estimators to estimate the desired TEM-VIP, while the
 latter uses a one step estimator.}
 
 \item{cross_fit}{A \code{logical} determining whether cross-fitting should be
@@ -85,14 +85,14 @@ Defaults to \code{NULL}.}
 \item{failure_hazard_estimator}{A \code{\link[sl3]{Stack}}, or other learner
 class (inheriting from \code{\link[sl3]{Lrnr_base}}), containing a set of
 learners from \pkg{sl3} to estimate the conditional failure hazard
-function. Defaults to an xgboost learner with \code{confounders} and
+function. Defaults to an XGBoost learner with \code{confounders} and
 \code{exposure} variables as covariates. Only used with time-to-event
 outcomes.}
 
 \item{censoring_hazard_estimator}{A \code{\link[sl3]{Stack}}, or other
 learner class (inheriting from \code{\link[sl3]{Lrnr_base}}), containing a
 set of learners from \pkg{sl3} to estimate the conditional censoring hazard
-function. Defaults to an xgboost learner with \code{confounders} and
+function. Defaults to an XGBoost learner with \code{confounders} and
 \code{exposure} variables as covariates. Only used with time-to-event
 outcomes.}
 

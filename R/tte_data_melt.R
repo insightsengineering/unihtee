@@ -8,15 +8,15 @@
 #'   baseline covariates.
 #' @param exposure A \code{character} corresponding to the exposure variable.
 #' @param outcome A \code{character} corresponding to the outcome variable.
-#' @param censoring A \code{character} indicating the right censogin indicator
+#' @param censoring A \code{character} indicating the right censoring indicator
 #'   variable.
-#' @param time_cutoff A \code{numeric} representing the timepoint at which to
+#' @param time_cutoff A \code{numeric} representing the time point at which to
 #'   evaluate the time-to-event parameter.
 #' @param prop_score_values A \code{character} corresponding to the (known)
 #'   propensity score values for each observation in \code{data}.
 #'
 #' @return A long, time-to-event version of the original \code{data.table}
-#'   object. That is, observations are repeated at timepoints between the
+#'   object. That is, observations are repeated at time points between the
 #'   earliest time in the data and the \code{time_cutoff} argument.
 #'
 #' @importFrom data.table .N rbindlist
@@ -68,12 +68,12 @@ tte_data_melt <- function(data,
       ## add the pseudo observation times
       obs_data[[outcome]] <- unique_times[1:num_reps]
 
-      ## indicate if censored at the last measured timepoint
+      ## indicate if censored at the last measured time point
       if (censored && event_time <= time_cutoff) {
         obs_data[num_reps, censoring] <- 1
       }
 
-      ## indicate failure at the last measured timepoint
+      ## indicate failure at the last measured time point
       if (censored == 0 && event_time <= time_cutoff) {
         failure <- "failure"
         obs_data[num_reps, failure] <- 1
@@ -83,8 +83,8 @@ tte_data_melt <- function(data,
       ## parameters?
       obs_data$keep <- 1
 
-      ## if observation does not make it to designated timepoint, add dummy
-      ## observations used for computing at that timepoint anyways
+      ## if observation does not make it to designated time point, add dummy
+      ## observations used for computing at that time point anyways
       ## NOTE: these repeated measures are dropped during nuisance parameter
       ## estimation, but used for EIF calculation
       if (num_reps < length(unique_times)) {

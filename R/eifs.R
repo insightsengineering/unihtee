@@ -8,7 +8,7 @@ utils::globalVariables(
 )
 #' @title Uncentered Efficient Influence Function Computer
 #'
-#' @description \code{uncentered_eif()} computes thei efficient influence
+#' @description \code{uncentered_eif()} computes the efficient influence
 #'   function for the chosen parameter using the already estimated nuisance
 #'   parameters. If certain nuisance parameters are known, such as propensity
 #'   scores in a randomized control trial, then they may be input directly into

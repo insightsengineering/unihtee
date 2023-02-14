@@ -20,7 +20,7 @@ developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.re
 high-dimensional data. Treatment effect modification is defined using
 variable importance parameters based on absolute and relative effects.
 The variable importance parameters are model-agnostic, meaning they do
-not depend on specific regression pocedures (for example, the variable
+not depend on specific regression procedures (for example, the variable
 importance measures of Random Forests). Inference is performed about
 these variable importance measures using nonparametric estimators. Users
 may use one-step or targeted maximum likelihood estimators. Under

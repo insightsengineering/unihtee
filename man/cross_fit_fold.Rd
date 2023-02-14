@@ -51,7 +51,7 @@ modifier variable importance parameter. Currently supports
 
 \item{estimator}{A \code{character} set to either \code{"tmle"} or
 \code{"onestep"}. The former results in \code{unihtee()} to use a targeted
-maximum likelihood estimators to estimate the deisred TEM-VIP, while the
+maximum likelihood estimators to estimate the desired TEM-VIP, while the
 latter uses a one step estimator.}
 
 \item{cond_outcome_estimator}{A \code{\link[sl3]{Stack}}, or other learner
@@ -74,14 +74,14 @@ Defaults to \code{NULL}.}
 \item{failure_hazard_estimator}{A \code{\link[sl3]{Stack}}, or other learner
 class (inheriting from \code{\link[sl3]{Lrnr_base}}), containing a set of
 learners from \pkg{sl3} to estimate the conditional failure hazard
-function. Defaults to an xgboost learner with \code{confounders} and
+function. Defaults to an XGBoost learner with \code{confounders} and
 \code{exposure} variables as covariates. Only used with time-to-event
 outcomes.}
 
 \item{censoring_hazard_estimator}{A \code{\link[sl3]{Stack}}, or other
 learner class (inheriting from \code{\link[sl3]{Lrnr_base}}), containing a
 set of learners from \pkg{sl3} to estimate the conditional censoring hazard
-function. Defaults to an xgboost learner with \code{confounders} and
+function. Defaults to an XGBoost learner with \code{confounders} and
 \code{exposure} variables as covariates. Only used with time-to-event
 outcomes.}
 }

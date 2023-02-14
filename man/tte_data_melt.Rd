@@ -24,10 +24,10 @@ baseline covariates.}
 
 \item{outcome}{A \code{character} corresponding to the outcome variable.}
 
-\item{censoring}{A \code{character} indicating the right censogin indicator
+\item{censoring}{A \code{character} indicating the right censoring indicator
 variable.}
 
-\item{time_cutoff}{A \code{numeric} representing the timepoint at which to
+\item{time_cutoff}{A \code{numeric} representing the time point at which to
 evaluate the time-to-event parameter.}
 
 \item{prop_score_values}{A \code{character} corresponding to the (known)
@@ -35,7 +35,7 @@ propensity score values for each observation in \code{data}.}
 }
 \value{
 A long, time-to-event version of the original \code{data.table}
-object. That is, observations are repeated at timepoints between the
+object. That is, observations are repeated at time points between the
 earliest time in the data and the \code{time_cutoff} argument.
 }
 \description{
