@@ -119,7 +119,7 @@ modifier variable importance parameter. Currently supports
 <dt>estimator</dt>
 <dd><p>A <code>character</code> set to either <code>"tmle"</code> or
 <code>"onestep"</code>. The former results in <code><a href="unihtee.html">unihtee()</a></code> to use a targeted
-maximum likelihood estimators to estimate the deisred TEM-VIP, while the
+maximum likelihood estimators to estimate the desired TEM-VIP, while the
 latter uses a one step estimator.</p></dd>
 
 
@@ -150,7 +150,7 @@ Defaults to <code>NULL</code>.</p></dd>
 <dd><p>A <code><a href="https://tlverse.org/sl3/reference/Stack.html" class="external-link">Stack</a></code>, or other learner
 class (inheriting from <code><a href="https://tlverse.org/sl3/reference/Lrnr_base.html" class="external-link">Lrnr_base</a></code>), containing a set of
 learners from <span class="pkg">sl3</span> to estimate the conditional failure hazard
-function. Defaults to an xgboost learner with <code>confounders</code> and
+function. Defaults to an XGBoost learner with <code>confounders</code> and
 <code>exposure</code> variables as covariates. Only used with time-to-event
 outcomes.</p></dd>
 
@@ -159,7 +159,7 @@ outcomes.</p></dd>
 <dd><p>A <code><a href="https://tlverse.org/sl3/reference/Stack.html" class="external-link">Stack</a></code>, or other
 learner class (inheriting from <code><a href="https://tlverse.org/sl3/reference/Lrnr_base.html" class="external-link">Lrnr_base</a></code>), containing a
 set of learners from <span class="pkg">sl3</span> to estimate the conditional censoring hazard
-function. Defaults to an xgboost learner with <code>confounders</code> and
+function. Defaults to an XGBoost learner with <code>confounders</code> and
 <code>exposure</code> variables as covariates. Only used with time-to-event
 outcomes.</p></dd>
 
