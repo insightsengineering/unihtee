@@ -1,5 +1,5 @@
 ---
-title: "Using `unihtee`"
+title: "Using unihtee"
 author: "[Philippe Boileau](https://pboileau.ca)"
 date: "`r Sys.Date()`"
 bibliography: ../inst/references.bib
@@ -770,7 +770,7 @@ follows.
 
 ## `sl3` Integration: Using Super Learners
 
-`unihtee` uses the estimators implemented in the `sl3` [@coyle2021sl3-pkg] to
+`unihtee` uses the estimators implemented in the `sl3` [@coyle2021sl3-rpkg] to
 estimate nuisance parameters. While individual estimators may be used, as is
 done in the examples above, `sl3`'s main contribution are facilities for
 constructing Super Learners [@vdl2007]. Super Learners are ensemble algorithms,

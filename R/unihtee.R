@@ -1,10 +1,9 @@
 utils::globalVariables(c("..to_keep", ".SD", ".I", "p_value"))
 #' @title Univariate Heterogeneous Treatment Effect Modifier Estimator
 #'
-#' @description \code{unihtee()} estimates treatment effect modifiers variable
-#'   importance parameters (TEM-VIPs). These TEM-VIPs are defined on the
-#'   absolute or relative effects and can be estimated using one-step or targeted
-#'   maximum likelihood estimators.
+#' @description \code{unihtee()} estimates treatment effect modifier variable
+#'   importance parameters (TEM-VIPs). Both absolute and relative TEM-VIPs can
+#'   be estimated using one-step or targeted maximum likelihood estimators.
 #'
 #' @param data A \code{data.table} containing the observed data.
 #' @param confounders A \code{character} vector of column names corresponding to

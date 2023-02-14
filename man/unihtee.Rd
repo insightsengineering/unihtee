@@ -108,8 +108,7 @@ p-values of the \code{modifiers}. The suspected treatment effect modifiers
 ordered according to ascending p-values.
 }
 \description{
-\code{unihtee()} estimates treatment effect modifiers variable
-importance parameters (TEM-VIPs). These TEM-VIPs are defined on the
-absolute or relative effects and can be estimated using one-step or targeted
-maximum likelihood estimators.
+\code{unihtee()} estimates treatment effect modifier variable
+importance parameters (TEM-VIPs). Both absolute and relative TEM-VIPs can
+be estimated using one-step or targeted maximum likelihood estimators.
 }
