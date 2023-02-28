@@ -155,6 +155,7 @@ test_that(
         "cross-fitting, TTE outcome"),
   {
     # generate data
+    library(earth)
     set.seed(426723)
     dt <- generate_test_data(n_obs = 5000, outcome_type = "time-to-event RR")
     long_dt <- tte_data_melt(
