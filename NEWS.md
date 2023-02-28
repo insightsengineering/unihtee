@@ -1,3 +1,3 @@
-# unihtee 0.0.0.9000
+# unihtee 0.0.1
 
-* Added a `NEWS.md` file to track changes to the package.
+* Public release of `unihtee`.

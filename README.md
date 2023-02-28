@@ -16,15 +16,13 @@ developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.re
 
 ------------------------------------------------------------------------
 
-`unicate` provides tools for uncovering treatment effect modifiers in
+`unihtee` provides tools for uncovering treatment effect modifiers in
 high-dimensional data. Treatment effect modification is defined using
 variable importance parameters based on absolute and relative effects.
-The variable importance parameters are model-agnostic, meaning they do
-not depend on specific regression procedures (for example, the variable
-importance measures of Random Forests). Inference is performed about
-these variable importance measures using nonparametric estimators. Users
-may use one-step or targeted maximum likelihood estimators. Under
-general conditions, these estimators are unbiased and efficient.
+Inference is performed about these variable importance measures using
+nonparametric estimators. Users may use one-step or targeted maximum
+likelihood estimators. Under general conditions, these estimators are
+unbiased and efficient.
 
 ## Installation
 
@@ -41,17 +39,18 @@ remotes::install_github("insightsengineering/unihtee")
 
 `unihtee()` is the only user-facing function. It can be used to perform
 inference about the treatment effect modification variable importance
-parameters. These parameters are defined for use with continuous, binary
-and time-to-event outcomes with binary exposure variables. Variable
-importance parameters are defined on both the absolute and relative
-effect scales.
+parameters. These parameters are defined for data-generating processes
+with continuous, binary and time-to-event outcomes with binary exposure
+variables. Variable importance parameters based on absolute and relative
+effects are available. Details are provided in the vignette.
 
 ## Example
 
-We simulate some observational study data that contains ten confounders,
-of which are two treatment effect modifiers. We then perform inference
-about the absolute treatment effect modifier variable importance
-parameter.
+We simulate some observational study data that contains ten
+pre-treatment covariates, of which are two treatment effect modifiers.
+We then perform inference about the absolute treatment effect modifier
+variable importance parameter, which is inspired by the average
+treatment effect.
 
 ``` r
 library(unihtee)
