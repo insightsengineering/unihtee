@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="eifs" timestamp="2023-03-01T20:03:53Z" hostname="b0d3f7deeeb8" tests="8" skipped="0" failures="0" errors="0" time="52.558">
+    <testcase time="5.129" classname="eifs" name="uncentered_eif_minus_true_absolute_effect_parameter_value_has_a_mean_of_zero_when_propensity_scores_aren_t_known"/>
+    <testcase time="0.482000000000001" classname="eifs" name="uncentered_eif_minus_true_absolute_effect_parameter_value_has_a_mean_of_zero_when_propensity_scores_are_known"/>
+    <testcase time="0.795999999999999" classname="eifs" name="uncentered_eif_minus_true_relative_effect_parameter_value_has_a_mean_of_zero_when_propensity_scores_aren_t_known"/>
+    <testcase time="0.606999999999999" classname="eifs" name="uncentered_eif_minus_true_relative_effect_parameter_value_has_a_mean_of_zero_when_propensity_scores_are_known"/>
+    <testcase time="26.306" classname="eifs" name="uncentered_eif_minus_true_absolute_effect_parameter_value_has_a_mean_of_zero_for_the_RD_TTE_TEM_VIP"/>
+    <testcase time="0.007000000000005" classname="eifs" name="uncentered_eif_minus_true_absolute_effect_parameter_value_has_a_mean_of_zero_for_the_RD_TTE_TEM_VIP"/>
+    <testcase time="19.224" classname="eifs" name="uncentered_eif_minus_true_relative_effect_parameter_value_has_a_mean_of_zero_for_the_RR_TTE_TEM_VIP"/>
+    <testcase time="0.0069999999999979" classname="eifs" name="uncentered_eif_minus_true_relative_effect_parameter_value_has_a_mean_of_zero_for_the_RR_TTE_TEM_VIP"/>
+  </testsuite>
+  <testsuite name="nuisance-estimators" timestamp="2023-03-01T20:04:46Z" hostname="b0d3f7deeeb8" tests="12" skipped="0" failures="0" errors="0" time="15.246">
+    <testcase time="0.112000000000002" classname="nuisance_estimators" name="fit_prop_score_outputs_a_vector_of_estimates_that_is_similar_to_ground_truth_when_a_validation_dataset_isn_t_provided"/>
+    <testcase time="0.113" classname="nuisance_estimators" name="fit_prop_score_outputs_the_sl3_lrnr_object_fit_on_the_training_data"/>
+    <testcase time="0.213000000000001" classname="nuisance_estimators" name="fit_prop_score_outputs_a_vector_of_estimates_that_is_similar_to_ground_truth_when_a_validation_set_is_provided"/>
+    <testcase time="1.17" classname="nuisance_estimators" name="fit_cond_est_returns_a_vector_of_estimates_that_is_similar_to_ground_truth_when_no_validation_set_is_provided"/>
+    <testcase time="4.588" classname="nuisance_estimators" name="fit_cond_est_returns_a_vector_of_estimates_that_is_similar_to_ground_truth_when_a_validation_set_is_provided"/>
+    <testcase time="0.137999999999998" classname="nuisance_estimators" name="fit_cond_outcome_outputs_the_sl3_lrnr_object_fit_on_the_training_data"/>
+    <testcase time="6.755" classname="nuisance_estimators" name="fit_cond_est_returns_vectors_of_potential_outcome_estimates_that_is_similar_to_ground_truth_when_no_validation_set_is_provided"/>
+    <testcase time="0.007000000000005" classname="nuisance_estimators" name="fit_cond_est_returns_vectors_of_potential_outcome_estimates_that_is_similar_to_ground_truth_when_no_validation_set_is_provided"/>
+    <testcase time="1.399" classname="nuisance_estimators" name="fit_failure_hazard_returns_vectors_of_potential_conditional_failure_hazard_estmiates_that_are_close_to_the_ground_truth"/>
+    <testcase time="0.00799999999999557" classname="nuisance_estimators" name="fit_failure_hazard_returns_vectors_of_potential_conditional_failure_hazard_estmiates_that_are_close_to_the_ground_truth"/>
+    <testcase time="0.736000000000004" classname="nuisance_estimators" name="fit_censoring_hazard_returns_vectors_of_potential_conditional_censoring_hazard_estimates_that_are_close_to_the_ground_truth"/>
+    <testcase time="0.007000000000005" classname="nuisance_estimators" name="fit_censoring_hazard_returns_vectors_of_potential_conditional_censoring_hazard_estimates_that_are_close_to_the_ground_truth"/>
+  </testsuite>
+  <testsuite name="rel-risk-estimators" timestamp="2023-03-01T20:05:01Z" hostname="b0d3f7deeeb8" tests="12" skipped="0" failures="0" errors="0" time="18.432">
+    <testcase time="0.308999999999997" classname="rel_risk_estimators" name="one_step_estimator_produces_accurate_estimates_without_cross_fitting"/>
+    <testcase time="0.304000000000002" classname="rel_risk_estimators" name="one_step_estimator_solves_the_efficient_influence_function"/>
+    <testcase time="0.0229999999999961" classname="rel_risk_estimators" name="one_step_estimator_solves_the_efficient_influence_function"/>
+    <testcase time="1.411" classname="rel_risk_estimators" name="tml_estimator_produces_accurate_estimates_without_cross_fitting"/>
+    <testcase time="0.00699999999999079" classname="rel_risk_estimators" name="tml_estimator_produces_accurate_estimates_without_cross_fitting"/>
+    <testcase time="11.278" classname="rel_risk_estimators" name="one_step_estimator_produces_accurate_estimates_without_cross_fitting_TTE_outcome"/>
+    <testcase time="0.007000000000005" classname="rel_risk_estimators" name="one_step_estimator_produces_accurate_estimates_without_cross_fitting_TTE_outcome"/>
+    <testcase time="0.00699999999999079" classname="rel_risk_estimators" name="one_step_estimator_produces_accurate_estimates_without_cross_fitting_TTE_outcome"/>
+    <testcase time="0.51400000000001" classname="rel_risk_estimators" name="one_step_estimator_solves_the_efficient_influence_function_TTE_outcome"/>
+    <testcase time="4.559" classname="rel_risk_estimators" name="tml_estimator_produces_accurate_estimates_without_cross_fitting_TTE_outcome"/>
+    <testcase time="0.00600000000000023" classname="rel_risk_estimators" name="tml_estimator_produces_accurate_estimates_without_cross_fitting_TTE_outcome"/>
+    <testcase time="0.00699999999999079" classname="rel_risk_estimators" name="tml_estimator_produces_accurate_estimates_without_cross_fitting_TTE_outcome"/>
+  </testsuite>
+  <testsuite name="risk-diff-estimators" timestamp="2023-03-01T20:05:19Z" hostname="b0d3f7deeeb8" tests="13" skipped="0" failures="0" errors="0" time="27.008">
+    <testcase time="0.281000000000006" classname="risk_diff_estimators" name="one_step_estimator_produces_accurate_estimates_without_cross_fitting_cont_outcome_"/>
+    <testcase time="0.00799999999999557" classname="risk_diff_estimators" name="one_step_estimator_produces_accurate_estimates_without_cross_fitting_cont_outcome_"/>
+    <testcase time="0.242000000000004" classname="risk_diff_estimators" name="one_step_estimator_solves_the_efficient_influence_function_cont_outcome_"/>
+    <testcase time="0.00600000000000023" classname="risk_diff_estimators" name="one_step_estimator_solves_the_efficient_influence_function_cont_outcome_"/>
+    <testcase time="0.245999999999995" classname="risk_diff_estimators" name="tml_estimator_produces_accurate_estimates_without_cross_fitting_cont_outcome_"/>
+    <testcase time="0.00900000000000034" classname="risk_diff_estimators" name="tml_estimator_produces_accurate_estimates_without_cross_fitting_cont_outcome_"/>
+    <testcase time="0.634" classname="risk_diff_estimators" name="one_step_estimator_solves_the_efficient_influence_function_time_to_event_outcome_RD_TEM_VIP_"/>
+    <testcase time="10.132" classname="risk_diff_estimators" name="one_step_estimator_produces_accurate_estimates_without_cross_fitting_time_to_event_outcome_RD_TEM_VIP_"/>
+    <testcase time="0.00600000000000023" classname="risk_diff_estimators" name="one_step_estimator_produces_accurate_estimates_without_cross_fitting_time_to_event_outcome_RD_TEM_VIP_"/>
+    <testcase time="0.007000000000005" classname="risk_diff_estimators" name="one_step_estimator_produces_accurate_estimates_without_cross_fitting_time_to_event_outcome_RD_TEM_VIP_"/>
+    <testcase time="15.423" classname="risk_diff_estimators" name="tml_estimator_produces_accurate_estimates_without_cross_fitting_time_to_event_outcome_RD_TEM_VIP_"/>
+    <testcase time="0.00699999999999079" classname="risk_diff_estimators" name="tml_estimator_produces_accurate_estimates_without_cross_fitting_time_to_event_outcome_RD_TEM_VIP_"/>
+    <testcase time="0.007000000000005" classname="risk_diff_estimators" name="tml_estimator_produces_accurate_estimates_without_cross_fitting_time_to_event_outcome_RD_TEM_VIP_"/>
+  </testsuite>
+  <testsuite name="testing-utils" timestamp="2023-03-01T20:05:46Z" hostname="b0d3f7deeeb8" tests="6" skipped="0" failures="0" errors="0" time="18.868">
+    <testcase time="0.412999999999997" classname="testing_utils" name="test_hypotheses_outputs_a_data.table_with_one_row_per_modifier"/>
+    <testcase time="0.435000000000002" classname="testing_utils" name="test_hypotheses_contains_modifier_estimate_se_z_p_value_ci_lower_ci_upper_p_value_fdr_columns"/>
+    <testcase time="15.528" classname="testing_utils" name="test_hypotheses_properly_rescales_the_estimates"/>
+    <testcase time="0.007000000000005" classname="testing_utils" name="test_hypotheses_properly_rescales_the_estimates"/>
+    <testcase time="2.47900000000001" classname="testing_utils" name="test_hypotheses_properly_rescales_the_variance_estimates"/>
+    <testcase time="0.00600000000000023" classname="testing_utils" name="test_hypotheses_properly_rescales_the_variance_estimates"/>
+  </testsuite>
+  <testsuite name="tte_data_melt" timestamp="2023-03-01T20:06:05Z" hostname="b0d3f7deeeb8" tests="4" skipped="0" failures="0" errors="0" time="0.114">
+    <testcase time="0.0429999999999779" classname="tte_data_melt" name="tte_data_melt_melts_wide_time_to_event_data_with_the_correct_number_of_repeated_measures"/>
+    <testcase time="0.00600000000000023" classname="tte_data_melt" name="tte_data_melt_melts_wide_time_to_event_data_with_the_correct_number_of_repeated_measures"/>
+    <testcase time="0.0360000000000014" classname="tte_data_melt" name="tte_data_melt_outputs_a_data.table_with_columns_for_confounders_the_exposure_the_outcome_the_censoring_indicator_and_if_necessary_the_known_propensity_scores"/>
+    <testcase time="0.0289999999999964" classname="tte_data_melt" name="tte_data_melt_outputs_a_data.table_with_columns_for_confounders_the_exposure_the_outcome_the_censoring_indicator_and_if_necessary_the_known_propensity_scores"/>
+  </testsuite>
+  <testsuite name="unihtee" timestamp="2023-03-01T20:06:05Z" hostname="b0d3f7deeeb8" tests="39" skipped="0" failures="0" errors="0" time="54.178">
+    <testcase time="0.330000000000013" classname="unihtee" name="unihtee_uncovers_treatment_effect_modifiers_on_the_absolute_effect_when_outcomes_are_continuous_with_the_one_step_estimator"/>
+    <testcase time="0.007000000000005" classname="unihtee" name="unihtee_uncovers_treatment_effect_modifiers_on_the_absolute_effect_when_outcomes_are_continuous_with_the_one_step_estimator"/>
+    <testcase time="0.00600000000000023" classname="unihtee" name="unihtee_uncovers_treatment_effect_modifiers_on_the_absolute_effect_when_outcomes_are_continuous_with_the_one_step_estimator"/>
+    <testcase time="0.007000000000005" classname="unihtee" name="unihtee_uncovers_treatment_effect_modifiers_on_the_absolute_effect_when_outcomes_are_continuous_with_the_one_step_estimator"/>
+    <testcase time="1.452" classname="unihtee" name="unihtee_uncovers_treatment_effect_modifiers_on_the_absolute_effect_when_outcomes_are_continuous_with_the_cross_fitted_one_step_estimator"/>
+    <testcase time="6.68699999999998" classname="unihtee" name="unihtee_uncovers_treatment_effect_modifiers_on_the_absolute_effect_when_outcomes_are_continuous_with_the_TML_estimator"/>
+    <testcase time="0.00800000000000978" classname="unihtee" name="unihtee_uncovers_treatment_effect_modifiers_on_the_absolute_effect_when_outcomes_are_continuous_with_the_TML_estimator"/>
+    <testcase time="0.00600000000000023" classname="unihtee" name="unihtee_uncovers_treatment_effect_modifiers_on_the_absolute_effect_when_outcomes_are_continuous_with_the_TML_estimator"/>
+    <testcase time="0.00800000000000978" classname="unihtee" name="unihtee_uncovers_treatment_effect_modifiers_on_the_absolute_effect_when_outcomes_are_continuous_with_the_TML_estimator"/>
+    <testcase time="1.90199999999999" classname="unihtee" name="unihtee_uncovers_treatment_effect_modifiers_on_the_absolute_effect_when_outcomes_are_continuous_with_the_cross_fitted_TML_estimator"/>
+    <testcase time="0.659999999999997" classname="unihtee" name="unihtee_uncovers_treatment_effect_modifiers_on_the_absolute_effect_when_outcomes_are_binary_with_the_one_step_estimator"/>
+    <testcase time="0.007000000000005" classname="unihtee" name="unihtee_uncovers_treatment_effect_modifiers_on_the_absolute_effect_when_outcomes_are_binary_with_the_one_step_estimator"/>
+    <testcase time="0.007000000000005" classname="unihtee" name="unihtee_uncovers_treatment_effect_modifiers_on_the_absolute_effect_when_outcomes_are_binary_with_the_one_step_estimator"/>
+    <testcase time="0.007000000000005" classname="unihtee" name="unihtee_uncovers_treatment_effect_modifiers_on_the_absolute_effect_when_outcomes_are_binary_with_the_one_step_estimator"/>
+    <testcase time="0.560000000000002" classname="unihtee" name="unihtee_uncovers_treatment_effect_modifiers_on_the_absolute_effect_when_outcomes_are_binary_with_the_TML_estimator"/>
+    <testcase time="0.00699999999997658" classname="unihtee" name="unihtee_uncovers_treatment_effect_modifiers_on_the_absolute_effect_when_outcomes_are_binary_with_the_TML_estimator"/>
+    <testcase time="0.00600000000000023" classname="unihtee" name="unihtee_uncovers_treatment_effect_modifiers_on_the_absolute_effect_when_outcomes_are_binary_with_the_TML_estimator"/>
+    <testcase time="0.007000000000005" classname="unihtee" name="unihtee_uncovers_treatment_effect_modifiers_on_the_absolute_effect_when_outcomes_are_binary_with_the_TML_estimator"/>
+    <testcase time="0.338999999999999" classname="unihtee" name="unihtee_uncovers_treatment_effect_modifiers_on_the_relative_effect_when_outcomes_are_binary_with_the_one_step_estimator"/>
+    <testcase time="0.007000000000005" classname="unihtee" name="unihtee_uncovers_treatment_effect_modifiers_on_the_relative_effect_when_outcomes_are_binary_with_the_one_step_estimator"/>
+    <testcase time="0.00600000000000023" classname="unihtee" name="unihtee_uncovers_treatment_effect_modifiers_on_the_relative_effect_when_outcomes_are_binary_with_the_one_step_estimator"/>
+    <testcase time="0.0109999999999957" classname="unihtee" name="unihtee_uncovers_treatment_effect_modifiers_on_the_relative_effect_when_outcomes_are_binary_with_the_one_step_estimator"/>
+    <testcase time="1.04600000000002" classname="unihtee" name="unihtee_uncovers_treatment_effect_modifiers_on_the_relative_effect_when_outcomes_are_binary_with_the_cross_fitted_one_step_estimator"/>
+    <testcase time="0.389999999999986" classname="unihtee" name="unihtee_uncovers_treatment_effect_modifiers_on_the_relative_effect_when_outcomes_are_binary_with_the_TML_estimator"/>
+    <testcase time="0.007000000000005" classname="unihtee" name="unihtee_uncovers_treatment_effect_modifiers_on_the_relative_effect_when_outcomes_are_binary_with_the_TML_estimator"/>
+    <testcase time="0.007000000000005" classname="unihtee" name="unihtee_uncovers_treatment_effect_modifiers_on_the_relative_effect_when_outcomes_are_binary_with_the_TML_estimator"/>
+    <testcase time="0.00699999999997658" classname="unihtee" name="unihtee_uncovers_treatment_effect_modifiers_on_the_relative_effect_when_outcomes_are_binary_with_the_TML_estimator"/>
+    <testcase time="1.19900000000001" classname="unihtee" name="unihtee_uncovers_treatment_effect_modifiers_on_the_relative_effect_when_outcomes_are_binary_with_the_cross_fitted_TML_estimator"/>
+    <testcase time="9.79499999999999" classname="unihtee" name="unihtee_uncovers_treatment_effect_modifiers_on_the_absolute_effect_with_time_to_event_outcomes_with_the_one_step_estimator"/>
+    <testcase time="0.007000000000005" classname="unihtee" name="unihtee_uncovers_treatment_effect_modifiers_on_the_absolute_effect_with_time_to_event_outcomes_with_the_one_step_estimator"/>
+    <testcase time="0.00800000000000978" classname="unihtee" name="unihtee_uncovers_treatment_effect_modifiers_on_the_absolute_effect_with_time_to_event_outcomes_with_the_one_step_estimator"/>
+    <testcase time="0.007000000000005" classname="unihtee" name="unihtee_uncovers_treatment_effect_modifiers_on_the_absolute_effect_with_time_to_event_outcomes_with_the_one_step_estimator"/>
+    <testcase time="3.16299999999998" classname="unihtee" name="unihtee_uncovers_treatment_effect_modifiers_on_the_absolute_effect_with_time_to_event_outcomes_with_the_cross_fitted_one_step_estimator"/>
+    <testcase time="14.477" classname="unihtee" name="unihtee_uncovers_treatment_effect_modifiers_on_the_absolute_effect_with_time_to_event_outcomes_with_the_TML_estimator"/>
+    <testcase time="0.007000000000005" classname="unihtee" name="unihtee_uncovers_treatment_effect_modifiers_on_the_absolute_effect_with_time_to_event_outcomes_with_the_TML_estimator"/>
+    <testcase time="0.007000000000005" classname="unihtee" name="unihtee_uncovers_treatment_effect_modifiers_on_the_absolute_effect_with_time_to_event_outcomes_with_the_TML_estimator"/>
+    <testcase time="0.007000000000005" classname="unihtee" name="unihtee_uncovers_treatment_effect_modifiers_on_the_absolute_effect_with_time_to_event_outcomes_with_the_TML_estimator"/>
+    <testcase time="5.929" classname="unihtee" name="unihtee_uncovers_treatment_effect_modifiers_on_the_absolute_effect_with_time_to_event_outcomes_with_the_cross_fitted_TML_estimator"/>
+    <testcase time="6.078" classname="unihtee" name="unihtee_uncovers_treatment_effect_modifiers_on_the_relative_effect_with_time_to_event_outcomes_with_the_cross_fitted_TML_estimator"/>
+  </testsuite>
+</testsuites>
