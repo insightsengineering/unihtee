@@ -55,12 +55,6 @@
 <li class="nav-item">
   <a class="nav-link" href="news/index.html">Changelog</a>
 </li>
-<!-- start dropdown for versions --> <li class="nav-item dropdown">
-        <a href="#" class="nav-link dropdown-toggle"
-          data-bs-toggle="dropdown" role="button"
-          aria-expanded="false" aria-haspopup="true"
-          id="dropdown-versions">Versions</a> <div class="dropdown-menu" aria-labelledby="dropdown-versions"> <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/unihtee/main">main</a> </div></li>
-<!-- end dropdown for versions -->
       </ul>
 <form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="search.json" id="search-input" placeholder="Search for" autocomplete="off">
@@ -74,8 +68,7 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
-<div class="page-header"><h1 id="runihtee">
-<code>R</code>/<code>unihtee</code>
+<div class="page-header"><h1 id="runihtee">R/<code>unihtee</code>
 <a class="anchor" aria-label="anchor" href="#runihtee"></a>
 </h1></div>
 <blockquote>
@@ -86,6 +79,7 @@
 
 <hr>
 <p><code>unihtee</code> provides tools for uncovering treatment effect modifiers in high-dimensional data. Treatment effect modification is defined using variable importance parameters based on absolute and relative effects. Inference is performed about these variable importance measures using nonparametric estimators. Users may use one-step or targeted maximum likelihood estimators. Under general conditions, these estimators are unbiased and efficient.</p>
+<p>Additional details about this methodology is provided in Boileau et al. (2022) and in the package’s <a href="https://insightsengineering.github.io/unihtee/main/articles/using-unihtee.html">vignette</a>.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -165,9 +159,28 @@
 <p>Contributions are very welcome. Interested contributors should consult our <a href="https://github.com/insightsengineering/unihtee/blob/master/.github/CONTRIBUTING.md" class="external-link">contribution guidelines</a> prior to submitting a pull request.</p>
 </div>
 <div class="section level2">
+<h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
+</h2>
+<p>Cite <code>unihtee</code> using the following BibTeX entry:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="sc">@</span>manual{unihtee,</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  title <span class="ot">=</span> {unihtee<span class="sc">:</span> Univariate Heterogeneous Treatment Effect Estimation},</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  author <span class="ot">=</span> {Philippe Boileau},</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  note <span class="ot">=</span> {R package version <span class="dv">0</span>.<span class="fl">0.1</span>}</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+<div class="section level2">
 <h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
 </h2>
 <p>The contents of this repository are distributed under the Apache 2.0 license. See the <a href="https://github.com/insightsengineering/unihtee/blob/main/LICENSE.md" class="external-link"><code>LICENSE.md</code></a> and <a href="https://github.com/insightsengineering/unihtee/blob/main/LICENSE" class="external-link"><code>LICENSE</code></a> files for details.</p>
+</div>
+<div class="section level2">
+<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-boileau2022" class="csl-entry">
+Boileau, Philippe, Nina Ting Qi, Mark J van der Laan, Sandrine Dudoit, and Ning Leng. 2022. “<span class="nocase">A flexible approach for predictive biomarker discovery</span>.” <em>Biostatistics</em>, July. <a href="https://doi.org/10.1093/biostatistics/kxac029" class="external-link uri">https://doi.org/10.1093/biostatistics/kxac029</a>.
+</div>
+</div>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="license">
