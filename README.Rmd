@@ -1,5 +1,6 @@
 ---
 output: github_document
+bibliography: inst/references.bib 
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -13,7 +14,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# `R`/`unihtee`
+# R/`unihtee`
 
 > Univariate Heterogeneous Treatment Effect Estimation
 
@@ -31,6 +32,10 @@ importance parameters based on absolute and relative effects. Inference is
 performed about these variable importance measures using nonparametric
 estimators. Users may use one-step or targeted maximum likelihood estimators.
 Under general conditions, these estimators are unbiased and efficient.
+
+Additional details about this methodology is provided in @boileau2022
+and in the package's
+[vignette](https://insightsengineering.github.io/unihtee/main/articles/using-unihtee.html).
 
 ## Installation
 
@@ -101,6 +106,17 @@ Contributions are very welcome. Interested contributors should consult our
 guidelines](https://github.com/insightsengineering/unihtee/blob/master/.github/CONTRIBUTING.md)
 prior to submitting a pull request.
 
+## Citation
+
+Cite `unihtee` using the following BibTeX entry:
+
+```
+@manual{unihtee,
+  title = {unihtee: Univariate Heterogeneous Treatment Effect Estimation},
+  author = {Philippe Boileau},
+  note = {R package version 0.0.1}
+}
+```
 
 ## License
 
@@ -110,3 +126,5 @@ See the
 and
 [`LICENSE`](https://github.com/insightsengineering/unihtee/blob/main/LICENSE)
 files for details.
+
+## References

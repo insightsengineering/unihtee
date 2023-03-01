@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# `R`/`unihtee`
+# R/`unihtee`
 
 > Univariate Heterogeneous Treatment Effect Estimation
 
@@ -23,6 +23,10 @@ Inference is performed about these variable importance measures using
 nonparametric estimators. Users may use one-step or targeted maximum
 likelihood estimators. Under general conditions, these estimators are
 unbiased and efficient.
+
+Additional details about this methodology is provided in Boileau et al.
+(2022) and in the package’s
+[vignette](https://insightsengineering.github.io/unihtee/main/articles/using-unihtee.html).
 
 ## Installation
 
@@ -116,6 +120,16 @@ our [contribution
 guidelines](https://github.com/insightsengineering/unihtee/blob/master/.github/CONTRIBUTING.md)
 prior to submitting a pull request.
 
+## Citation
+
+Cite `unihtee` using the following BibTeX entry:
+
+    @manual{unihtee,
+      title = {unihtee: Univariate Heterogeneous Treatment Effect Estimation},
+      author = {Philippe Boileau},
+      note = {R package version 0.0.1}
+    }
+
 ## License
 
 The contents of this repository are distributed under the Apache 2.0
@@ -124,3 +138,18 @@ license. See the
 and
 [`LICENSE`](https://github.com/insightsengineering/unihtee/blob/main/LICENSE)
 files for details.
+
+## References
+
+<div id="refs" class="references csl-bib-body hanging-indent">
+
+<div id="ref-boileau2022" class="csl-entry">
+
+Boileau, Philippe, Nina Ting Qi, Mark J van der Laan, Sandrine Dudoit,
+and Ning Leng. 2022. “<span class="nocase">A flexible approach for
+predictive biomarker discovery</span>.” *Biostatistics*, July.
+<https://doi.org/10.1093/biostatistics/kxac029>.
+
+</div>
+
+</div>
