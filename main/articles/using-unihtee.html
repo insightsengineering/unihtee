@@ -47,14 +47,6 @@
 <li class="nav-item">
   <a class="nav-link" href="../news/index.html">Changelog</a>
 </li>
-<!-- start dropdown for versions --> <li class="nav-item dropdown">
-        <a href="#" class="nav-link dropdown-toggle"
-          data-bs-toggle="dropdown" role="button"
-          aria-expanded="false" aria-haspopup="true"
-          id="dropdown-versions">Versions</a> <div class="dropdown-menu" aria-labelledby="dropdown-versions"> <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/unihtee/main">main</a>
-<a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/unihtee/latest-tag">latest-tag</a>
-<a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/unihtee/v0.0.1">v0.0.1</a> </div></li>
-<!-- end dropdown for versions -->
       </ul>
 <form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off">
@@ -75,7 +67,7 @@
       <img src="" class="logo" alt=""><h1>Using unihtee</h1>
                         <h4 data-toc-skip class="author"><a href="https://pboileau.ca" class="external-link">Philippe Boileau</a></h4>
             
-            <h4 data-toc-skip class="date">2023-03-01</h4>
+            <h4 data-toc-skip class="date">2023-04-14</h4>
       
       
       <div class="d-none name"><code>using-unihtee.Rmd</code></div>
@@ -1019,17 +1011,17 @@ expected outcomes’ uses the squared error loss. Additionally, we employ
 <span>  cross_fit_folds <span class="op">=</span> <span class="fl">2</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt;    modifier    estimate         se          z   p_value    ci_lower  ci_upper</span></span>
-<span><span class="co">#&gt; 1:      w_2  1.01322539 0.10199926  9.9336541 0.0000000  0.81330683 1.2131439</span></span>
-<span><span class="co">#&gt; 2:      w_3  1.98347632 0.13831711 14.3400644 0.0000000  1.71237477 2.2545779</span></span>
-<span><span class="co">#&gt; 3:      w_4  0.15980555 0.09755231  1.6381525 0.1013899 -0.03139697 0.3510081</span></span>
-<span><span class="co">#&gt; 4:      w_1 -0.01980657 0.10279772 -0.1926752 0.8472134 -0.22129009 0.1816770</span></span>
-<span><span class="co">#&gt; 5:      w_5  0.01434660 0.09377385  0.1529915 0.8784050 -0.16945014 0.1981433</span></span>
+<span><span class="co">#&gt; 1:      w_2  1.01322541 0.10199927  9.9336537 0.0000000  0.81330684 1.2131440</span></span>
+<span><span class="co">#&gt; 2:      w_3  1.98347638 0.13831712 14.3400640 0.0000000  1.71237482 2.2545779</span></span>
+<span><span class="co">#&gt; 3:      w_4  0.15980553 0.09755231  1.6381522 0.1013899 -0.03139699 0.3510081</span></span>
+<span><span class="co">#&gt; 4:      w_1 -0.01980657 0.10279772 -0.1926752 0.8472133 -0.22129010 0.1816770</span></span>
+<span><span class="co">#&gt; 5:      w_5  0.01434656 0.09377386  0.1529911 0.8784053 -0.16945020 0.1981433</span></span>
 <span><span class="co">#&gt;    p_value_fdr</span></span>
 <span><span class="co">#&gt; 1:   0.0000000</span></span>
 <span><span class="co">#&gt; 2:   0.0000000</span></span>
 <span><span class="co">#&gt; 3:   0.1689832</span></span>
-<span><span class="co">#&gt; 4:   0.8784050</span></span>
-<span><span class="co">#&gt; 5:   0.8784050</span></span>
+<span><span class="co">#&gt; 4:   0.8784053</span></span>
+<span><span class="co">#&gt; 5:   0.8784053</span></span>
 <span></span>
 <span><span class="co"># TML estimator</span></span>
 <span><span class="fu"><a href="../reference/unihtee.html">unihtee</a></span><span class="op">(</span></span>
@@ -1046,18 +1038,18 @@ expected outcomes’ uses the squared error loss. Additionally, we employ
 <span>  cross_fit <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  cross_fit_folds <span class="op">=</span> <span class="fl">2</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt;    modifier    estimate         se          z   p_value    ci_lower  ci_upper</span></span>
-<span><span class="co">#&gt; 1:      w_2  0.98762260 0.10454871  9.4465306 0.0000000  0.78270713 1.1925381</span></span>
-<span><span class="co">#&gt; 2:      w_3  1.98247449 0.13797716 14.3681356 0.0000000  1.71203926 2.2529097</span></span>
-<span><span class="co">#&gt; 3:      w_4  0.15711403 0.09755985  1.6104374 0.1073024 -0.03410328 0.3483313</span></span>
-<span><span class="co">#&gt; 4:      w_1 -0.03473524 0.10365604 -0.3351010 0.7375489 -0.23790108 0.1684306</span></span>
-<span><span class="co">#&gt; 5:      w_5  0.01402747 0.09395343  0.1493023 0.8813151 -0.17012126 0.1981762</span></span>
+<span><span class="co">#&gt;    modifier    estimate         se          z   p_value   ci_lower  ci_upper</span></span>
+<span><span class="co">#&gt; 1:      w_2  0.98762264 0.10454871  9.4465311 0.0000000  0.7827072 1.1925381</span></span>
+<span><span class="co">#&gt; 2:      w_3  1.98247437 0.13797716 14.3681347 0.0000000  1.7120391 2.2529096</span></span>
+<span><span class="co">#&gt; 3:      w_4  0.15711411 0.09755985  1.6104382 0.1073022 -0.0341032 0.3483314</span></span>
+<span><span class="co">#&gt; 4:      w_1 -0.03473531 0.10365604 -0.3351016 0.7375484 -0.2379011 0.1684305</span></span>
+<span><span class="co">#&gt; 5:      w_5  0.01402747 0.09395342  0.1493024 0.8813150 -0.1701212 0.1981762</span></span>
 <span><span class="co">#&gt;    p_value_fdr</span></span>
 <span><span class="co">#&gt; 1:   0.0000000</span></span>
 <span><span class="co">#&gt; 2:   0.0000000</span></span>
-<span><span class="co">#&gt; 3:   0.1788373</span></span>
-<span><span class="co">#&gt; 4:   0.8813151</span></span>
-<span><span class="co">#&gt; 5:   0.8813151</span></span></code></pre></div>
+<span><span class="co">#&gt; 3:   0.1788371</span></span>
+<span><span class="co">#&gt; 4:   0.8813150</span></span>
+<span><span class="co">#&gt; 5:   0.8813150</span></span></code></pre></div>
 <p>Though this procedure is more robust, the resulting estimates and
 hypothesis tests are to those of the previous continuous outcome,
 absolute TEM-VIP example.</p>
@@ -1070,7 +1062,7 @@ absolute TEM-VIP example.</p>
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; R version 4.2.2 (2022-10-31)</span></span>
 <span><span class="co">#&gt; Platform: x86_64-pc-linux-gnu (64-bit)</span></span>
-<span><span class="co">#&gt; Running under: Ubuntu 22.04.1 LTS</span></span>
+<span><span class="co">#&gt; Running under: Ubuntu 22.04.2 LTS</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Matrix products: default</span></span>
 <span><span class="co">#&gt; BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3</span></span>
@@ -1089,47 +1081,47 @@ absolute TEM-VIP example.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; other attached packages:</span></span>
 <span><span class="co">#&gt;  [1] unihtee_0.0.1      earth_5.3.2        plotmo_3.6.2       TeachingDemos_2.12</span></span>
-<span><span class="co">#&gt;  [5] plotrix_3.8-2      Formula_1.2-4      ranger_0.14.1      xgboost_1.7.3.1   </span></span>
-<span><span class="co">#&gt;  [9] glmnet_4.1-6       Matrix_1.5-3       Rsolnp_1.16        sl3_1.4.4         </span></span>
-<span><span class="co">#&gt; [13] dplyr_1.1.0       </span></span>
+<span><span class="co">#&gt;  [5] plotrix_3.8-2      Formula_1.2-5      ranger_0.15.1      xgboost_1.7.5.1   </span></span>
+<span><span class="co">#&gt;  [9] glmnet_4.1-7       Matrix_1.5-4       Rsolnp_1.16        sl3_1.4.4         </span></span>
+<span><span class="co">#&gt; [13] dplyr_1.1.1       </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
-<span><span class="co">#&gt;   [1] colorspace_2.1-0     ellipsis_0.3.2       class_7.3-21        </span></span>
-<span><span class="co">#&gt;   [4] rprojroot_2.0.3      fs_1.6.1             listenv_0.9.0       </span></span>
-<span><span class="co">#&gt;   [7] prodlim_2019.11.13   fansi_1.0.4          lubridate_1.9.2     </span></span>
-<span><span class="co">#&gt;  [10] codetools_0.2-19     splines_4.2.2        R.methodsS3_1.8.2   </span></span>
-<span><span class="co">#&gt;  [13] cachem_1.0.6         knitr_1.42           jsonlite_1.8.4      </span></span>
-<span><span class="co">#&gt;  [16] pROC_1.18.0          caret_6.0-93         R.oo_1.25.0         </span></span>
-<span><span class="co">#&gt;  [19] compiler_4.2.2       backports_1.4.1      assertthat_0.2.1    </span></span>
-<span><span class="co">#&gt;  [22] fastmap_1.1.0        rstackdeque_1.1.1    cli_3.6.0           </span></span>
-<span><span class="co">#&gt;  [25] visNetwork_2.1.2     htmltools_0.5.4      prettyunits_1.1.1   </span></span>
-<span><span class="co">#&gt;  [28] tools_4.2.2          igraph_1.4.0         gtable_0.3.1        </span></span>
-<span><span class="co">#&gt;  [31] glue_1.6.2           reshape2_1.4.4       Rcpp_1.0.10         </span></span>
-<span><span class="co">#&gt;  [34] jquerylib_0.1.4      pkgdown_2.0.7        vctrs_0.5.2         </span></span>
-<span><span class="co">#&gt;  [37] nlme_3.1-162         iterators_1.0.14     timeDate_4022.108   </span></span>
-<span><span class="co">#&gt;  [40] origami_1.0.7        gower_1.0.1          xfun_0.37           </span></span>
-<span><span class="co">#&gt;  [43] stringr_1.5.0        globals_0.16.2       rbibutils_2.2.13    </span></span>
-<span><span class="co">#&gt;  [46] delayed_0.4.0        timechange_0.2.0     lifecycle_1.0.3     </span></span>
-<span><span class="co">#&gt;  [49] future_1.31.0        MASS_7.3-58.2        scales_1.2.1        </span></span>
-<span><span class="co">#&gt;  [52] ipred_0.9-13         ragg_1.2.5           hms_1.1.2           </span></span>
-<span><span class="co">#&gt;  [55] parallel_4.2.2       BBmisc_1.13          yaml_2.3.7          </span></span>
-<span><span class="co">#&gt;  [58] memoise_2.0.1        ggplot2_3.4.1        sass_0.4.5          </span></span>
-<span><span class="co">#&gt;  [61] rpart_4.1.19         stringi_1.7.12       desc_1.4.2          </span></span>
-<span><span class="co">#&gt;  [64] foreach_1.5.2        randomForest_4.7-1.1 checkmate_2.1.0     </span></span>
-<span><span class="co">#&gt;  [67] hardhat_1.2.0        lava_1.7.1           truncnorm_1.0-8     </span></span>
-<span><span class="co">#&gt;  [70] shape_1.4.6          Rdpack_2.4           rlang_1.0.6         </span></span>
-<span><span class="co">#&gt;  [73] pkgconfig_2.0.3      systemfonts_1.0.4    evaluate_0.20       </span></span>
-<span><span class="co">#&gt;  [76] lattice_0.20-45      ROCR_1.0-11          purrr_1.0.1         </span></span>
-<span><span class="co">#&gt;  [79] recipes_1.0.5        htmlwidgets_1.6.1    tidyselect_1.2.0    </span></span>
-<span><span class="co">#&gt;  [82] parallelly_1.34.0    plyr_1.8.8           magrittr_2.0.3      </span></span>
-<span><span class="co">#&gt;  [85] R6_2.5.1             generics_0.1.3       pillar_1.8.1        </span></span>
-<span><span class="co">#&gt;  [88] withr_2.5.0          survival_3.5-3       abind_1.4-5         </span></span>
-<span><span class="co">#&gt;  [91] nnet_7.3-18          tibble_3.1.8         future.apply_1.10.0 </span></span>
-<span><span class="co">#&gt;  [94] crayon_1.5.2         uuid_1.1-0           utf8_1.2.3          </span></span>
-<span><span class="co">#&gt;  [97] rmarkdown_2.20       imputeMissings_0.0.3 progress_1.2.2      </span></span>
-<span><span class="co">#&gt; [100] grid_4.2.2           data.table_1.14.8    ModelMetrics_1.2.2.2</span></span>
-<span><span class="co">#&gt; [103] digest_0.6.31        R.utils_2.12.2       textshaping_0.3.6   </span></span>
-<span><span class="co">#&gt; [106] stats4_4.2.2         munsell_0.5.0        bslib_0.4.2</span></span></code></pre></div>
+<span><span class="co">#&gt;   [1] colorspace_2.1-0     class_7.3-21         rprojroot_2.0.3     </span></span>
+<span><span class="co">#&gt;   [4] fs_1.6.1             listenv_0.9.0        prodlim_2023.03.31  </span></span>
+<span><span class="co">#&gt;   [7] fansi_1.0.4          lubridate_1.9.2      codetools_0.2-19    </span></span>
+<span><span class="co">#&gt;  [10] splines_4.2.2        R.methodsS3_1.8.2    cachem_1.0.7        </span></span>
+<span><span class="co">#&gt;  [13] knitr_1.42           jsonlite_1.8.4       pROC_1.18.0         </span></span>
+<span><span class="co">#&gt;  [16] caret_6.0-94         R.oo_1.25.0          compiler_4.2.2      </span></span>
+<span><span class="co">#&gt;  [19] backports_1.4.1      assertthat_0.2.1     fastmap_1.1.1       </span></span>
+<span><span class="co">#&gt;  [22] rstackdeque_1.1.1    cli_3.6.1            visNetwork_2.1.2    </span></span>
+<span><span class="co">#&gt;  [25] htmltools_0.5.5      prettyunits_1.1.1    tools_4.2.2         </span></span>
+<span><span class="co">#&gt;  [28] igraph_1.4.2         gtable_0.3.3         glue_1.6.2          </span></span>
+<span><span class="co">#&gt;  [31] reshape2_1.4.4       Rcpp_1.0.10          jquerylib_0.1.4     </span></span>
+<span><span class="co">#&gt;  [34] pkgdown_2.0.7        vctrs_0.6.1          nlme_3.1-162        </span></span>
+<span><span class="co">#&gt;  [37] iterators_1.0.14     timeDate_4022.108    origami_1.0.7       </span></span>
+<span><span class="co">#&gt;  [40] gower_1.0.1          xfun_0.38            stringr_1.5.0       </span></span>
+<span><span class="co">#&gt;  [43] globals_0.16.2       rbibutils_2.2.13     delayed_0.4.0       </span></span>
+<span><span class="co">#&gt;  [46] timechange_0.2.0     lifecycle_1.0.3      future_1.32.0       </span></span>
+<span><span class="co">#&gt;  [49] MASS_7.3-58.3        scales_1.2.1         ipred_0.9-14        </span></span>
+<span><span class="co">#&gt;  [52] ragg_1.2.5           hms_1.1.3            parallel_4.2.2      </span></span>
+<span><span class="co">#&gt;  [55] BBmisc_1.13          yaml_2.3.7           memoise_2.0.1       </span></span>
+<span><span class="co">#&gt;  [58] ggplot2_3.4.2        sass_0.4.5           rpart_4.1.19        </span></span>
+<span><span class="co">#&gt;  [61] stringi_1.7.12       desc_1.4.2           foreach_1.5.2       </span></span>
+<span><span class="co">#&gt;  [64] randomForest_4.7-1.1 checkmate_2.1.0      hardhat_1.3.0       </span></span>
+<span><span class="co">#&gt;  [67] lava_1.7.2.1         truncnorm_1.0-9      shape_1.4.6         </span></span>
+<span><span class="co">#&gt;  [70] Rdpack_2.4           rlang_1.1.0          pkgconfig_2.0.3     </span></span>
+<span><span class="co">#&gt;  [73] systemfonts_1.0.4    evaluate_0.20        lattice_0.21-8      </span></span>
+<span><span class="co">#&gt;  [76] ROCR_1.0-11          purrr_1.0.1          recipes_1.0.5       </span></span>
+<span><span class="co">#&gt;  [79] htmlwidgets_1.6.2    tidyselect_1.2.0     parallelly_1.35.0   </span></span>
+<span><span class="co">#&gt;  [82] plyr_1.8.8           magrittr_2.0.3       R6_2.5.1            </span></span>
+<span><span class="co">#&gt;  [85] generics_0.1.3       pillar_1.9.0         withr_2.5.0         </span></span>
+<span><span class="co">#&gt;  [88] survival_3.5-5       abind_1.4-5          nnet_7.3-18         </span></span>
+<span><span class="co">#&gt;  [91] tibble_3.2.1         future.apply_1.10.0  crayon_1.5.2        </span></span>
+<span><span class="co">#&gt;  [94] uuid_1.1-0           utf8_1.2.3           rmarkdown_2.21      </span></span>
+<span><span class="co">#&gt;  [97] imputeMissings_0.0.3 progress_1.2.2       grid_4.2.2          </span></span>
+<span><span class="co">#&gt; [100] data.table_1.14.8    ModelMetrics_1.2.2.2 digest_0.6.31       </span></span>
+<span><span class="co">#&gt; [103] R.utils_2.12.2       textshaping_0.3.6    stats4_4.2.2        </span></span>
+<span><span class="co">#&gt; [106] munsell_0.5.0        bslib_0.4.2</span></span></code></pre></div>
 <div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-bahamyirou2022" class="csl-entry">
 Bahamyirou, Asma, Mireille E. Schnitzer, Edward H. Kennedy, Lucie Blais,
