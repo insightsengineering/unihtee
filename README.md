@@ -122,12 +122,33 @@ prior to submitting a pull request.
 
 ## Citation
 
-Cite `unihtee` using the following BibTeX entry:
+To cite `unihtee` and the papers introducing the underlying framework,
+use the following BibTeX entries:
 
     @manual{unihtee,
       title = {unihtee: Univariate Heterogeneous Treatment Effect Estimation},
       author = {Philippe Boileau},
       note = {R package version 0.0.1}
+    }
+
+    @misc{boileau2023,
+          title={A nonparametric framework for treatment effect modifier discovery in high dimensions}, 
+          author={Philippe Boileau and Ning Leng and Nima S. Hejazi and Mark van der Laan and Sandrine Dudoit},
+          year={2023},
+          eprint={2304.05323},
+          archivePrefix={arXiv},
+          primaryClass={stat.ME}
+    }
+
+    @article{boileau2022,
+        author = {Boileau, Philippe and Qi, Nina Ting and van der Laan, Mark J and Dudoit, Sandrine and Leng, Ning},
+        title = {A flexible approach for predictive biomarker discovery},
+        journal = {Biostatistics},
+        year = {2022},
+        month = {07},
+        issn = {1465-4644},
+        doi = {10.1093/biostatistics/kxac029},
+        url = {https://doi.org/10.1093/biostatistics/kxac029}
     }
 
 ## License
