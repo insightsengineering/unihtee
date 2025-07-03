@@ -407,3 +407,38 @@ fit_censoring_hazard <- function(train_data,
     "noexp_estimates" = noexp_estimates
   ))
 }
+
+
+one_step_ate_estimator <- function(
+  data,
+  confounders,
+  exposure,
+  outcome,
+  prop_score_fit,
+  prop_score_values = NULL,
+  cond_outcome_fit
+) {
+
+  ## compute the inverse probability weights
+  if (!is.null(prop_score_values)) {
+    prop_scores <- data[[prop_score_values]]
+  } else {
+    prop_scores <- prop_score_fit$estimates
+  }
+  ipws <- (2 * data[[exposure]] - 1) /
+    (data[[exposure]] * prop_scores +
+       (1 - data[[exposure]]) * (1 - prop_scores))
+
+  ## compute conditional outcome residuals
+  cond_outcome_resid <- data[[outcome]] - cond_outcome_fit$estimates
+
+  # compute the uncentered EIF of the ATE
+  uncentered_eif <- ipws * cond_outcome_resid + cond_outcome_fit$exp_estimates -
+    cond_outcome_fit$noexp_estimates
+
+  # compute the estimate
+  estimate <- mean(uncentered_eif)
+
+  return(estimate)
+}
+
