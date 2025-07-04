@@ -478,3 +478,166 @@ test_that(
     expect_equal(abs(estimate + 1), 0, tolerance = 0.01)
 
   })
+
+test_that(
+  paste("one_step_rmst_diff_estimator() returns the marginal RMST diff"),
+  {
+    library(sl3)
+
+    # generate data
+    set.seed(84891)
+    dt <- generate_test_data(n_obs = 50000, outcome_type = "time-to-event")
+    long_dt <- tte_data_melt(
+      data = dt,
+      confounders = c("w_1", "w_2", "w_3"),
+      exposure = "a",
+      outcome = "time",
+      censoring = "censoring",
+      time_cutoff = 5,
+      prop_score_values = NULL
+    )
+
+    # fit the propensity score
+    prop_score_fit <- fit_prop_score(
+      train_data = dt,
+      valid_data = long_dt,
+      learners = sl3::Lrnr_xgboost$new(),
+      exposure = "a",
+      confounders = c("w_1", "w_2", "w_3")
+    )
+
+    # fit the expected failure hazard
+    fail_fit <- fit_failure_hazard(
+      train_data = long_dt,
+      valid_data = NULL,
+      learners = sl3::Lrnr_xgboost$new(),
+      exposure = "a",
+      times = "time",
+      confounders = c("w_1", "w_2", "w_3")
+    )
+
+    # fit the expected failure hazard
+    cens_fit <- fit_censoring_hazard(
+      train_data = long_dt,
+      valid_data = NULL,
+      learners = sl3:::Lrnr_glmnet$new(),
+      exposure = "a",
+      confounders = c("w_1", "w_2", "w_3"),
+      times = "time",
+      censoring = "censoring"
+    )
+
+    # compute the one-step estimate
+    estimate <- one_step_rmst_diff_estimator(
+      data = long_dt,
+      exposure = "a",
+      outcome = "time",
+      prop_score_values = NULL,
+      prop_score_fit = prop_score_fit,
+      failure_hazard_fit = fail_fit,
+      censoring_hazard_fit = cens_fit
+    )
+
+    ## Obtain true difference of RMSTs
+    # #  manually generate long data
+    # long_dt <- lapply(
+    #   seq_len(nrow(dt)),
+    #   function(obs) {
+    #     obs_dt <- dt[obs]
+    #     obs_dt <- obs_dt[rep(1:.N, 5)]
+    #     obs_dt$time <- seq_len(5)
+    #     obs_dt
+    #   }
+    # )
+    # long_dt <- rbindlist(long_dt, idcol = "id")
+    #
+    # # compute the true failure hazard at each timepoint under each condition
+    # cond_surv_hazard <- function(time, exposure, w_1, w_2, w_3) {
+    #   (time < 9) / (1 + exp(2 + 3 * exposure * w_1)) + (time == 9)
+    # }
+    # exp_truth <-
+    #     cond_surv_hazard(long_dt$time, 1, long_dt$w_1, long_dt$w_2, long_dt$w_3)
+    # noexp_truth <-
+    #     cond_surv_hazard(long_dt$time, 0, long_dt$w_1, long_dt$w_2, long_dt$w_3)
+    #
+    # # compute the survival probability at each time under each condition
+    # long_dt$true_haz_exp <- exp_truth
+    # long_dt$true_haz_noexp <- noexp_truth
+    # long_dt[, surv_exp := cumprod(1 - true_haz_exp), by = "id"]
+    # long_dt[, surv_noexp := cumprod(1 - true_haz_noexp), by = "id"]
+    #
+    # # compute the differences of RMST
+    # long_dt[, rmst_exp := cumsum(surv_exp), by = "id"]
+    # long_dt[, rmst_noexp := cumsum(surv_noexp), by = "id"]
+    # res_dt <- long_dt[time == 5]
+    # res_dt[, difference := rmst_exp - rmst_noexp, by = "id"]
+    # true_param <- mean(res_dt$difference) # - 0.55
+
+    # note that the true parameter value is -0.55
+    expect_equal(estimate + 0.55 , 0, tolerance = 0.1)
+  }
+)
+
+test_that(
+  paste("tml_rmst_diff_estimator() returns the marginal RMST diff"),
+  {
+    library(sl3)
+
+    # generate data
+    set.seed(84891)
+    dt <- generate_test_data(n_obs = 50000, outcome_type = "time-to-event")
+    long_dt <- tte_data_melt(
+      data = dt,
+      confounders = c("w_1", "w_2", "w_3"),
+      exposure = "a",
+      outcome = "time",
+      censoring = "censoring",
+      time_cutoff = 5,
+      prop_score_values = NULL
+    )
+
+    # fit the propensity score
+    prop_score_fit <- fit_prop_score(
+      train_data = dt,
+      valid_data = long_dt,
+      learners = sl3::Lrnr_xgboost$new(),
+      exposure = "a",
+      confounders = c("w_1", "w_2", "w_3")
+    )
+
+    # fit the expected failure hazard
+    fail_fit <- fit_failure_hazard(
+      train_data = long_dt,
+      valid_data = NULL,
+      learners = sl3::Lrnr_xgboost$new(),
+      exposure = "a",
+      times = "time",
+      confounders = c("w_1", "w_2", "w_3")
+    )
+
+    # fit the expected failure hazard
+    cens_fit <- fit_censoring_hazard(
+      train_data = long_dt,
+      valid_data = NULL,
+      learners = sl3:::Lrnr_glmnet$new(),
+      exposure = "a",
+      confounders = c("w_1", "w_2", "w_3"),
+      times = "time",
+      censoring = "censoring"
+    )
+
+    # compute the one-step estimate
+    estimate <- tml_rmst_diff_estimator(
+      data = long_dt,
+      exposure = "a",
+      outcome = "time",
+      prop_score_values = NULL,
+      prop_score_fit = prop_score_fit,
+      failure_hazard_fit = fail_fit,
+      censoring_hazard_fit = cens_fit
+    )
+
+    # note that the true parameter value is -0.55
+    expect_equal(estimate + 0.55 , 0, tolerance = 0.1)
+  }
+)

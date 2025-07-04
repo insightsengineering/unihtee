@@ -671,3 +671,259 @@ tml_estimator_ate_log_outcome <- function(
 
   return(estimate)
 }
+
+
+one_step_rmst_diff_estimator <- function(
+  data,
+  exposure,
+  outcome,
+  prop_score_fit,
+  prop_score_values,
+  failure_hazard_fit,
+  censoring_hazard_fit
+) {
+
+  ## compute the inverse probability weights
+  ## NOTE: PS estimates must be as long as long_dt in TTE settings
+  if (!is.null(prop_score_values)) {
+    prop_scores <- data[[prop_score_values]]
+  } else {
+    prop_scores <- prop_score_fit$estimates
+  }
+  ipws <- (2 * data[[exposure]] - 1) /
+    (data[[exposure]] * prop_scores +
+       (1 - data[[exposure]]) * (1 - prop_scores))
+
+  ## compute the survival probabilities
+  data$ipws <- -ipws
+  data$failure_haz_est <- failure_hazard_fit$estimates
+  data$failure_haz_exp_est <- failure_hazard_fit$exp_estimates
+  data$failure_haz_noexp_est <- failure_hazard_fit$noexp_estimates
+  data$censoring_haz_est <- censoring_hazard_fit$estimates
+  data[, surv_est := cumprod(1 - failure_haz_est), by = "id"]
+  data[, `:=`(
+    surv_exp_est = cumprod(1 - failure_haz_exp_est),
+    surv_noexp_est = cumprod(1 - failure_haz_noexp_est),
+    cens_est = cumprod(1 - censoring_haz_est)
+  ), by = "id"]
+  data[, cens_est_lag := data.table::shift(cens_est, n = 1, fill = 1),
+       by = "id"]
+
+  ## compute the integrand of the EIF for each row
+  data[, prev_time := data.table::shift(get(outcome), n = 1, fill = 0),
+       by = "id"]
+  data[, int_weight := as.numeric(get(outcome)) - as.numeric(prev_time),
+       by = "id"]
+  data[, inner_integrand := int_weight * keep * ipws /
+         (cens_est_lag * surv_est) * (failure - failure_haz_est),
+       by = "id"
+  ]
+  data[, inner_integral := cumsum(inner_integrand), by = "id"]
+  data[, outer_integrand := int_weight * (surv_est * inner_integral +
+                                            surv_exp_est - surv_noexp_est),
+       by = "id"
+  ]
+  data[, aipws := cumsum(outer_integrand), by = "id"]
+
+  ## use only the observations at the time_cutoff
+  time_cutoff <- max(data[[outcome]])
+  data <- data[get(outcome) == time_cutoff, ]
+
+  ## return the AIPWs at the currect cutoff
+  aipws <- data$aipws
+
+  ## compute the one-step estimate
+  estimate <- mean(aipws)
+
+  return(estimate)
+}
+
+tml_rmst_diff_estimator <- function(
+    data,
+    exposure,
+    outcome,
+    prop_score_fit,
+    prop_score_values,
+    failure_hazard_fit,
+    censoring_hazard_fit
+) {
+
+  # constant used to truncate estimates near zero
+  eps <- .Machine$double.eps
+
+  ## compute the inverse probability weights
+  ## NOTE: PS estimates must be as long as long_dt in TTE settings
+  if (!is.null(prop_score_values)) {
+    prop_scores <- data[[prop_score_values]]
+  } else {
+    prop_scores <- prop_score_fit$estimates
+  }
+
+  ## compute the IPWs
+  data$prop_scores <- prop_scores
+  data$ipws <- -(2 * data[[exposure]] - 1) /
+    (data[[exposure]] * prop_scores +
+       (1 - data[[exposure]]) * (1 - prop_scores))
+
+  ## compute the survival and censoring probabilities
+  data$failure_haz_est <- failure_hazard_fit$estimates
+  data$failure_haz_exp_est <- failure_hazard_fit$exp_estimates
+  data$failure_haz_noexp_est <- failure_hazard_fit$noexp_estimates
+  data$censoring_haz_est <- censoring_hazard_fit$estimates
+  data[, surv_est := cumprod(1 - failure_haz_est), by = "id"]
+  data[, `:=`(
+    surv_exp_est = cumprod(1 - failure_haz_exp_est),
+    surv_noexp_est = cumprod(1 - failure_haz_noexp_est),
+    cens_est = cumprod(1 - censoring_haz_est)
+  ), by = "id"]
+  data[, cens_est_lag := data.table::shift(cens_est, n = 1, fill = 1),
+       by = "id"]
+
+  # compute the weights for envetual discrete integration
+  data[, prev_time := data.table::shift(get(outcome), n = 1, fill = 0),
+       by = "id"]
+  data[, int_weight := as.numeric(get(outcome)) - as.numeric(prev_time),
+       by = "id"]
+
+  ## compute the partial clever covariate at each timepoint
+  data[, inner_integrand := keep * ipws / (cens_est_lag * surv_est),
+       by = "id"]
+
+  ## set parameters for update step
+  max_iter <- 10
+  tilt_tol <- 5
+
+  ## compute the partial clever covariates at each timepoint
+  the_times <- sort(unique(data[[outcome]]))
+  survival_preds <- lapply(
+    the_times,
+    function(t) {
+
+      ## extract timepoints used for tilting
+      filtered_dt <- data.table::copy(data)
+      filtered_dt <- filtered_dt[get(outcome) <= t, ]
+
+      ## the time cutoff
+      filtered_dt[, surv_time_cutoff := min(surv_est)]
+
+      ## compute the partial clever covariates
+      filtered_dt[, `:=`(
+        partial_h = inner_integrand * surv_time_cutoff,
+        partial_h_1 = -surv_time_cutoff * keep /
+          (cens_est_lag * surv_est),
+        partial_h_0 = -surv_time_cutoff * keep /
+          (cens_est_lag * surv_est)
+      )]
+
+      ## finalize the clever covariate
+      mod_h <- filtered_dt$partial_h
+      mod_h_1 <- filtered_dt$partial_h_1
+      mod_h_0 <- filtered_dt$partial_h_0
+
+      ## set initial values
+      fail_haz_est <- filtered_dt$failure_haz_est
+      fail_haz_1_est <- filtered_dt$failure_haz_exp_est
+      fail_haz_0_est <- filtered_dt$failure_haz_noexp_est
+      iter <- 1
+      haz_score <- Inf
+      score_stop_crit <- 1 /
+        (nrow(filtered_dt) * log(nrow(filtered_dt)))
+
+      ## tilt the conditional failure estimates
+      while (abs(mean(haz_score)) > score_stop_crit &&
+             iter < max_iter) {
+
+        ## transform expected conditional outcomes for tilting
+        fail_haz_est_logit <- stats::qlogis(
+          bound_precision(fail_haz_est)
+        )
+        fail_haz_1_est_logit <- stats::qlogis(
+          bound_precision(fail_haz_1_est)
+        )
+        fail_haz_0_est_logit <- stats::qlogis(
+          bound_precision(fail_haz_0_est)
+        )
+
+        ## tilt the clever covariate of failure hazard under treatment
+        suppressWarnings(
+          fail_haz_1_tilt_fit <- stats::glm(
+            filtered_dt$failure ~ -1 + mod_h_1,
+            offset = fail_haz_1_est_logit,
+            weights = filtered_dt$keep * filtered_dt[[exposure]] /
+              filtered_dt$prop_scores,
+            family = "binomial"
+          )
+        )
+
+        ## tilt the clever covariate of failure hazard under control
+        suppressWarnings(
+          fail_haz_0_tilt_fit <- stats::glm(
+            filtered_dt$failure ~ -1 + mod_h_0,
+            offset = fail_haz_0_est_logit,
+            weights = filtered_dt$keep * (1 - filtered_dt[[exposure]]) /
+              (1 - filtered_dt$prop_scores),
+            family = "binomial"
+          )
+        )
+
+        ## update the nuisance parameter estimates
+        fail_haz_1_est <- predict(fail_haz_1_tilt_fit, type = "response")
+        fail_haz_0_est <- predict(fail_haz_0_tilt_fit, type = "response")
+        fail_haz_est <- filtered_dt[[exposure]] * fail_haz_1_est +
+          (1 - filtered_dt[[exposure]]) * fail_haz_0_est
+
+        ## update the clever covariate
+        filtered_dt$failure_haz_est_star <- fail_haz_est
+        filtered_dt$failure_haz_exp_est_star <- fail_haz_1_est
+        filtered_dt$failure_haz_noexp_est_star <- fail_haz_0_est
+        filtered_dt[, `:=`(
+          surv_est = cumprod(1 - failure_haz_est_star)
+        ), by = "id"]
+        filtered_dt[,
+                    inner_integrand := keep * ipws / (cens_est_lag * surv_est),
+                    by = "id"]
+        ## the time cutoff
+        filtered_dt[, surv_time_cutoff := min(surv_est)]
+        ## compute the partial clever covariates
+        filtered_dt[, `:=`(
+          partial_h = inner_integrand * surv_time_cutoff,
+          partial_h_1 = -surv_time_cutoff * keep /
+            (cens_est_lag * surv_est),
+          partial_h_0 = surv_time_cutoff * keep /
+            (cens_est_lag * surv_est)
+        )]
+        mod_h <- filtered_dt$partial_h
+        mod_h_1 <- filtered_dt$partial_h_1
+        mod_h_0 <- filtered_dt$partial_h_0
+
+        ## compute the score
+        haz_score <- mod_h * (filtered_dt$failure - fail_haz_est)
+
+        iter <- iter + 1
+      }
+
+      # compute the RMST plug in estimator
+      filtered_dt[, `:=`(
+        surv_exp_est_star = cumprod(1 - failure_haz_exp_est_star),
+        surv_noexp_est_star = cumprod(1 - failure_haz_noexp_est_star)
+      ), by = "id"]
+      filtered_dt <- filtered_dt[filtered_dt[, .I[.N], by = "id"]$V1]
+      filtered_dt <- filtered_dt[, `:=`(
+        weighted_surv_diff = int_weight *
+          (surv_exp_est_star - surv_noexp_est_star)
+      )]
+
+      ## return the modifier and surv diff
+      filtered_dt[, c("id", "weighted_surv_diff"), with = FALSE]
+
+    }
+  )
+
+  ## combine all times and survival probabilities into a long data.table
+  survival_preds <- data.table::rbindlist(survival_preds)
+
+  ## compute the difference in restricted mean survival times
+  survival_preds[, rmst_diff := sum(weighted_surv_diff), by = "id"]
+  estimate <- mean(survival_preds$rmst_diff)
+
+}
