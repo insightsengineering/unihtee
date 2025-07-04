@@ -142,7 +142,7 @@ use the following BibTeX entries:
       number = {1},
       pages = {157--185},
       issn = {1369-7412},
-      doi = {10.1093/jrsssb/qkae084},
+      doi = {10.1093/jrsssb/qkae084}
     }
 
     @article{boileau2022,
