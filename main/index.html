@@ -5,73 +5,49 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="description" content="unihtee implements nonparametric inference procedures for
-  treatment effect modification variable importance parameters. These variable
-  importance parameters reflect individual confounders\' capacity for treatment
-  effect modification and are suited for high-dimensional data with potentially
-  complex correlation structures.">
 <title>Univariate Heterogeneous Treatment Effect Estimation • unihtee</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="deps/bootstrap-5.2.2/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.2.2/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Univariate Heterogeneous Treatment Effect Estimation">
-<meta property="og:description" content="unihtee implements nonparametric inference procedures for
-  treatment effect modification variable importance parameters. These variable
-  importance parameters reflect individual confounders\' capacity for treatment
-  effect modification and are suited for high-dimensional data with potentially
-  complex correlation structures.">
-<!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
-<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-<![endif]-->
+<link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Univariate Heterogeneous Treatment Effect Estimation">
+<meta name="description" content="unihtee implements nonparametric inference procedures for treatment effect modification variable importance parameters. These variable importance parameters reflect individual confounders\' capacity for treatment effect modification and are suited for high-dimensional data with potentially complex correlation structures.">
+<meta property="og:description" content="unihtee implements nonparametric inference procedures for treatment effect modification variable importance parameters. These variable importance parameters reflect individual confounders\' capacity for treatment effect modification and are suited for high-dimensional data with potentially complex correlation structures.">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
-    
 
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
-    
+
+    <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
+
     <a class="navbar-brand me-2" href="index.html">unihtee</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.2</small>
 
-    
+
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
-<li class="nav-item">
-  <a class="nav-link" href="reference/index.html">Reference</a>
-</li>
+<li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
-  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
-  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="articles/using-unihtee.html">Using unihtee</a>
-  </div>
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><a class="dropdown-item" href="articles/using-unihtee.html">Using unihtee</a></li>
+  </ul>
 </li>
-<li class="nav-item">
-  <a class="nav-link" href="news/index.html">Changelog</a>
-</li>
-<!-- start dropdown for versions --> <li class="nav-item dropdown">
-        <a href="#" class="nav-link dropdown-toggle"
-          data-bs-toggle="dropdown" role="button"
-          aria-expanded="false" aria-haspopup="true"
-          id="dropdown-versions">Versions</a> <div class="dropdown-menu" aria-labelledby="dropdown-versions"> <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/unihtee/main">main</a>
-<a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/unihtee/latest-tag">latest-tag</a>
-<a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/unihtee/v0.0.1">v0.0.1</a> </div></li>
-<!-- end dropdown for versions -->
+<li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul>
-<form class="form-inline my-2 my-lg-0" role="search">
-        <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="search.json" id="search-input" placeholder="Search for" autocomplete="off">
-</form>
-
-      <ul class="navbar-nav"></ul>
+<ul class="navbar-nav">
+<li class="nav-item"><form class="form-inline" role="search">
+ <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="search.json">
+</form></li>
+      </ul>
 </div>
 
-    
+
   </div>
 </nav><div class="container template-home">
 <div class="row">
@@ -120,7 +96,7 @@
 <span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">w</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">confounder_names</span></span>
 <span><span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Binomial.html" class="external-link">rbinom</a></span><span class="op">(</span>n <span class="op">=</span> <span class="va">n_obs</span>, size <span class="op">=</span> <span class="fl">1</span>, prob <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Logistic.html" class="external-link">plogis</a></span><span class="op">(</span><span class="va">w</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span> <span class="op">+</span> <span class="va">w</span><span class="op">[</span>, <span class="fl">2</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span>n <span class="op">=</span> <span class="va">n_obs</span>, mean <span class="op">=</span> <span class="va">w</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span> <span class="op">+</span> <span class="va">w</span><span class="op">[</span>, <span class="fl">2</span><span class="op">]</span> <span class="op">+</span> <span class="va">a</span> <span class="op">*</span> <span class="va">w</span><span class="op">[</span>, <span class="fl">3</span><span class="op">]</span> <span class="op">-</span> <span class="va">a</span> <span class="op">*</span> <span class="va">w</span><span class="op">[</span>, <span class="fl">4</span><span class="op">]</span><span class="op">)</span></span>
-<span><span class="va">dt</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/as.data.table.html" class="external-link">as.data.table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">w</span>, <span class="va">a</span>, <span class="va">y</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">dt</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/as.data.table.html" class="external-link">as.data.table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">w</span>, <span class="va">a</span>, <span class="va">y</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co">## targeted maximum likelihood estimates and testing procedure</span></span>
 <span><span class="fu"><a href="reference/unihtee.html">unihtee</a></span><span class="op">(</span></span>
@@ -134,27 +110,29 @@
 <span>  estimator <span class="op">=</span> <span class="st">"tmle"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt;     modifier     estimate        se           z      p_value    ci_lower</span></span>
-<span><span class="co">#&gt;  1:      w_3  1.044592804 0.1613285  6.47494319 9.484769e-11  0.72838896</span></span>
-<span><span class="co">#&gt;  2:      w_4 -0.869002514 0.1492388 -5.82289742 5.783606e-09 -1.16151066</span></span>
-<span><span class="co">#&gt;  3:      w_8  0.137803254 0.1137965  1.21096238 2.259098e-01 -0.08523784</span></span>
-<span><span class="co">#&gt;  4:      w_1  0.115258422 0.1160997  0.99275414 3.208298e-01 -0.11229692</span></span>
-<span><span class="co">#&gt;  5:      w_9  0.124150185 0.1300374  0.95472664 3.397160e-01 -0.13072315</span></span>
-<span><span class="co">#&gt;  6:     w_10 -0.097928234 0.1356976 -0.72166517 4.705004e-01 -0.36389554</span></span>
-<span><span class="co">#&gt;  7:      w_6  0.054845105 0.1159964  0.47281713 6.363437e-01 -0.17250792</span></span>
-<span><span class="co">#&gt;  8:      w_2 -0.064478504 0.1767632 -0.36477331 7.152806e-01 -0.41093441</span></span>
-<span><span class="co">#&gt;  9:      w_7 -0.014704981 0.1485331 -0.09900136 9.211372e-01 -0.30582989</span></span>
-<span><span class="co">#&gt; 10:      w_5  0.001500152 0.1103752  0.01359138 9.891560e-01 -0.21483526</span></span>
+<span><span class="co">#&gt;       &lt;fctr&gt;        &lt;num&gt;     &lt;num&gt;       &lt;num&gt;        &lt;num&gt;       &lt;num&gt;</span></span>
+<span><span class="co">#&gt;  1:      w_3  1.044592804 0.1599527  6.53063474 6.549161e-11  0.73108547</span></span>
+<span><span class="co">#&gt;  2:      w_4 -0.869002514 0.1505155 -5.77351005 7.763697e-09 -1.16401281</span></span>
+<span><span class="co">#&gt;  3:      w_8  0.137803254 0.1138565  1.21032372 2.261547e-01 -0.08535554</span></span>
+<span><span class="co">#&gt;  4:      w_1  0.115258422 0.1168820  0.98610900 3.240796e-01 -0.11383036</span></span>
+<span><span class="co">#&gt;  5:      w_9  0.124150185 0.1295567  0.95826884 3.379272e-01 -0.12978102</span></span>
+<span><span class="co">#&gt;  6:     w_10 -0.097928234 0.1356345 -0.72200119 4.702937e-01 -0.36377176</span></span>
+<span><span class="co">#&gt;  7:      w_6  0.054845105 0.1157812  0.47369617 6.357166e-01 -0.17208602</span></span>
+<span><span class="co">#&gt;  8:      w_2 -0.064478504 0.1761998 -0.36593963 7.144101e-01 -0.40983019</span></span>
+<span><span class="co">#&gt;  9:      w_7 -0.014704981 0.1485610 -0.09898279 9.211519e-01 -0.30588450</span></span>
+<span><span class="co">#&gt; 10:      w_5  0.001500152 0.1100365  0.01363321 9.891226e-01 -0.21417147</span></span>
 <span><span class="co">#&gt;       ci_upper  p_value_fdr</span></span>
-<span><span class="co">#&gt;  1:  1.3607966 9.484769e-10</span></span>
-<span><span class="co">#&gt;  2: -0.5764944 2.891803e-08</span></span>
-<span><span class="co">#&gt;  3:  0.3608444 6.794319e-01</span></span>
-<span><span class="co">#&gt;  4:  0.3428138 6.794319e-01</span></span>
-<span><span class="co">#&gt;  5:  0.3790235 6.794319e-01</span></span>
-<span><span class="co">#&gt;  6:  0.1680391 7.841673e-01</span></span>
-<span><span class="co">#&gt;  7:  0.2821981 8.941008e-01</span></span>
-<span><span class="co">#&gt;  8:  0.2819774 8.941008e-01</span></span>
-<span><span class="co">#&gt;  9:  0.2764199 9.891560e-01</span></span>
-<span><span class="co">#&gt; 10:  0.2178356 9.891560e-01</span></span></code></pre></div>
+<span><span class="co">#&gt;          &lt;num&gt;        &lt;num&gt;</span></span>
+<span><span class="co">#&gt;  1:  1.3581001 6.549161e-10</span></span>
+<span><span class="co">#&gt;  2: -0.5739922 3.881849e-08</span></span>
+<span><span class="co">#&gt;  3:  0.3609620 6.758544e-01</span></span>
+<span><span class="co">#&gt;  4:  0.3443472 6.758544e-01</span></span>
+<span><span class="co">#&gt;  5:  0.3780814 6.758544e-01</span></span>
+<span><span class="co">#&gt;  6:  0.1679153 7.838229e-01</span></span>
+<span><span class="co">#&gt;  7:  0.2817762 8.930127e-01</span></span>
+<span><span class="co">#&gt;  8:  0.2808732 8.930127e-01</span></span>
+<span><span class="co">#&gt;  9:  0.2764745 9.891226e-01</span></span>
+<span><span class="co">#&gt; 10:  0.2171718 9.891226e-01</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="issues">Issues<a class="anchor" aria-label="anchor" href="#issues"></a>
@@ -170,31 +148,34 @@
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
 <p>To cite <code>unihtee</code> and the papers introducing the underlying framework, use the following BibTeX entries:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="sc">@</span>manual{unihtee,</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  title <span class="ot">=</span> {unihtee<span class="sc">:</span> Univariate Heterogeneous Treatment Effect Estimation},</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  author <span class="ot">=</span> {Philippe Boileau},</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  note <span class="ot">=</span> {R package version <span class="dv">0</span>.<span class="fl">0.1</span>}</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="sc">@</span>misc{boileau2023,</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>      title<span class="ot">=</span>{A nonparametric framework <span class="cf">for</span> treatment effect modifier discovery <span class="cf">in</span> high dimensions}, </span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>      author<span class="ot">=</span>{Philippe Boileau and Ning Leng and Nima S. Hejazi and Mark van der Laan and Sandrine Dudoit},</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>      year<span class="ot">=</span>{<span class="dv">2023</span>},</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>      eprint<span class="ot">=</span>{<span class="fl">2304.05323</span>},</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>      archivePrefix<span class="ot">=</span>{arXiv},</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>      primaryClass<span class="ot">=</span>{stat.ME}</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="sc">@</span>article{boileau2022,</span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    author <span class="ot">=</span> {Boileau, Philippe and Qi, Nina Ting and van der Laan, Mark J and Dudoit, Sandrine and Leng, Ning},</span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    title <span class="ot">=</span> {A flexible approach <span class="cf">for</span> predictive biomarker discovery},</span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    journal <span class="ot">=</span> {Biostatistics},</span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    year <span class="ot">=</span> {<span class="dv">2022</span>},</span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    month <span class="ot">=</span> {<span class="dv">07</span>},</span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    issn <span class="ot">=</span> {<span class="dv">1465-4644</span>},</span>
-<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>    doi <span class="ot">=</span> {<span class="fl">10.1093</span><span class="sc">/</span>biostatistics<span class="sc">/</span>kxac029},</span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>    url <span class="ot">=</span> {https<span class="sc">:</span><span class="er">//</span>doi.org<span class="sc">/</span><span class="fl">10.1093</span><span class="sc">/</span>biostatistics<span class="sc">/</span>kxac029}</span>
-<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="sc">@</span>manual{unihtee,</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>  title <span class="ot">=</span> {unihtee<span class="sc">:</span> Univariate Heterogeneous Treatment Effect Estimation},</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>  author <span class="ot">=</span> {Philippe Boileau},</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>  note <span class="ot">=</span> {R package version <span class="dv">0</span>.<span class="fl">0.1</span>}</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>}</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="sc">@</span>article{boileau2025,</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>  title <span class="ot">=</span> {A Nonparametric Framework <span class="cf">for</span> Treatment Effect Modifier Discovery <span class="cf">in</span> High Dimensions},</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>  author <span class="ot">=</span> {Boileau, Philippe and Leng, Ning and Hejazi, Nima S and {van der Laan}, Mark and Dudoit, Sandrine},</span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>  year <span class="ot">=</span> {<span class="dv">2025</span>},</span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>  journal <span class="ot">=</span> {Journal of the Royal Statistical Society Series B<span class="sc">:</span> Statistical Methodology},</span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>  volume <span class="ot">=</span> {<span class="dv">87</span>},</span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>  number <span class="ot">=</span> {<span class="dv">1</span>},</span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>  pages <span class="ot">=</span> {<span class="dv">157</span><span class="sc">--</span><span class="dv">185</span>},</span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a>  issn <span class="ot">=</span> {<span class="dv">1369-7412</span>},</span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>  doi <span class="ot">=</span> {<span class="fl">10.1093</span><span class="sc">/</span>jrsssb<span class="sc">/</span>qkae084}</span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a>}</span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="sc">@</span>article{boileau2022,</span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a>  author <span class="ot">=</span> {Boileau, Philippe and Qi, Nina Ting and van der Laan, Mark J and Dudoit, Sandrine and Leng, Ning},</span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a>  title <span class="ot">=</span> {A flexible approach <span class="cf">for</span> predictive biomarker discovery},</span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a>  journal <span class="ot">=</span> {Biostatistics},</span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a>  year <span class="ot">=</span> {<span class="dv">2022</span>},</span>
+<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a>  month <span class="ot">=</span> {<span class="dv">07</span>},</span>
+<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a>  issn <span class="ot">=</span> {<span class="dv">1465-4644</span>},</span>
+<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a>  doi <span class="ot">=</span> {<span class="fl">10.1093</span><span class="sc">/</span>biostatistics<span class="sc">/</span>kxac029},</span>
+<span id="cb3-27"><a href="#cb3-27" tabindex="-1"></a>  url <span class="ot">=</span> {https<span class="sc">:</span><span class="er">//</span>doi.org<span class="sc">/</span><span class="fl">10.1093</span><span class="sc">/</span>biostatistics<span class="sc">/</span>kxac029}</span>
+<span id="cb3-28"><a href="#cb3-28" tabindex="-1"></a>}</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
@@ -204,7 +185,7 @@
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
-<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
 <div id="ref-boileau2022" class="csl-entry">
 Boileau, Philippe, Nina Ting Qi, Mark J van der Laan, Sandrine Dudoit, and Ning Leng. 2022. “<span class="nocase">A flexible approach for predictive biomarker discovery</span>.” <em>Biostatistics</em>, July. <a href="https://doi.org/10.1093/biostatistics/kxac029" class="external-link uri">https://doi.org/10.1093/biostatistics/kxac029</a>.
 </div>
@@ -236,7 +217,7 @@ Boileau, Philippe, Nina Ting Qi, Mark J van der Laan, Sandrine Dudoit, and Ning 
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>Philippe Boileau <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0002-4850-2507" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+<li>Philippe Boileau <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0002-4850-2507" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
 </ul>
 </div>
 
@@ -252,21 +233,19 @@ Boileau, Philippe, Nina Ting Qi, Mark J van der Laan, Sandrine Dudoit, and Ning 
 
 
     <footer><div class="pkgdown-footer-left">
-  <p></p>
-<p>Developed by Philippe Boileau.</p>
+  <p>Developed by Philippe Boileau.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer>
 </div>
 
-  
 
-  
+
+
 
   </body>
 </html>
