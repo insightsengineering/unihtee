@@ -1,3 +1,5 @@
+utils::globalVariables(c("weighted_surv_diff", "rmst_diff"))
+
 #' @title Propensity Score Estimator
 #'
 #' @description \code{fit_prop_score()} estimates the propensity score over the
@@ -493,7 +495,7 @@ tml_ate_estimator <- function(
       family = "binomial"
     )
   )
-  q_1_star <- predict(q_1_tilt_fit, type = "response")
+  q_1_star <- stats::predict(q_1_tilt_fit, type = "response")
 
   ## tilt conditional expected outcome under non-exposure
   noexp_estimates <- cond_outcome_fit$noexp_estimates
@@ -508,7 +510,7 @@ tml_ate_estimator <- function(
       family = "binomial"
     )
   )
-  q_0_star <- predict(q_0_tilt_fit, type = "response")
+  q_0_star <- stats::predict(q_0_tilt_fit, type = "response")
 
   ## compute the plug-in estimate
   estimate <- mean(q_1_star - q_0_star)
@@ -647,8 +649,8 @@ tml_estimator_ate_log_outcome <- function(
     )
 
     ## update the nuisance parameter estimates
-    q_1_star <- predict(q_1_tilt_fit, type = "response")
-    q_0_star <- predict(q_0_tilt_fit, type = "response")
+    q_1_star <- stats::predict(q_1_tilt_fit, type = "response")
+    q_0_star <- stats::predict(q_0_tilt_fit, type = "response")
     q_star <- data[[exposure]] * q_1_star +
       (1 - data[[exposure]]) * q_0_star
 
@@ -879,8 +881,8 @@ tml_rmst_diff_estimator <- function(
         )
 
         ## update the nuisance parameter estimates
-        fail_haz_1_est <- predict(fail_haz_1_tilt_fit, type = "response")
-        fail_haz_0_est <- predict(fail_haz_0_tilt_fit, type = "response")
+        fail_haz_1_est <- stats::predict(fail_haz_1_tilt_fit, type = "response")
+        fail_haz_0_est <- stats::predict(fail_haz_0_tilt_fit, type = "response")
         fail_haz_est <- filtered_dt[[exposure]] * fail_haz_1_est +
           (1 - filtered_dt[[exposure]]) * fail_haz_0_est
 
@@ -1124,10 +1126,10 @@ tml_estimator_rmst_log_outcome <- function(
       )
     )
     ## update hazards, bound them just in case
-    data$failure_haz_exp_est_star <- predict(
+    data$failure_haz_exp_est_star <- stats::predict(
       fail_haz_1_tilt_fit, type = "response"
     )
-    data$failure_haz_noexp_est_star <- predict(
+    data$failure_haz_noexp_est_star <- stats::predict(
       fail_haz_0_tilt_fit, type = "response"
     )
     data$failure_haz_est_star <-
