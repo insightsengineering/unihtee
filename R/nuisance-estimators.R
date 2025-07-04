@@ -673,6 +673,12 @@ tml_estimator_ate_log_outcome <- function(
 }
 
 
+#' One-Step Estimator of Difference of RMST
+#'
+#' @inheritParams tml_estimator
+#'
+#' @returns A \code{numeric} one-step estimate.
+#' @keywords internal
 one_step_rmst_diff_estimator <- function(
   data,
   exposure,
@@ -738,6 +744,12 @@ one_step_rmst_diff_estimator <- function(
   return(estimate)
 }
 
+#' Targeted Maximum Likelihood Estimator of Difference of RMST
+#'
+#' @inheritParams tml_estimator
+#'
+#' @returns A \code{numeric} one-step estimate.
+#' @keywords internal
 tml_rmst_diff_estimator <- function(
     data,
     exposure,
