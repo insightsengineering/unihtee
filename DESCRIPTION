@@ -1,6 +1,6 @@
 Package: unihtee
 Title: Univariate Heterogeneous Treatment Effect Estimation
-Version: 0.0.1
+Version: 0.0.2
 Authors@R:
     person("Philippe", "Boileau", , "philippe_boileau@berkeley.edu",
     role = c("aut", "cre"), comment = c(ORCID = "0000-0002-4850-2507"))
@@ -32,6 +32,6 @@ Suggests:
 Remotes:
     github::tlverse/sl3
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
 Config/testthat/edition: 3
 VignetteBuilder: knitr

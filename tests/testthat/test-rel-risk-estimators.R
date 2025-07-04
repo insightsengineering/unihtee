@@ -29,7 +29,7 @@ test_that(
     )
 
     # compute the uncentered eif
-    ueif_dt <- uncentered_eif(
+    ueif_dt <- compute_eif(
       data = dt,
       effect = "relative",
       confounders = c("w_1", "w_2", "w_3"),
@@ -40,7 +40,9 @@ test_that(
       prop_score_values = NULL,
       cond_outcome_fit = cond_outcome_fit,
       failure_hazard_fit = NULL,
-      censoring_hazard_fit = NULL
+      censoring_hazard_fit = NULL,
+      ace_estimate = NULL,
+      plugin_estimates = NULL
     )
 
     one_step_fit <- one_step_estimator(uncentered_eif_data = ueif_dt)
@@ -79,7 +81,7 @@ test_that(
     )
 
     # compute the uncentered eif
-    ueif_dt <- uncentered_eif(
+    ueif_dt <- compute_eif(
       data = dt,
       effect = "relative",
       confounders = c("w_1", "w_2", "w_3"),
@@ -90,7 +92,9 @@ test_that(
       prop_score_values = NULL,
       cond_outcome_fit = cond_outcome_fit,
       failure_hazard_fit = NULL,
-      censoring_hazard_fit = NULL
+      censoring_hazard_fit = NULL,
+      ace_estimate = NULL,
+      plugin_estimates = NULL
     )
 
     one_step_fit <- one_step_estimator(uncentered_eif_data = ueif_dt)
@@ -201,7 +205,7 @@ test_that(
       censoring = "censoring"
     )
 
-    eif <- uncentered_eif(
+    eif <- compute_eif(
       data = long_dt,
       effect = "relative",
       confounders = c("w_1", "w_2", "w_3"),
@@ -212,7 +216,9 @@ test_that(
       cond_outcome_fit = NULL,
       prop_score_values = NULL,
       failure_hazard_fit = fail_fit,
-      censoring_hazard_fit = cens_fit
+      censoring_hazard_fit = cens_fit,
+      ace_estimate = NULL,
+      plugin_estimates = NULL
     )
 
     # fit the estimator
@@ -265,7 +271,7 @@ test_that(
       censoring = "censoring"
     )
 
-    eif <- uncentered_eif(
+    eif <- compute_eif(
       data = long_dt,
       effect = "relative",
       confounders = c("w_1", "w_2", "w_3"),
@@ -276,7 +282,9 @@ test_that(
       cond_outcome_fit = NULL,
       prop_score_values = "prop_score",
       failure_hazard_fit = fail_fit,
-      censoring_hazard_fit = cens_fit
+      censoring_hazard_fit = cens_fit,
+      ace_estimate = NULL,
+      plugin_estimates = NULL
     )
 
     # fit the estimator
@@ -365,5 +373,89 @@ test_that(
     expect_equal(abs(tmle$w_1 - 0.6), 0, tolerance = 0.1)
     expect_equal(tmle$w_2, 0, tolerance = 0.1)
     expect_equal(tmle$w_3, 0, tolerance = 0.1)
+  }
+)
+
+test_that(
+  paste("plugin_estimator() for continuous outcomes don't have enormous error"),
+  {
+    library(sl3)
+
+    # generate data
+    set.seed(72342)
+    dt <- generate_test_data(n_obs = 100000, outcome_type = "binary")
+
+    # fit the expected cond outcome
+    cond_outcome_fit <- fit_cond_outcome(
+      train_data = dt,
+      valid_data = NULL,
+      learners = sl3::Lrnr_xgboost$new(),
+      exposure = "a",
+      confounders = c("w_1", "w_2", "w_3"),
+      outcome = "y"
+    )
+
+    # plugin estimates
+    plugin_estimates <- plugin_estimator(
+      data = dt,
+      effect = "relative",
+      outcome = "y",
+      modifiers = c("w_1", "w_3"),
+      cond_outcome_fit = cond_outcome_fit,
+      failure_hazard_fit = NULL
+    )
+
+    # make sure error isn't too egregious asymptotically
+    expect_equal(as.numeric(plugin_estimates["w_1"]), 0, tolerance = 0.2)
+    expect_equal(as.numeric(plugin_estimates["w_3"]) - 2, 0, tolerance = 0.2)
+  }
+)
+
+test_that(
+  paste("plugin_estimator() for time-to-event outcomes don't have enormous",
+        "error"),
+  {
+    library(sl3)
+
+    # generate data
+    set.seed(72342)
+    dt <- generate_test_data(n_obs = 2000, outcome_type = "time-to-event RR")
+    long_dt <- tte_data_melt(
+      data = dt,
+      confounders = c("w_1", "w_2", "w_3"),
+      exposure = "a",
+      outcome = "time",
+      censoring = "censoring",
+      time_cutoff = 3,
+      prop_score_values = NULL
+    )
+
+    # fit the expected failure hazard
+    fail_fit <- fit_failure_hazard(
+      train_data = long_dt,
+      valid_data = NULL,
+      learners = sl3:::Lrnr_earth$new(
+        formula = "~ a * w_1 + w_2 + w_3",
+        glm = list(family = "binomial")
+      ),
+      exposure = "a",
+      times = "time",
+      confounders = c("w_1", "w_2", "w_3")
+    )
+
+    # plugin estimates
+    plugin_estimates <- plugin_estimator(
+      data = long_dt,
+      effect = "relative",
+      outcome = "time",
+      modifiers = c("w_1", "w_2", "w_3"),
+      cond_outcome_fit = NULL,
+      failure_hazard_fit = fail_fit
+    )
+
+    # make sure error isn't too egregious asymptotically
+    expect_equal(as.numeric(plugin_estimates["w_1"]) - 0.6, 0, tolerance = 0.5)
+    expect_equal(as.numeric(plugin_estimates["w_2"]), 0, tolerance = 0.5)
+    expect_equal(as.numeric(plugin_estimates["w_3"]), 0, tolerance = 0.5)
   }
 )

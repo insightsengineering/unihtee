@@ -85,27 +85,29 @@ unihtee(
   estimator = "tmle"
 )
 #>     modifier     estimate        se           z      p_value    ci_lower
-#>  1:      w_3  1.044592804 0.1613285  6.47494319 9.484769e-11  0.72838896
-#>  2:      w_4 -0.869002514 0.1492388 -5.82289742 5.783606e-09 -1.16151066
-#>  3:      w_8  0.137803254 0.1137965  1.21096238 2.259098e-01 -0.08523784
-#>  4:      w_1  0.115258422 0.1160997  0.99275414 3.208298e-01 -0.11229692
-#>  5:      w_9  0.124150185 0.1300374  0.95472664 3.397160e-01 -0.13072315
-#>  6:     w_10 -0.097928234 0.1356976 -0.72166517 4.705004e-01 -0.36389554
-#>  7:      w_6  0.054845105 0.1159964  0.47281713 6.363437e-01 -0.17250792
-#>  8:      w_2 -0.064478504 0.1767632 -0.36477331 7.152806e-01 -0.41093441
-#>  9:      w_7 -0.014704981 0.1485331 -0.09900136 9.211372e-01 -0.30582989
-#> 10:      w_5  0.001500152 0.1103752  0.01359138 9.891560e-01 -0.21483526
+#>       <fctr>        <num>     <num>       <num>        <num>       <num>
+#>  1:      w_3  1.044592804 0.1599527  6.53063474 6.549161e-11  0.73108547
+#>  2:      w_4 -0.869002514 0.1505155 -5.77351005 7.763697e-09 -1.16401281
+#>  3:      w_8  0.137803254 0.1138565  1.21032372 2.261547e-01 -0.08535554
+#>  4:      w_1  0.115258422 0.1168820  0.98610900 3.240796e-01 -0.11383036
+#>  5:      w_9  0.124150185 0.1295567  0.95826884 3.379272e-01 -0.12978102
+#>  6:     w_10 -0.097928234 0.1356345 -0.72200119 4.702937e-01 -0.36377176
+#>  7:      w_6  0.054845105 0.1157812  0.47369617 6.357166e-01 -0.17208602
+#>  8:      w_2 -0.064478504 0.1761998 -0.36593963 7.144101e-01 -0.40983019
+#>  9:      w_7 -0.014704981 0.1485610 -0.09898279 9.211519e-01 -0.30588450
+#> 10:      w_5  0.001500152 0.1100365  0.01363321 9.891226e-01 -0.21417147
 #>       ci_upper  p_value_fdr
-#>  1:  1.3607966 9.484769e-10
-#>  2: -0.5764944 2.891803e-08
-#>  3:  0.3608444 6.794319e-01
-#>  4:  0.3428138 6.794319e-01
-#>  5:  0.3790235 6.794319e-01
-#>  6:  0.1680391 7.841673e-01
-#>  7:  0.2821981 8.941008e-01
-#>  8:  0.2819774 8.941008e-01
-#>  9:  0.2764199 9.891560e-01
-#> 10:  0.2178356 9.891560e-01
+#>          <num>        <num>
+#>  1:  1.3581001 6.549161e-10
+#>  2: -0.5739922 3.881849e-08
+#>  3:  0.3609620 6.758544e-01
+#>  4:  0.3443472 6.758544e-01
+#>  5:  0.3780814 6.758544e-01
+#>  6:  0.1679153 7.838229e-01
+#>  7:  0.2817762 8.930127e-01
+#>  8:  0.2808732 8.930127e-01
+#>  9:  0.2764745 9.891226e-01
+#> 10:  0.2171718 9.891226e-01
 ```
 
 ## Issues
@@ -131,24 +133,27 @@ use the following BibTeX entries:
       note = {R package version 0.0.1}
     }
 
-    @misc{boileau2023,
-          title={A nonparametric framework for treatment effect modifier discovery in high dimensions}, 
-          author={Philippe Boileau and Ning Leng and Nima S. Hejazi and Mark van der Laan and Sandrine Dudoit},
-          year={2023},
-          eprint={2304.05323},
-          archivePrefix={arXiv},
-          primaryClass={stat.ME}
+    @article{boileau2025,
+      title = {A Nonparametric Framework for Treatment Effect Modifier Discovery in High Dimensions},
+      author = {Boileau, Philippe and Leng, Ning and Hejazi, Nima S and {van der Laan}, Mark and Dudoit, Sandrine},
+      year = {2025},
+      journal = {Journal of the Royal Statistical Society Series B: Statistical Methodology},
+      volume = {87},
+      number = {1},
+      pages = {157--185},
+      issn = {1369-7412},
+      doi = {10.1093/jrsssb/qkae084}
     }
 
     @article{boileau2022,
-        author = {Boileau, Philippe and Qi, Nina Ting and van der Laan, Mark J and Dudoit, Sandrine and Leng, Ning},
-        title = {A flexible approach for predictive biomarker discovery},
-        journal = {Biostatistics},
-        year = {2022},
-        month = {07},
-        issn = {1465-4644},
-        doi = {10.1093/biostatistics/kxac029},
-        url = {https://doi.org/10.1093/biostatistics/kxac029}
+      author = {Boileau, Philippe and Qi, Nina Ting and van der Laan, Mark J and Dudoit, Sandrine and Leng, Ning},
+      title = {A flexible approach for predictive biomarker discovery},
+      journal = {Biostatistics},
+      year = {2022},
+      month = {07},
+      issn = {1465-4644},
+      doi = {10.1093/biostatistics/kxac029},
+      url = {https://doi.org/10.1093/biostatistics/kxac029}
     }
 
 ## License
@@ -162,7 +167,8 @@ files for details.
 
 ## References
 
-<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="refs" class="references csl-bib-body hanging-indent"
+entry-spacing="0">
 
 <div id="ref-boileau2022" class="csl-entry">
 

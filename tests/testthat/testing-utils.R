@@ -2,12 +2,22 @@
 library(data.table)
 
 # randomly generates a basic dataset for testing
-generate_test_data <- function(n_obs = 200, outcome_type = "continuous") {
+generate_test_data <- function(
+  n_obs = 200,
+  outcome_type = "continuous",
+  centered_modifiers = TRUE
+) {
 
   # confounders
-  w_1 <- rnorm(n = n_obs)
-  w_2 <- rnorm(n = n_obs)
-  w_3 <- rnorm(n = n_obs)
+  if (centered_modifiers) {
+    w_1 <- rnorm(n = n_obs)
+    w_2 <- rnorm(n = n_obs)
+    w_3 <- rnorm(n = n_obs)
+  } else {
+    w_1 <- rnorm(n = n_obs, mean = 1)
+    w_2 <- rnorm(n = n_obs, mean = -1)
+    w_3 <- rbinom(n = n_obs, size = 1, prob = 0.5)
+  }
 
   # exposure
   prop_score <- plogis(w_1 + w_2)

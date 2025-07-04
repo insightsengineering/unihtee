@@ -595,6 +595,88 @@ tml_estimator <- function(data,
   return(tmle_dt)
 }
 
+#' Plug-In Estimator
+#'
+#' \code{plugin_estimator()} estimates the treatment effect modifier variable
+#' importance parameters using a plug-in estimation strategy.
+#'
+#' @inheritParams tml_estimator
+#'
+#' @return A vector containing the plug-in estimates for each potential
+#'   modifier.
+#' @keywords internal
+plugin_estimator <- function(
+  data,
+  outcome,
+  modifiers,
+  effect,
+  cond_outcome_fit,
+  failure_hazard_fit
+) {
+
+  # determine target parameter based on nuisance estimator fits
+  # plug-in estimates for continuous or binary outcomes
+  if (!is.null(cond_outcome_fit)) {
+
+    ## compute expected outcomes on effect scale
+    if (effect == "absolute") {
+      diff_exp_ests <- cond_outcome_fit$exp_estimates -
+        cond_outcome_fit$noexp_estimates
+    } else if (effect == "relative") {
+      ## NOTE: Make sure not to divide by zero or compute log of zero
+      eps <- 1e-10
+      exp_estimates <- cond_outcome_fit$exp_estimates
+      exp_estimates[exp_estimates < eps] <- eps
+      noexp_estimates <- cond_outcome_fit$noexp_estimates
+      noexp_estimates[noexp_estimates < eps] <- eps
+      diff_exp_ests <- log(exp_estimates) - log(noexp_estimates)
+    }
+
+  # plug-in estimates for time-to-event outcomes
+  } else {
+
+    # estimate survival curves in fixed exposures
+    data$failure_haz_exp_est <- failure_hazard_fit$exp_estimates
+    data$failure_haz_noexp_est <- failure_hazard_fit$noexp_estimates
+    data[, `:=`(
+      surv_exp_est = cumprod(1 - failure_haz_exp_est),
+      surv_noexp_est = cumprod(1 - failure_haz_noexp_est)
+    ), by = "id"]
+
+    # compute the integrand of the EIF for each row
+    data[, prev_time := data.table::shift(get(outcome), n = 1, fill = 0),
+         by = "id"]
+    data[, int_weight := as.numeric(get(outcome)) - as.numeric(prev_time),
+         by = "id"]
+
+    if (effect == "absolute") {
+      data[,  outer_integrand :=  int_weight *
+             (surv_exp_est - surv_noexp_est), by = "id"]
+    } else if (effect == "relative") {
+      data[,  outer_integrand :=  int_weight *
+             log(surv_exp_est / surv_noexp_est), by = "id"]
+    }
+    data[, diff_exp_ests := cumsum(outer_integrand), by = "id"]
+
+    ## use only the observations at the time_cutoff
+    time_cutoff <- max(data[[outcome]])
+    data <- data[get(outcome) == time_cutoff, ]
+
+    ## return the AIPWs
+    diff_exp_ests <- data$diff_exp_ests
+  }
+
+  # compute plug-in TEM-VIP estimates
+  plugin_estimates <- sapply(
+    modifiers,
+    function(modifier) {
+      cov(data[[modifier]], diff_exp_ests) / var(data[[modifier]])
+    }
+  )
+
+  return(plugin_estimates)
+}
+
 
 ###############################################################################
 
