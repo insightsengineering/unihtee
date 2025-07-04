@@ -209,6 +209,7 @@ unihtee <- function(data,
       plugin_estimates = NULL
     )
 
+    # compute the marginal estimate for the EIF calculation
     if (!is.null(cond_outcome_fit)) {
       if (param_effect == "absolute") {
         if (estimator == "onestep") {
@@ -303,6 +304,7 @@ unihtee <- function(data,
       }
     }
 
+    # compute the plugin estimate for the EIF calculation
     plugin_estimates <- plugin_estimator(
       data = data,
       outcome = outcome,
@@ -566,11 +568,12 @@ cross_fit_fold <- function(fold,
     plugin_estimates = NULL
   )
 
+  # compute the marginal estimates for the EIF calculation
   if (!is.null(cond_outcome_fit)) {
-    if (param_effect == "absolute") {
+    if (effect == "absolute") {
       if (estimator == "onestep") {
         ace_estimate <- one_step_ate_estimator(
-          data = data,
+          data = valid_data,
           confounders = confounders,
           exposure = exposure,
           outcome = outcome,
@@ -580,7 +583,7 @@ cross_fit_fold <- function(fold,
         )
       } else if (estimator == "tmle") {
         ace_estimate <- tml_ate_estimator(
-          data = data,
+          data = valid_data,
           confounders = confounders,
           exposure = exposure,
           outcome = outcome,
@@ -589,16 +592,80 @@ cross_fit_fold <- function(fold,
           cond_outcome_fit = cond_outcome_fit
         )
       }
-    } else if (param_effect == "relative") {
-
+    } else if (effect == "relative") {
+      if (estimator == "onestep") {
+        ace_estimate <- one_step_estimator_ate_log_outcome(
+          data = valid_data,
+          confounders = confounders,
+          exposure = exposure,
+          outcome = outcome,
+          prop_score_fit = prop_score_fit,
+          prop_score_values = prop_score_values,
+          cond_outcome_fit = cond_outcome_fit
+        )
+      } else if (estimator == "tmle") {
+        ace_estimate <- tml_estimator_ate_log_outcome(
+          data = valid_data,
+          confounders = confounders,
+          exposure = exposure,
+          outcome = outcome,
+          prop_score_fit = prop_score_fit,
+          prop_score_values = prop_score_values,
+          cond_outcome_fit = cond_outcome_fit
+        )
+      }
     }
   } else {
-
+    if (effect == "absolute") {
+      if (estimator == "onestep") {
+        ace_estimate <- one_step_rmst_diff_estimator(
+          data = valid_data,
+          exposure = exposure,
+          outcome = outcome,
+          prop_score_fit = prop_score_fit,
+          prop_score_values = prop_score_values,
+          failure_hazard_fit = failure_hazard_fit,
+          censoring_hazard_fit = censoring_hazard_fit
+        )
+      } else if (estimator == "tmle") {
+        ace_estimate <- tml_rmst_diff_estimator(
+          data = valid_data,
+          exposure = exposure,
+          outcome = outcome,
+          prop_score_fit = prop_score_fit,
+          prop_score_values = prop_score_values,
+          failure_hazard_fit = failure_hazard_fit,
+          censoring_hazard_fit = censoring_hazard_fit
+        )
+      }
+    } else if (effect == "relative") {
+      if (estimator == "onestep") {
+        ace_estimate <- one_step_estimator_rmst_log_outcome(
+          data = valid_data,
+          exposure = exposure,
+          outcome = outcome,
+          prop_score_fit = prop_score_fit,
+          prop_score_values = prop_score_values,
+          failure_hazard_fit = failure_hazard_fit,
+          censoring_hazard_fit = censoring_hazard_fit
+        )
+      } else if (estimator == "tmle") {
+        ace_estimate <- tml_estimator_rmst_log_outcome(
+          data = valid_data,
+          exposure = exposure,
+          outcome = outcome,
+          prop_score_fit = prop_score_fit,
+          prop_score_values = prop_score_values,
+          failure_hazard_fit = failure_hazard_fit,
+          censoring_hazard_fit = censoring_hazard_fit
+        )
+      }
+    }
   }
 
   ## compute the plug-in estimates
   plugin_estimates <- plugin_estimator(
-    data = data,
+    data = valid_data,
     outcome = outcome,
     modifiers = modifiers,
     effect = effect,
@@ -608,8 +675,8 @@ cross_fit_fold <- function(fold,
 
   ## compute the centered efficient influence function
   eif_dt <- compute_eif(
-    data = data,
-    effect = param_effect,
+    data = valid_data,
+    effect = effect,
     confounders = confounders,
     exposure = exposure,
     outcome = outcome,

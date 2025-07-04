@@ -44,7 +44,7 @@ test_that(
 
     # generate data
     set.seed(8234)
-    dt <- generate_test_data(n_obs = 500)
+    dt <- generate_test_data(n_obs = 1000)
 
     # apply unihtee
     results <- unihtee(
@@ -124,9 +124,7 @@ test_that(
       effect = "absolute",
       estimator = "tmle",
       cross_fit = TRUE,
-      cond_outcome_estimator = sl3::Lrnr_glmnet$new(
-        formula = "~ a * w_1 + a * w_2 + a * w_3"
-      )
+      cond_outcome_estimator = sl3::Lrnr_xgboost$new()
     )
 
     # ensure that the adjusted p-value of w_3 is less than 0.05, and those of
