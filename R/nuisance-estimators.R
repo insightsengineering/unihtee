@@ -939,3 +939,213 @@ tml_rmst_diff_estimator <- function(
   estimate <- mean(survival_preds$rmst_diff)
 
 }
+
+
+one_step_estimator_rmst_log_outcome <- function(
+  data,
+  exposure,
+  outcome,
+  prop_score_fit,
+  prop_score_values,
+  failure_hazard_fit,
+  censoring_hazard_fit
+) {
+
+  ## compute the inverse probability weights
+  ## NOTE: PS estimates must be as long as long_dt in TTE settings
+  if (!is.null(prop_score_values)) {
+    prop_scores <- data[[prop_score_values]]
+  } else {
+    prop_scores <- prop_score_fit$estimates
+  }
+  ipws <- (2 * data[[exposure]] - 1) /
+    (data[[exposure]] * prop_scores +
+       (1 - data[[exposure]]) * (1 - prop_scores))
+
+  ## compute the survival probabilities
+  data$ipws <- -ipws
+  data$failure_haz_est <- failure_hazard_fit$estimates
+  data$failure_haz_exp_est <- failure_hazard_fit$exp_estimates
+  data$failure_haz_noexp_est <- failure_hazard_fit$noexp_estimates
+  data$censoring_haz_est <- censoring_hazard_fit$estimates
+  data[, surv_est := cumprod(1 - failure_haz_est), by = "id"]
+  data[, `:=`(
+    surv_exp_est = cumprod(1 - failure_haz_exp_est),
+    surv_noexp_est = cumprod(1 - failure_haz_noexp_est),
+    cens_est = cumprod(1 - censoring_haz_est)
+  ), by = "id"]
+  data[, cens_est_lag := data.table::shift(cens_est, n = 1, fill = 1),
+       by = "id"]
+
+  ## compute the integrand of the EIF for each row
+  data[, prev_time := data.table::shift(get(outcome), n = 1, fill = 0),
+       by = "id"]
+  data[, int_weight := as.numeric(get(outcome)) - as.numeric(prev_time),
+       by = "id"]
+  data[, integrand := int_weight * keep * ipws /
+         (cens_est_lag * surv_est) * (failure - failure_haz_est),
+       by = "id"
+  ]
+  data[, integral := cumsum(integrand), by = "id"]
+  data[, aipws := integral + log(surv_exp_est / surv_noexp_est)]
+
+  ## use only the observations at the time_cutoff
+  time_cutoff <- max(data[[outcome]])
+  data <- data[get(outcome) == time_cutoff, ]
+
+  ## return the AIPWs at the currect cutoff
+  aipws <- data$aipws
+
+  ## compute the one-step estimate
+  estimate <- mean(aipws)
+
+  return(estimate)
+}
+
+tml_estimator_rmst_log_outcome <- function(
+    data,
+    exposure,
+    outcome,
+    prop_score_fit,
+    prop_score_values,
+    failure_hazard_fit,
+    censoring_hazard_fit
+) {
+
+  # constant used to truncate estimates near zero
+  eps <- .Machine$double.eps
+
+  ## compute the inverse probability weights
+  ## NOTE: PS estimates must be as long as long_dt in TTE settings
+  if (!is.null(prop_score_values)) {
+    prop_scores <- data[[prop_score_values]]
+  } else {
+    prop_scores <- prop_score_fit$estimates
+  }
+
+  ## compute the IPWs
+  data$prop_scores <- prop_scores
+  data$ipws <- -(2 * data[[exposure]] - 1) /
+    (data[[exposure]] * prop_scores +
+       (1 - data[[exposure]]) * (1 - prop_scores))
+
+  ## compute the survival and censoring probabilities
+  data$failure_haz_est <- failure_hazard_fit$estimates
+  data$failure_haz_exp_est <- failure_hazard_fit$exp_estimates
+  data$failure_haz_noexp_est <- failure_hazard_fit$noexp_estimates
+  data$censoring_haz_est <- censoring_hazard_fit$estimates
+  data[, surv_est := cumprod(1 - failure_haz_est), by = "id"]
+  data[, `:=`(
+    surv_exp_est = cumprod(1 - failure_haz_exp_est),
+    surv_noexp_est = cumprod(1 - failure_haz_noexp_est),
+    cens_est = cumprod(1 - censoring_haz_est)
+  ), by = "id"]
+  data[, cens_est_lag := data.table::shift(cens_est, n = 1, fill = 1),
+       by = "id"]
+
+  # compute the weights for envetual discrete integration
+  data[, prev_time := data.table::shift(get(outcome), n = 1, fill = 0),
+       by = "id"]
+  data[, int_weight := as.numeric(get(outcome)) - as.numeric(prev_time),
+       by = "id"]
+
+  ## compute the clever covariate
+  data[, `:=`(
+    partial_h = keep * ipws / (cens_est_lag * surv_est),
+    partial_h_1 = keep / (cens_est_lag * surv_est),
+    partial_h_0 = keep / (cens_est_lag * surv_est)
+  )]
+
+  ## set parameters for update step
+  ## TML update hyperparameters
+  max_iter <- 10
+  tilt_tol <- 5
+  score_stop_crit <- 1 / (nrow(data) * log(nrow(data)))
+
+  ## finalize the clever covariate
+  h <- data$partial_h
+  h_1 <- data$partial_h_1
+  h_0 <- data$partial_h_0
+
+  ## set initial values
+  data$failure_haz_est_star <- data$failure_haz_est
+  data$failure_haz_exp_est_star <- data$failure_haz_exp_est
+  data$failure_haz_noexp_est_star <- data$failure_haz_noexp_est
+  iter <- 1
+  haz_score <- Inf
+
+  ## tilt the conditional failure estimates
+  while (abs(mean(haz_score)) > score_stop_crit && iter < max_iter) {
+
+    ## transform expected conditional outcomes for tilting
+    fail_haz_est_logit <- stats::qlogis(
+      bound_precision(data$failure_haz_est_star)
+    )
+    fail_haz_1_est_logit <- stats::qlogis(
+      bound_precision(data$failure_haz_exp_est_star)
+    )
+    fail_haz_0_est_logit <- stats::qlogis(
+      bound_precision(data$failure_haz_noexp_est_star)
+    )
+
+    ## tilt failure hazard under treatment
+    suppressWarnings(
+      fail_haz_1_tilt_fit <- stats::glm(
+        data$failure ~ -1 + h_1,
+        offset = fail_haz_1_est_logit,
+        weights = data$keep * data[[exposure]] /
+          data$prop_scores,
+        family = "binomial"
+      )
+    )
+
+    ## tilt failure hazard under control
+    suppressWarnings(
+      fail_haz_0_tilt_fit <- stats::glm(
+        data$failure ~ -1 + h_0,
+        offset = fail_haz_0_est_logit,
+        weights = data$keep * (1 - data[[exposure]]) /
+          (1 - data$prop_scores),
+        family = "binomial"
+      )
+    )
+    ## update hazards, bound them just in case
+    data$failure_haz_exp_est_star <- predict(
+      fail_haz_1_tilt_fit, type = "response"
+    )
+    data$failure_haz_noexp_est_star <- predict(
+      fail_haz_0_tilt_fit, type = "response"
+    )
+    data$failure_haz_est_star <-
+      data[[exposure]] * data$failure_haz_exp_est_star +
+      (1 - data[[exposure]]) * data$failure_haz_noexp_est_star
+
+    ## update the clever covariates
+    data[, surv_est := cumprod(1 - failure_haz_est_star), by = "id"]
+    data[, `:=`(
+      partial_h = keep * ipws / (cens_est_lag * surv_est),
+      partial_h_1 = keep / (cens_est_lag * surv_est),
+      partial_h_0 = keep / (cens_est_lag * surv_est)
+    )]
+    h <- data$partial_h
+    h_1 <- data$partial_h_1
+    h_0 <- data$partial_h_0
+
+    ## compute the score
+    haz_score <- h * (data$failure - data$failure_haz_est_star)
+
+    iter <- iter + 1
+  }
+
+  ## compute the conditional survival under treatment and control
+  data[, `:=`(
+    surv_exp_est_star = cumprod(1 - failure_haz_exp_est_star),
+    surv_noexp_est_star = cumprod(1 - failure_haz_noexp_est_star)
+  ), by = "id"]
+
+  ## compute the estimate
+  estimate <- mean(log(data$surv_exp_est_star /
+                         data$surv_noexp_est_star))
+
+  return(estimate)
+}
