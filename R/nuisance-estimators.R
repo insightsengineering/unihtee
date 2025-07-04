@@ -940,7 +940,13 @@ tml_rmst_diff_estimator <- function(
 
 }
 
-
+#' One-Step Estimator of the Marginal Relative Effect for Time-to-Event Outcomes
+#'
+#' @inheritParams tml_estimator
+#'
+#' @returns The one-step estimate.
+#'
+#' @keywords internal
 one_step_estimator_rmst_log_outcome <- function(
   data,
   exposure,
@@ -1002,6 +1008,14 @@ one_step_estimator_rmst_log_outcome <- function(
   return(estimate)
 }
 
+
+#' TMLE of the Marginal Relative Effect for Time-to-Event Outcomes
+#'
+#' @inheritParams tml_estimator
+#'
+#' @returns The TML estimate.
+#'
+#' @keywords internal
 tml_estimator_rmst_log_outcome <- function(
     data,
     exposure,
