@@ -45,17 +45,19 @@ utils::globalVariables(
 #'
 #' @keywords internal
 
-uncentered_eif <- function(data,
-                           effect,
-                           confounders,
-                           exposure,
-                           outcome,
-                           modifiers,
-                           prop_score_fit,
-                           prop_score_values,
-                           cond_outcome_fit,
-                           failure_hazard_fit,
-                           censoring_hazard_fit) {
+uncentered_eif <- function(
+  data,
+  effect,
+  confounders,
+  exposure,
+  outcome,
+  modifiers,
+  prop_score_fit,
+  prop_score_values,
+  cond_outcome_fit,
+  failure_hazard_fit,
+  censoring_hazard_fit
+) {
 
   ## compute the inverse probability weights
   ## NOTE: PS estimates must be as long as long_dt in TTE settings
@@ -79,6 +81,7 @@ uncentered_eif <- function(data,
     if (effect == "absolute") {
       aipws <- ipws * cond_outcome_resid + cond_outcome_fit$exp_estimates -
         cond_outcome_fit$noexp_estimates
+
     } else if (effect == "relative") {
       ## NOTE: Make sure not to divide by zero or compute log of zero
       eps <- 1e-10
@@ -156,6 +159,105 @@ uncentered_eif <- function(data,
   modifiers_dt <- data.table::as.data.table(modifiers_dt)
   colnames(modifiers_dt) <- modifiers
   eif_dt <- tcrossprod(aipws, 1 / modifier_vars) * modifiers_dt
+
+  return(eif_dt)
+}
+
+
+#' @title Centered Efficient Influence Function Computer
+#'
+#' @description \code{centered_eif()} computes the efficient influence
+#'   function for the chosen parameter using the already estimated nuisance
+#'   parameters. If certain nuisance parameters are known, such as propensity
+#'   scores in a randomized control trial, then they may be input directly into
+#'   this function.
+#'
+#' @param data A \code{data.table} containing the observed data.
+#'   \code{train_data} is formatted by \code{\link{unihtee}()}.
+#' @param effect A \code{character} indicating the type of treatment effect
+#'   modifier variable importance parameter. Currently supports
+#'   \code{"absolute"} and \code{"relative"}.
+#' @param confounders A \code{character} vector of column names corresponding to
+#'   baseline covariates.
+#' @param exposure A \code{character} corresponding to the exposure variable.
+#' @param outcome A \code{character} corresponding to the outcome variable.
+#' @param modifiers A \code{character} vector of columns names corresponding to
+#'   the suspected effect modifiers. This vector must be a subset of
+#'   \code{confounders}.
+#' @param prop_score_fit A \code{list} output by the
+#'   \code{\link{fit_prop_score}()} function.
+#' @param prop_score_values A \code{numeric} vector corresponding to the (known)
+#'   propensity score values for each observation in \code{data}.
+#' @param cond_outcome_fit A \code{list} output by the
+#'   \code{\link{fit_failure_hazard}()} function.'
+#' @param ace_estimate A \code{numeric} o the average causal effect.
+#'
+#' @return A \code{data.table} whose columns are the centered efficient
+#'   influence functions of each variable in \code{modifiers}. The rows
+#'   correspond to the observations of \code{data}.
+#'
+#' @importFrom data.table copy as.data.table `:=` shift
+#'
+#' @keywords internal
+centered_eif <- function(
+    data,
+    confounders,
+    exposure,
+    outcome,
+    modifiers,
+    prop_score_fit,
+    prop_score_values,
+    cond_outcome_fit,
+    ace_estimate
+) {
+
+  ## compute the inverse probability weights
+  ## NOTE: PS estimates must be as long as long_dt in TTE settings
+  if (!is.null(prop_score_values)) {
+    prop_scores <- data[[prop_score_values]]
+  } else {
+    prop_scores <- prop_score_fit$estimates
+  }
+  ipws <- (2 * data[[exposure]] - 1) /
+    (data[[exposure]] * prop_scores +
+       (1 - data[[exposure]]) * (1 - prop_scores))
+
+  ## compute conditional outcome residuals
+  cond_outcome_resid <- data[[outcome]] - cond_outcome_fit$estimates
+
+  ## compute centred augmented inverse probability weights outcomes
+  centred_aipws <- ipws * cond_outcome_resid +
+    cond_outcome_fit$exp_estimates - cond_outcome_fit$noexp_estimates -
+    ace_estimate
+
+  ## compute that variance of the effect modifiers
+  modifier_vars <- sapply(modifiers, function(modifier) var(data[[modifier]]))
+
+  ## center the effect modifiers
+  centred_modifiers_dt <- lapply(
+    modifiers,
+    function(modifier) {
+      mod_vec <- data[[modifier]]
+      mod_vec - mean(mod_vec)
+    }
+  )
+  centred_modifiers_dt <- data.table::as.data.table(centred_modifiers_dt)
+  colnames(centred_modifiers_dt) <- modifiers
+
+  ## compute the plug-in estimate
+  plug_in_est <- sapply(
+    modifiers,
+    function(modifier) {
+      cov(
+        data[[modifier]],
+        cond_outcome_fit$exp_estimates - cond_outcome_fit$noexp_estimates
+      ) / var(data[[modifier]])
+    }
+  )
+
+  # compute the eif
+  eif_dt <- tcrossprod(centred_aipws, 1 / modifier_vars) *
+    centred_modifiers_dt - centred_modifiers_dt^2 / modifier_vars * plug_in_est
 
   return(eif_dt)
 }

@@ -409,3 +409,71 @@ test_that(
     expect_equal(mean(eif$w_3), 0, tolerance = 0.1)
   }
 )
+
+test_that(
+  paste(
+    "uncentered_eif() produces standard errors near zero in large datasets"
+  ),
+  {
+    library(sl3)
+
+    # generate data
+    set.seed(5123)
+    sample_size <- 100000
+    dt <- generate_test_data(n_obs = sample_size, centered_modifiers = TRUE)
+
+    # fit the propensity score
+    prop_score_fit <- fit_prop_score(
+      train_data = dt,
+      valid_data = NULL,
+      learners = sl3::Lrnr_glm_fast$new(),
+      exposure = "a",
+      confounders = c("w_1", "w_2", "w_3")
+    )
+
+    # fit the expected cond outcome
+    cond_outcome_fit <- fit_cond_outcome(
+      train_data = dt,
+      valid_data = NULL,
+      learners = sl3::make_learner(
+        sl3::Pipeline,
+        sl3::Lrnr_define_interactions$new(
+          list(c("w_1", "a"), c("w_2", "a"), c("w_3", "a"))
+        ),
+        sl3::Lrnr_glm_fast$new()
+      ),
+      exposure = "a",
+      confounders = c("w_1", "w_2", "w_3"),
+      outcome = "y"
+    )
+
+    # estimate the ATE
+    ate_estimate <- one_step_ate_estimator(
+      data = dt,
+      confounders = c("w_1", "w_2", "w_3"),
+      exposure = "a",
+      outcome = "y",
+      prop_score_fit = prop_score_fit,
+      prop_score_values = NULL,
+      cond_outcome_fit = cond_outcome_fit
+    )
+
+    # compute the eif
+    eif <- centered_eif(
+      data = dt,
+      confounders = c("w_1", "w_2", "w_3"),
+      exposure = "a",
+      outcome = "y",
+      modifiers = c("w_1", "w_3"),
+      prop_score_fit = prop_score_fit,
+      prop_score_values = NULL,
+      cond_outcome_fit = cond_outcome_fit,
+      ace_estimate = ate_estimate
+    )
+
+    expect_equal(sqrt(eif[, sapply(.SD, var)] / sample_size),
+                 c("w_1" = 0, "w_3" = 0),
+                 tolerance = 0.01
+    )
+  }
+)
