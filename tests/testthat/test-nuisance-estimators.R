@@ -382,3 +382,99 @@ test_that("tml_ate_estimator() estimates are close to gound truth", {
   expect_equal(abs(tml_ate_estimate - 1), 0, tolerance = 0.01)
 
 })
+
+test_that(
+  "one_step_estimator_ate_log_outcome() estimates are close to gound truth", {
+
+  # generate data
+  set.seed(723423)
+  dt <- generate_test_data(n_obs = 100000, outcome_type = "binary")
+
+  # fit the propensity score
+  prop_score_fit <- fit_prop_score(
+    train_data = dt,
+    valid_data = NULL,
+    learners = sl3::Lrnr_glm_fast$new(),
+    exposure = "a",
+    confounders = c("w_1", "w_2", "w_3")
+  )
+
+  # fit the expected cond outcome
+  cond_outcome_fit <- fit_cond_outcome(
+    train_data = dt,
+    valid_data = NULL,
+    learners = sl3::make_learner(
+      sl3::Pipeline,
+      sl3::Lrnr_define_interactions$new(
+        list(c("w_1", "a"), c("w_2", "a"), c("w_3", "a"))
+      ),
+      sl3::Lrnr_glm_fast$new()
+    ),
+    exposure = "a",
+    confounders = c("w_1", "w_2", "w_3"),
+    outcome = "y"
+  )
+
+  # estimate the ATE
+  estimate <- one_step_estimator_ate_log_outcome(
+    data = dt,
+    confounders = c("w_1", "w_2", "w_3"),
+    exposure = "a",
+    outcome = "y",
+    prop_score_fit = prop_score_fit,
+    prop_score_values = NULL,
+    cond_outcome_fit = cond_outcome_fit
+  )
+
+  # make sure that the ATE is near the true value of 1
+  expect_equal(abs(estimate + 1), 0, tolerance = 0.01)
+
+})
+
+test_that(
+  "tmle_ate_log_outcome() estimates are close to gound truth", {
+
+    # generate data
+    set.seed(723423)
+    dt <- generate_test_data(n_obs = 100000, outcome_type = "binary")
+
+    # fit the propensity score
+    prop_score_fit <- fit_prop_score(
+      train_data = dt,
+      valid_data = NULL,
+      learners = sl3::Lrnr_glm_fast$new(),
+      exposure = "a",
+      confounders = c("w_1", "w_2", "w_3")
+    )
+
+    # fit the expected cond outcome
+    cond_outcome_fit <- fit_cond_outcome(
+      train_data = dt,
+      valid_data = NULL,
+      learners = sl3::make_learner(
+        sl3::Pipeline,
+        sl3::Lrnr_define_interactions$new(
+          list(c("w_1", "a"), c("w_2", "a"), c("w_3", "a"))
+        ),
+        sl3::Lrnr_glm_fast$new()
+      ),
+      exposure = "a",
+      confounders = c("w_1", "w_2", "w_3"),
+      outcome = "y"
+    )
+
+    # estimate the ATE
+    estimate <- tml_estimator_ate_log_outcome(
+      data = dt,
+      confounders = c("w_1", "w_2", "w_3"),
+      exposure = "a",
+      outcome = "y",
+      prop_score_fit = prop_score_fit,
+      prop_score_values = NULL,
+      cond_outcome_fit = cond_outcome_fit
+    )
+
+    # make sure that the ATE is near the true value of 1
+    expect_equal(abs(estimate + 1), 0, tolerance = 0.01)
+
+  })

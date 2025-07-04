@@ -516,3 +516,144 @@ tml_ate_estimator <- function(
   return(estimate)
 
 }
+
+one_step_estimator_ate_log_outcome <- function(
+  data,
+  confounders,
+  exposure,
+  outcome,
+  prop_score_fit,
+  prop_score_values = NULL,
+  cond_outcome_fit
+) {
+
+  ## compute the inverse probability weights
+  if (!is.null(prop_score_values)) {
+    prop_scores <- data[[prop_score_values]]
+  } else {
+    prop_scores <- prop_score_fit$estimates
+  }
+  ipws <- (2 * data[[exposure]] - 1) /
+    (data[[exposure]] * prop_scores +
+       (1 - data[[exposure]]) * (1 - prop_scores))
+
+  ## compute conditional outcome residuals
+  cond_outcome_resid <- data[[outcome]] - cond_outcome_fit$estimates
+
+  # compute the uncentered EIF
+  eps <- 1e-10
+  estimates <- cond_outcome_fit$estimates
+  estimates[estimates < eps] <- eps
+  exp_estimates <- cond_outcome_fit$exp_estimates
+  exp_estimates[exp_estimates < eps] <- eps
+  noexp_estimates <- cond_outcome_fit$noexp_estimates
+  noexp_estimates[noexp_estimates < eps] <- eps
+  aipws <- ipws * cond_outcome_resid / estimates +
+    log(exp_estimates) - log(noexp_estimates)
+
+  # compute the estimate
+  estimate <- mean(aipws)
+
+  return(estimate)
+}
+
+tml_estimator_ate_log_outcome <- function(
+    data,
+    confounders,
+    exposure,
+    outcome,
+    prop_score_fit,
+    prop_score_values = NULL,
+    cond_outcome_fit
+) {
+
+  # constant used to truncate estimates near zero
+  eps <- .Machine$double.eps
+
+  ## compute the inverse probability weights
+  if (!is.null(prop_score_values)) {
+    prop_scores <- data[[prop_score_values]]
+  } else {
+    prop_scores <- prop_score_fit$estimates
+  }
+  ipws <- (2 * data[[exposure]] - 1) /
+    (data[[exposure]] * prop_scores +
+       (1 - data[[exposure]]) * (1 - prop_scores))
+
+  # truncate cond outcome estimates if necessary
+  estimates <- cond_outcome_fit$estimates
+  exp_estimates <- cond_outcome_fit$exp_estimates
+  noexp_estimates <- cond_outcome_fit$noexp_estimates
+  exp_estimates[exp_estimates < eps] <- eps
+  noexp_estimates[noexp_estimates < eps] <- eps
+
+  # compute that partial clever covariate
+  h_num_1 <- data[[exposure]]
+  h_denom_1 <- 1 / prop_scores
+  h_num_0 <- (1 - data[[exposure]])
+  h_denom_0 <- 1 / (1 - prop_scores)
+
+  ## set the TML tilting hyperparameters
+  score_stop_crit <- 1 / nrow(data) * log(nrow(data))
+  tilt_tol <- 5
+  max_iter <- 10
+
+  ## compute the tilted conditional outcome estimators
+  q_score <- Inf
+  iter <- 1
+  q_star <- estimates
+  q_1_star <- exp_estimates
+  q_0_star <- noexp_estimates
+
+  while (score_stop_crit < abs(mean(q_score)) && iter < max_iter) {
+
+    ## transform expected conditional outcomes for tilting
+    q_star_logit <- stats::qlogis(bound_precision(q_star))
+    q_1_star_logit <- stats::qlogis(bound_precision(q_1_star))
+    q_0_star_logit <- stats::qlogis(bound_precision(q_0_star))
+
+    ## tilt the clever covariate using the log loss for q_1
+    suppressWarnings(
+      q_1_tilt_fit <- stats::glm(
+        data[[outcome]] ~ -1 + h_num_1,
+        offset = q_1_star_logit,
+        weights = h_denom_1,
+        family = "binomial"
+      )
+    )
+
+    ## tilt the clever covariate using the log loss for q_0
+    suppressWarnings(
+      q_0_tilt_fit <- stats::glm(
+        data[[outcome]] ~ -1 + h_num_0,
+        offset = q_0_star_logit,
+        weights = h_denom_0,
+        family = "binomial"
+      )
+    )
+
+    ## update the nuisance parameter estimates
+    q_1_star <- predict(q_1_tilt_fit, type = "response")
+    q_0_star <- predict(q_0_tilt_fit, type = "response")
+    q_star <- data[[exposure]] * q_1_star +
+      (1 - data[[exposure]]) * q_0_star
+
+    # avoid division by near zero in the score
+    bounded_q_star <- q_star
+    bounded_q_star[bounded_q_star < 0.1] <- 0.1
+
+    ## compute the score
+    q_score <- (2 * data[[exposure]] - 1) /
+      (data[[exposure]] * prop_scores +
+         (1 - data[[exposure]]) * (1 - prop_scores)) *
+      (data[[outcome]] - q_star) / bounded_q_star
+
+    iter <- iter + 1
+
+  }
+
+  ## compute the plugin estimate with the update cond outcome estimates
+  estimate <- mean(log(q_1_star / q_0_star))
+
+  return(estimate)
+}
