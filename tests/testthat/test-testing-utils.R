@@ -26,7 +26,7 @@ test_that(
       outcome = "y"
     )
 
-    ueif_dt <- uncentered_eif(
+    ueif_dt <- compute_eif(
       data = dt,
       effect = "absolute",
       confounders = c("w_1", "w_2", "w_3"),
@@ -37,7 +37,9 @@ test_that(
       prop_score_values = NULL,
       cond_outcome_fit = cond_outcome_fit,
       failure_hazard_fit = NULL,
-      censoring_hazard_fit = NULL
+      censoring_hazard_fit = NULL,
+      ace_estimate = NULL,
+      plugin_estimates = NULL
     )
 
     eif_vars <- ueif_dt[, lapply(.SD, var)]
@@ -82,7 +84,7 @@ test_that(
       outcome = "y"
     )
 
-    ueif_dt <- uncentered_eif(
+    ueif_dt <- compute_eif(
       data = dt,
       effect = "absolute",
       confounders = c("w_1", "w_2", "w_3"),
@@ -93,7 +95,9 @@ test_that(
       prop_score_values = NULL,
       cond_outcome_fit = cond_outcome_fit,
       failure_hazard_fit = NULL,
-      censoring_hazard_fit = NULL
+      censoring_hazard_fit = NULL,
+      ace_estimate = NULL,
+      plugin_estimates = NULL
     )
 
     eif_vars <-
@@ -147,7 +151,7 @@ test_that(
       outcome = "y"
     )
 
-    ueif_dt <- uncentered_eif(
+    ueif_dt <- compute_eif(
       data = dt,
       effect = "absolute",
       confounders = c("w_1", "w_2", "w_3"),
@@ -158,7 +162,9 @@ test_that(
       prop_score_values = NULL,
       cond_outcome_fit = cond_outcome_fit,
       failure_hazard_fit = NULL,
-      censoring_hazard_fit = NULL
+      censoring_hazard_fit = NULL,
+      ace_estimate = NULL,
+      plugin_estimates = NULL
     )
 
     eif_vars <- ueif_dt[, lapply(.SD, var)]
@@ -206,7 +212,7 @@ test_that(
       outcome = "y"
     )
 
-    ueif_dt <- uncentered_eif(
+    ueif_dt <- compute_eif(
       data = dt,
       effect = "absolute",
       confounders = c("w_1", "w_2", "w_3"),
@@ -217,7 +223,9 @@ test_that(
       prop_score_values = NULL,
       cond_outcome_fit = cond_outcome_fit,
       failure_hazard_fit = NULL,
-      censoring_hazard_fit = NULL
+      censoring_hazard_fit = NULL,
+      ace_estimate = NULL,
+      plugin_estimates = NULL
     )
 
     eif_vars <- ueif_dt[, lapply(.SD, var)]
@@ -250,7 +258,7 @@ test_that(
       outcome = "y"
     )
 
-    ueif_dt <- uncentered_eif(
+    ueif_dt <- compute_eif(
       data = dt,
       effect = "absolute",
       confounders = c("w_1", "w_2", "w_3"),
@@ -261,7 +269,9 @@ test_that(
       prop_score_values = NULL,
       cond_outcome_fit = cond_outcome_fit,
       failure_hazard_fit = NULL,
-      censoring_hazard_fit = NULL
+      censoring_hazard_fit = NULL,
+      ace_estimate = NULL,
+      plugin_estimates = NULL
     )
 
     eif_vars <- ueif_dt[, lapply(.SD, var)]

@@ -33,7 +33,7 @@ test_that(
     )
 
     # compute the uncentered eif
-    ueif_dt <- uncentered_eif(
+    ueif_dt <- compute_eif(
       data = dt,
       effect = "absolute",
       confounders = c("w_1", "w_2", "w_3"),
@@ -44,7 +44,9 @@ test_that(
       prop_score_values = NULL,
       cond_outcome_fit = cond_outcome_fit,
       failure_hazard_fit = NULL,
-      censoring_hazard_fit = NULL
+      censoring_hazard_fit = NULL,
+      ace_estimate = NULL,
+      plugin_estimates = NULL
     )
 
     one_step_fit <- one_step_estimator(uncentered_eif_data = ueif_dt)
@@ -88,7 +90,7 @@ test_that(
     )
 
     # compute the uncentered eif
-    ueif_dt <- uncentered_eif(
+    ueif_dt <- compute_eif(
       data = dt,
       effect = "absolute",
       confounders = c("w_1", "w_2", "w_3"),
@@ -99,7 +101,9 @@ test_that(
       prop_score_values = NULL,
       cond_outcome_fit = cond_outcome_fit,
       failure_hazard_fit = NULL,
-      censoring_hazard_fit = NULL
+      censoring_hazard_fit = NULL,
+      ace_estimate = NULL,
+      plugin_estimates = NULL
     )
 
     one_step_fit <- one_step_estimator(uncentered_eif_data = ueif_dt)
@@ -217,7 +221,7 @@ test_that(
     )
 
     # compute the uncentered eif
-    ueif_dt <- uncentered_eif(
+    ueif_dt <- compute_eif(
       data = long_dt,
       effect = "absolute",
       confounders = c("w_1", "w_2", "w_3"),
@@ -228,7 +232,9 @@ test_that(
       cond_outcome_fit = NULL,
       prop_score_values = NULL,
       failure_hazard_fit = fail_fit,
-      censoring_hazard_fit = cens_fit
+      censoring_hazard_fit = cens_fit,
+      ace_estimate = NULL,
+      plugin_estimates = NULL
     )
 
 
@@ -295,7 +301,7 @@ test_that(
     )
 
     # compute the uncentered eif
-    ueif_dt <- uncentered_eif(
+    ueif_dt <- compute_eif(
       data = long_dt,
       effect = "absolute",
       confounders = c("w_1", "w_2", "w_3"),
@@ -306,7 +312,9 @@ test_that(
       cond_outcome_fit = NULL,
       prop_score_values = NULL,
       failure_hazard_fit = fail_fit,
-      censoring_hazard_fit = cens_fit
+      censoring_hazard_fit = cens_fit,
+      ace_estimate = NULL,
+      plugin_estimates = NULL
     )
 
     # fit the propensity score
@@ -417,8 +425,7 @@ test_that(
       outcome = "y",
       modifiers = c("w_1", "w_3"),
       cond_outcome_fit = cond_outcome_fit,
-      failure_hazard_fit = NULL,
-      censoring_hazard_fit = NULL
+      failure_hazard_fit = NULL
     )
 
     # make sure error isn't too egregious asymptotically
