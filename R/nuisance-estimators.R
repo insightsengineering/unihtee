@@ -442,3 +442,56 @@ one_step_ate_estimator <- function(
   return(estimate)
 }
 
+tml_ate_estimator <- function(
+    data,
+    confounders,
+    exposure,
+    outcome,
+    prop_score_fit,
+    prop_score_values = NULL,
+    cond_outcome_fit
+) {
+
+  ## compute the inverse probability weights
+  if (!is.null(prop_score_values)) {
+    prop_scores <- data[[prop_score_values]]
+  } else {
+    prop_scores <- prop_score_fit$estimates
+  }
+
+  ## tilt conditional expected outcome under exposure
+  exp_estimates <- cond_outcome_fit$exp_estimates
+  h_num_1 <- data[[exposure]]
+  h_denom_1 <- data[[exposure]] * prop_scores
+  q_1_star_logit <- stats::qlogis(bound_precision(exp_estimates))
+  suppressWarnings(
+    q_1_tilt_fit <- stats::glm(
+      data[[outcome]] ~ -1 + h_num_1,
+      offset = q_1_star_logit,
+      weights = h_denom_1,
+      family = "binomial"
+    )
+  )
+  q_1_star <- predict(q_1_tilt_fit, type = "response")
+
+  ## tilt conditional expected outcome under non-exposure
+  noexp_estimates <- cond_outcome_fit$noexp_estimates
+  h_num_0 <- 1 - data[[exposure]]
+  h_denom_0 <- (1 - data[[exposure]]) / (1 - prop_scores)
+  q_0_star_logit <- stats::qlogis(bound_precision(noexp_estimates))
+  suppressWarnings(
+    q_0_tilt_fit <- stats::glm(
+      data[[outcome]] ~ -1 + h_num_0,
+      offset = q_0_star_logit,
+      weights = h_denom_0,
+      family = "binomial"
+    )
+  )
+  q_0_star <- predict(q_0_tilt_fit, type = "response")
+
+  ## compute the plug-in estimate
+  estimate <- mean(q_1_star - q_0_star)
+
+  return(estimate)
+
+}
