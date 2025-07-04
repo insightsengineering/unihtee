@@ -2,7 +2,7 @@ source("testing-utils.R")
 
 test_that(
   paste(
-    "uncentered_eif() minus true absolute effect parameter value has a mean",
+    "compute_eif() minus true absolute effect parameter value has a mean",
     "of zero when propensity scores aren't known"
   ),
   {
@@ -36,7 +36,7 @@ test_that(
     )
 
     # compute the uncentered eif
-    eif <- uncentered_eif(
+    eif <- compute_eif(
       data = dt,
       effect = "absolute",
       confounders = c("w_1", "w_2", "w_3"),
@@ -47,7 +47,9 @@ test_that(
       prop_score_values = NULL,
       cond_outcome_fit = cond_outcome_fit,
       failure_hazard_fit = NULL,
-      censoring_hazard_fit = NULL
+      censoring_hazard_fit = NULL,
+      ace_estimate = NULL,
+      plugin_estimates = NULL
     )
 
     # note that the true parameter values are equal to 0,1 for W_1, W_3
@@ -59,7 +61,7 @@ test_that(
 
 test_that(
   paste(
-    "uncentered_eif() minus true absolute effect parameter value has a mean",
+    "compute_eif() minus true absolute effect parameter value has a mean",
     "of zero when propensity scores are known"
   ),
   {
@@ -82,7 +84,7 @@ test_that(
     )
 
     # compute the uncentered eif
-    eif <- uncentered_eif(
+    eif <- compute_eif(
       data = dt,
       effect = "absolute",
       confounders = c("w_1", "w_2", "w_3"),
@@ -93,7 +95,9 @@ test_that(
       cond_outcome_fit = cond_outcome_fit,
       prop_score_values = "prop_score",
       failure_hazard_fit = NULL,
-      censoring_hazard_fit = NULL
+      censoring_hazard_fit = NULL,
+      ace_estimate = NULL,
+      plugin_estimates = NULL
     )
 
     # note that the true parameter values are equal to 0,1 for W_1, W_3
@@ -105,7 +109,7 @@ test_that(
 
 test_that(
   paste(
-    "uncentered_eif() minus true relative effect parameter value has a mean",
+    "compute_eif() minus true relative effect parameter value has a mean",
     "of zero when propensity scores aren't known"
   ),
   {
@@ -135,7 +139,7 @@ test_that(
     )
 
     # compute the uncentered eif
-    eif <- uncentered_eif(
+    eif <- compute_eif(
       data = dt,
       effect = "relative",
       confounders = c("w_1", "w_2", "w_3"),
@@ -146,7 +150,9 @@ test_that(
       prop_score_values = NULL,
       cond_outcome_fit = cond_outcome_fit,
       failure_hazard_fit = NULL,
-      censoring_hazard_fit = NULL
+      censoring_hazard_fit = NULL,
+      ace_estimate = NULL,
+      plugin_estimates = NULL
     )
 
     # note that the true parameter values are approx equal to 0, 2.0 for W_1,
@@ -159,7 +165,7 @@ test_that(
 
 test_that(
   paste(
-    "uncentered_eif() minus true relative effect parameter value has a mean",
+    "compute_eif() minus true relative effect parameter value has a mean",
     "of zero when propensity scores are known"
   ),
   {
@@ -180,7 +186,7 @@ test_that(
     )
 
     # compute the uncentered eif
-    eif <- uncentered_eif(
+    eif <- compute_eif(
       data = dt,
       effect = "relative",
       confounders = c("w_1", "w_2", "w_3"),
@@ -191,7 +197,9 @@ test_that(
       cond_outcome_fit = cond_outcome_fit,
       prop_score_values = "prop_score",
       failure_hazard_fit = NULL,
-      censoring_hazard_fit = NULL
+      censoring_hazard_fit = NULL,
+      ace_estimate = NULL,
+      plugin_estimates = NULL
     )
 
     # note that the true parameter values are equal approx to 0, 2.0 for W_1,
@@ -204,7 +212,7 @@ test_that(
 
 test_that(
   paste(
-    "uncentered_eif() minus true absolute effect parameter value has a mean",
+    "compute_eif() minus true absolute effect parameter value has a mean",
     "of zero for the RD TTE TEM VIP"
   ),
   {
@@ -254,7 +262,7 @@ test_that(
     )
 
     # compute the uncentered eif
-    eif <- uncentered_eif(
+    eif <- compute_eif(
       data = long_dt,
       effect = "absolute",
       confounders = c("w_1", "w_2", "w_3"),
@@ -265,7 +273,9 @@ test_that(
       cond_outcome_fit = NULL,
       prop_score_values = NULL,
       failure_hazard_fit = fail_fit,
-      censoring_hazard_fit = cens_fit
+      censoring_hazard_fit = cens_fit,
+      ace_estimate = NULL,
+      plugin_estimates = NULL
     )
 
     # get approximations to the true parameter values
@@ -316,7 +326,7 @@ test_that(
 
 test_that(
   paste(
-    "uncentered_eif() minus true relative effect parameter value has a mean",
+    "compute_eif() minus true relative effect parameter value has a mean",
     "of zero for the RR TTE TEM VIP"
   ),
   {
@@ -356,7 +366,7 @@ test_that(
       censoring = "censoring"
     )
 
-    eif <- uncentered_eif(
+    eif <- compute_eif(
       data = long_dt,
       effect = "relative",
       confounders = c("w_1", "w_2", "w_3"),
@@ -367,7 +377,9 @@ test_that(
       cond_outcome_fit = NULL,
       prop_score_values = "prop_score",
       failure_hazard_fit = fail_fit,
-      censoring_hazard_fit = cens_fit
+      censoring_hazard_fit = cens_fit,
+      ace_estimate = NULL,
+      plugin_estimates = NULL
     )
 
     ## # get approximations to the true parameter values
@@ -412,7 +424,7 @@ test_that(
 
 test_that(
   paste(
-    "uncentered_eif() produces standard errors near zero in large datasets"
+    "centered_eif() produces standard errors near zero in large datasets"
   ),
   {
     library(sl3)
@@ -473,6 +485,89 @@ test_that(
 
     expect_equal(sqrt(eif[, sapply(.SD, var)] / sample_size),
                  c("w_1" = 0, "w_3" = 0),
+                 tolerance = 0.01
+    )
+  }
+)
+
+
+test_that(
+  paste(
+    "compute_eif() centers the EIF appropriately for absolute effect"
+  ),
+  {
+    library(sl3)
+
+    # generate data
+    set.seed(5123)
+    sample_size <- 100000
+    dt <- generate_test_data(n_obs = sample_size)
+
+    # fit the propensity score
+    prop_score_fit <- fit_prop_score(
+      train_data = dt,
+      valid_data = NULL,
+      learners = sl3::Lrnr_glm_fast$new(
+        formula = "~ w_1 + w_2 + w_3"
+      ),
+      exposure = "a",
+      confounders = c("w_1", "w_2", "w_3")
+    )
+
+    # fit the expected cond outcome
+    cond_outcome_fit <- fit_cond_outcome(
+      train_data = dt,
+      valid_data = NULL,
+      learners = sl3::Lrnr_glm_fast$new(
+        formula = "~ w_1 * a + w_2 * a + w_3 * a"
+      ),
+      exposure = "a",
+      confounders = c("w_1", "w_2", "w_3"),
+      outcome = "y"
+    )
+
+    # estimate the ATE
+    ate_estimate <- one_step_ate_estimator(
+      data = dt,
+      confounders = c("w_1", "w_2", "w_3"),
+      exposure = "a",
+      outcome = "y",
+      prop_score_fit = prop_score_fit,
+      prop_score_values = NULL,
+      cond_outcome_fit = cond_outcome_fit
+    )
+
+    # plug-in estimates
+    plugin_estimates <- plugin_estimator(
+      data = dt,
+      effect = "absolute",
+      outcome = "y",
+      modifiers = c("w_1", "w_2", "w_3"),
+      cond_outcome_fit = cond_outcome_fit,
+      failure_hazard_fit = NULL,
+      censoring_hazard_fit = NULL
+    )
+
+    # compute the centered eif
+    eif <- compute_eif(
+      data = dt,
+      effect = "absolute",
+      confounders = c("w_1", "w_2", "w_3"),
+      exposure = "a",
+      outcome = "y",
+      modifiers = c("w_1", "w_2", "w_3"),
+      prop_score_fit = prop_score_fit,
+      prop_score_values = NULL,
+      cond_outcome_fit = cond_outcome_fit,
+      failure_hazard_fit = NULL,
+      censoring_hazard_fit = NULL,
+      ace_estimate = ate_estimate,
+      plugin_estimates = plugin_estimates
+    )
+
+    # note that the true parameter values are equal to 0,1 for W_1, W_3
+    expect_equal(sqrt(eif[, sapply(.SD, var)] / sample_size),
+                 c("w_1" = 0, "w_2" = 0, "w_3" = 0),
                  tolerance = 0.01
     )
   }

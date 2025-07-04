@@ -6,13 +6,16 @@ utils::globalVariables(
             "failure", "surv_exp_est", "surv_noexp_est", "`:=`", "integrand",
             "integral")
 )
-#' @title Uncentered Efficient Influence Function Computer
+#' @title Efficient Influence Function Computer
 #'
-#' @description \code{uncentered_eif()} computes the efficient influence
-#'   function for the chosen parameter using the already estimated nuisance
-#'   parameters. If certain nuisance parameters are known, such as propensity
-#'   scores in a randomized control trial, then they may be input directly into
-#'   this function.
+#' @description \code{compute_eif()} computes the efficient influence function
+#'   for the chosen parameter using the already estimated nuisance parameters.
+#'   If certain nuisance parameters are known, such as propensity scores in a
+#'   randomized control trial, then they may be input directly into this
+#'   function. Note that this EIF is only uncentered in expectation; it should
+#'   only be used with the one-step estimator. When \code{ace_estimate} is
+#'   \code{NULL}, and pseudo-uncentered EIF is computed. It should only be used
+#'   with the one-step estimator, as it is only uncentered in expectation.
 #'
 #' @param data A \code{data.table} containing the observed data.
 #'   \code{train_data} is formatted by \code{\link{unihtee}()}.
@@ -31,21 +34,26 @@ utils::globalVariables(
 #' @param prop_score_values A \code{numeric} vector corresponding to the (known)
 #'   propensity score values for each observation in \code{data}.
 #' @param cond_outcome_fit A \code{list} output by the
-#'   \code{\link{fit_failure_hazard}()} function.'
+#'   \code{\link{fit_failure_hazard}()} function.
 #' @param failure_hazard_fit A \code{list} output by the
-#'   \code{\link{fit_cond_outcome}()} function.'
+#'   \code{\link{fit_cond_outcome}()} function.
 #' @param censoring_hazard_fit A \code{list} output by the
-#'   \code{\link{fit_censoring_hazard}()} function.'
+#'   \code{\link{fit_censoring_hazard}()} function.
+#' @param ace_estimate A \code{numeric} estimate of the average causal effect
+#'   associated with the specified effect type and data-generating process.
+#' @param plugin_estimates A \code{numeric} vector of plug-in estimate of the
+#'   treatment effect modifier variable importance parameters associated with
+#'   the specified effect type and data-generating process.
 #'
-#' @return A \code{data.table} whose columns are the uncentered efficient
-#'   influence functions of each variable in \code{modifiers}. The rows
-#'   correspond to the observations of \code{data}.
+#' @return A \code{data.table} whose columns are the efficient influence
+#'   functions of each variable in \code{modifiers}. The rows correspond to the
+#'   observations of \code{data}.
 #'
 #' @importFrom data.table copy as.data.table `:=` shift
 #'
 #' @keywords internal
 
-uncentered_eif <- function(
+compute_eif <- function(
   data,
   effect,
   confounders,
@@ -56,7 +64,9 @@ uncentered_eif <- function(
   prop_score_values,
   cond_outcome_fit,
   failure_hazard_fit,
-  censoring_hazard_fit
+  censoring_hazard_fit,
+  ace_estimate,
+  plugin_estimates
 ) {
 
   ## compute the inverse probability weights
@@ -145,20 +155,34 @@ uncentered_eif <- function(
 
   }
 
+  ## subtract the ACE estimate from the aipws vector if provided
+  if (!is.null(ace_estimate)) {
+    aipws <- aipws - ace_estimate
+  }
+
   ## compute that variance of the effect modifiers
   modifier_vars <- sapply(modifiers, function(modifier) var(data[[modifier]]))
 
-  ## vectorized uncentered eifs
-  modifiers_dt <- lapply(
+  ## vectorized eifs
+  centred_modifiers_dt <- lapply(
     modifiers,
     function(modifier) {
       mod_vec <- data[[modifier]]
       mod_vec - mean(mod_vec)
     }
   )
-  modifiers_dt <- data.table::as.data.table(modifiers_dt)
-  colnames(modifiers_dt) <- modifiers
-  eif_dt <- tcrossprod(aipws, 1 / modifier_vars) * modifiers_dt
+  centred_modifiers_dt <- data.table::as.data.table(centred_modifiers_dt)
+  colnames(centred_modifiers_dt) <- modifiers
+
+  # uncentered EIF (in expectation)
+  if (is.null(ace_estimate)) {
+    eif_dt <- tcrossprod(aipws, 1 / modifier_vars) * centred_modifiers_dt
+  # centered EIF
+  } else {
+    eif_dt <- tcrossprod(aipws, 1 / modifier_vars) * centred_modifiers_dt -
+      centred_modifiers_dt^2 / modifier_vars * plugin_estimates
+  }
+
 
   return(eif_dt)
 }
