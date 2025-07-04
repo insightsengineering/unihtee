@@ -595,6 +595,16 @@ tml_estimator <- function(data,
   return(tmle_dt)
 }
 
+#' Plug-In Estimator
+#'
+#' \code{plugin_estimator()} estimates the treatment effect modifier variable
+#' importance parameters using a plug-in estimation strategy.
+#'
+#' @inheritParams tml_estimator
+#'
+#' @return A vector containing the plug-in estimates for each potential
+#'   modifier.
+#' @keywords internal
 plugin_estimator <- function(
   data,
   outcome,
