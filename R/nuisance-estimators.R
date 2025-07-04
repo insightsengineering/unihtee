@@ -517,6 +517,13 @@ tml_ate_estimator <- function(
 
 }
 
+#' One-Step Estimator of the Marginal Relative Effect for Non-Time-to-Event Outcomes
+#'
+#' @inheritParams tml_estimator
+#'
+#' @returns The one-step estimate.
+#'
+#' @keywords internal
 one_step_estimator_ate_log_outcome <- function(
   data,
   confounders,
@@ -557,6 +564,13 @@ one_step_estimator_ate_log_outcome <- function(
   return(estimate)
 }
 
+#' TMLE of the Marginal Relative Effect for Non-Time-to-Event Outcomes
+#'
+#' @inheritParams tml_estimator
+#'
+#' @returns The TML estimate.
+#'
+#' @keywords internal
 tml_estimator_ate_log_outcome <- function(
     data,
     confounders,
