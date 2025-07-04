@@ -409,6 +409,16 @@ fit_censoring_hazard <- function(train_data,
 }
 
 
+#' One Step Estimator of the Average Treatment Effect
+#'
+#' `one_step_ate_estimator()` implements a one-step estimator of the average
+#' treatment effect.
+#'
+#' @inheritParams tml_estimator
+#'
+#' @returns The one-step estimate of the average treatment effect.
+#'
+#' @keywords internal
 one_step_ate_estimator <- function(
   data,
   confounders,
@@ -442,6 +452,17 @@ one_step_ate_estimator <- function(
   return(estimate)
 }
 
+#' Targeted Maximum Likelihood Estimator of the Average Treatment Effect
+#'
+#' `tml_ate_estimator()` implements a targeted maximum likelihood estimator of
+#' the average treatment effect.
+#'
+#' @inheritParams tml_estimator
+#'
+#' @returns The targeted maximum likelihood estimate of the average treatment
+#'   effect.
+#'
+#' @keywords internal
 tml_ate_estimator <- function(
     data,
     confounders,
