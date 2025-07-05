@@ -88,8 +88,8 @@ outcomes.}
 \value{
 A \code{list} object containing the validation dataset's uncentered
 efficient influence function estimates, the treatment effect modification
-variable importance parameter estimates and the proportion of observations
-in the validation data.
+variable importance parameter estimates, the average causal effect
+estimate, and the proportion of observations in the validation data.
 }
 \description{
 \code{cross_fit_fold()} estimates the treatment effect

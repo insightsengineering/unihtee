@@ -68,10 +68,10 @@ utils::globalVariables(c("..to_keep", ".SD", ".I", "p_value"))
 #' @return A list containing:
 #'  * \code{temvip_inference_tbl}: A \code{data.table} containing the effect
 #'    estimates and (adjusted) p-values of the \code{modifiers}. The suspected
-#'    treatment effect modifiers ordered according to ascending p-values.
+#'    treatment effect modifiers ordered according to ascending p-values
 #'  * \code{ace_estimate}: A \code{numeric} providing the estimate of the
-#'    average causal effect associated with the speficied effect and outcome
-#'    types.
+#'    average causal effect associated with the specified effect and outcome
+#'    types
 #'
 #' @importFrom data.table as.data.table .I .SD rbindlist
 #'
@@ -423,6 +423,9 @@ unihtee <- function(data,
     temvip_inference_tbl = test_dt,
     ace_estimate = ace_estimate
   )
+
+  # create a unihtee object
+  class(results_ls) <- c("unihtee", class(results_ls))
 
   return(results_ls)
 }
