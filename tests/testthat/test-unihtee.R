@@ -21,7 +21,7 @@ test_that(
       outcome_type = "continuous",
       effect = "absolute",
       estimator = "onestep"
-    )
+    )$temvip_inference_tbl
 
     # ensure that the adjusted p-value of w_3 is less than 0.05, and those of
     # w_1 and w_2 are above 0.05
@@ -58,7 +58,7 @@ test_that(
       estimator = "onestep",
       cross_fit = TRUE,
       cond_outcome_estimator = sl3::Lrnr_xgboost$new()
-    )
+    )$temvip_inference_tbl
 
     # ensure that the adjusted p-value of w_3 is less than 0.05, and those of
     # w_1 and w_2 are above 0.05
@@ -89,7 +89,7 @@ test_that(
       effect = "absolute",
       estimator = "tmle",
       cond_outcome_estimator = sl3::Lrnr_ranger$new()
-    )
+    )$temvip_inference_tbl
 
     # ensure that the adjusted p-value of w_3 is less than 0.05, and those of
     # w_1 and w_2 are above 0.05
@@ -125,7 +125,7 @@ test_that(
       estimator = "tmle",
       cross_fit = TRUE,
       cond_outcome_estimator = sl3::Lrnr_xgboost$new()
-    )
+    )$temvip_inference_tbl
 
     # ensure that the adjusted p-value of w_3 is less than 0.05, and those of
     # w_1 and w_2 are above 0.05
@@ -154,7 +154,7 @@ test_that(
       outcome_type = "binary",
       effect = "absolute",
       estimator = "onestep"
-    )
+    )$temvip_inference_tbl
 
     # ensure that the adjusted p-value of w_3 is less than 0.05, and those of
     # w_1 and w_2 are above 0.05
@@ -190,7 +190,7 @@ test_that(
       estimator = "tmle",
       cond_outcome_estimator = sl3::Lrnr_xgboost$new(),
       prop_score_estimator = sl3::Lrnr_xgboost$new()
-    )
+    )$temvip_inference_tbl
 
     # ensure that the adjusted p-value of w_1 is less than 0.05, and those of
     # w_2 and w_2 are above 0.05
@@ -225,7 +225,7 @@ test_that(
       effect = "relative",
       estimator = "onestep",
       cond_outcome_estimator = sl3:::Lrnr_xgboost$new()
-    )
+    )$temvip_inference_tbl
 
     # ensure that the adjusted p-value of w_3 is less than 0.05, and those of
     # w_1 and w_2 are above 0.05
@@ -260,7 +260,7 @@ test_that(
       effect = "relative",
       estimator = "onestep",
       cross_fit = TRUE
-    )
+    )$temvip_inference_tbl
 
     # ensure that the adjusted p-value of w_3 is less than 0.05, and those of
     # w_1 and w_2 are above 0.05
@@ -289,7 +289,7 @@ test_that(
       outcome_type = "binary",
       effect = "relative",
       estimator = "tmle"
-    )
+    )$temvip_inference_tbl
 
     # ensure that the adjusted p-value of w_3 is less than 0.05, and those of
     # w_1 and w_2 are above 0.05
@@ -324,7 +324,7 @@ test_that(
       effect = "relative",
       estimator = "tmle",
       cross_fit = TRUE
-    )
+    )$temvip_inference_tbl
 
     # ensure that the adjusted p-value of w_3 is less than 0.05, and those of
     # w_1 and w_2 are above 0.05
@@ -359,7 +359,7 @@ test_that(
       cond_outcome_estimator = NULL,
       failure_hazard_estimator = sl3::Lrnr_xgboost$new(),
       censoring_hazard_estimator = sl3::Lrnr_xgboost$new()
-    )
+    )$temvip_inference_tbl
 
     # ensure that the adjusted p-value of w_1 is less than 0.05, and those of
     # w_2 and w_2 are above 0.05
@@ -400,7 +400,7 @@ test_that(
       cond_outcome_estimator = NULL,
       failure_hazard_estimator = sl3::Lrnr_xgboost$new(),
       censoring_hazard_estimator = sl3::Lrnr_xgboost$new()
-    )
+    )$temvip_inference_tbl
 
     # ensure that the adjusted p-value of w_1 is less than 0.05, and those of
     # w_2 and w_2 are above 0.05
@@ -435,7 +435,7 @@ test_that(
       cond_outcome_estimator = NULL,
       failure_hazard_estimator = sl3::Lrnr_xgboost$new(),
       censoring_hazard_estimator = sl3::Lrnr_xgboost$new()
-    )
+    )$temvip_inference_tbl
 
     # ensure that the adjusted p-value of w_1 is less than 0.05, and those of
     # w_2 and w_2 are above 0.05
@@ -476,7 +476,7 @@ test_that(
       cond_outcome_estimator = NULL,
       failure_hazard_estimator = sl3::Lrnr_xgboost$new(),
       censoring_hazard_estimator = sl3::Lrnr_xgboost$new()
-    )
+    )$temvip_inference_tbl
 
     # ensure that the adjusted p-value of w_1 is less than 0.05, and those of
     # w_2 and w_2 are above 0.05
@@ -516,7 +516,7 @@ test_that(
         glm = list(family = "binomial")
       ),
       censoring_hazard_estimator = sl3::Lrnr_glm$new()
-    )
+    )$temvip_inference_tbl
 
     # ensure that the adjusted p-value of w_1 is less than 0.05, and those of
     # w_2 and w_2 are above 0.05
@@ -556,7 +556,7 @@ test_that(
         glm = list(family = "binomial")
       ),
       censoring_hazard_estimator = sl3::Lrnr_glm$new()
-    )
+    )$temvip_inference_tbl
 
     # ensure that the adjusted p-value of w_1 is less than 0.05, and those of
     # w_2 and w_2 are above 0.05
@@ -598,7 +598,7 @@ test_that(
         glm = list(family = "binomial")
       ),
       censoring_hazard_estimator = sl3::Lrnr_glm$new()
-    )
+    )$temvip_inference_tbl
 
     # ensure that the adjusted p-value of w_1 is less than 0.05, and those of
     # w_2 and w_2 are above 0.05

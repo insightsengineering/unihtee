@@ -65,9 +65,13 @@ utils::globalVariables(c("..to_keep", ".SD", ".I", "p_value"))
 #'   used. Defaults to \code{FALSE}.
 #'
 #'
-#' @return A \code{data.table} containing the effect estimates and (adjusted)
-#'   p-values of the \code{modifiers}. The suspected treatment effect modifiers
-#'   ordered according to ascending p-values.
+#' @return A list containing:
+#'  * \code{temvip_inference_tbl}: A \code{data.table} containing the effect
+#'    estimates and (adjusted) p-values of the \code{modifiers}. The suspected
+#'    treatment effect modifiers ordered according to ascending p-values.
+#'  * \code{ace_estimate}: A \code{numeric} providing the estimate of the
+#'    average causal effect associated with the speficied effect and outcome
+#'    types.
 #'
 #' @importFrom data.table as.data.table .I .SD rbindlist
 #'
@@ -381,13 +385,20 @@ unihtee <- function(data,
       use_future = parallel
     )
 
-    ## combine the estimates
+    ## combine the TEM-VIP estimates
     weighted_estimates <- lapply(
       seq_len(cross_fit_folds),
       function(idx) results$tem_vip_fit[[idx]] * results$prop_valid_data[[idx]]
     )
     weighted_estimates_dt <- data.table::rbindlist(weighted_estimates)
     tem_vip_fit <- weighted_estimates_dt[, lapply(.SD, sum)]
+
+    ## combine the ACE estimates
+    weighted_ace_estimates <- sapply(
+      seq_len(cross_fit_folds),
+      function(idx) results$ace_estimate[[idx]] * results$prop_valid_data[[idx]]
+    )
+    ace_estimate <- sum(weighted_ace_estimates)
   }
 
   ## compute the confidence intervals and rescale everything
@@ -407,7 +418,13 @@ unihtee <- function(data,
   ## organize table in decreasing order of p-value
   test_dt <- test_dt[order(p_value), ]
 
-  return(test_dt)
+  # return the TEM-VIP inference table and the average causal effect estimate
+  results_ls <- list(
+    temvip_inference_tbl = test_dt,
+    ace_estimate = ace_estimate
+  )
+
+  return(results_ls)
 }
 
 
@@ -467,8 +484,8 @@ unihtee <- function(data,
 #'
 #' @return A \code{list} object containing the validation dataset's uncentered
 #'   efficient influence function estimates, the treatment effect modification
-#'   variable importance parameter estimates and the proportion of observations
-#'   in the validation data.
+#'   variable importance parameter estimates, the average causal effect
+#'   estimate, and the proportion of observations in the validation data.
 #'
 #' @importFrom data.table as.data.table .I .SD
 #' @importFrom origami training validation
@@ -714,6 +731,7 @@ cross_fit_fold <- function(fold,
   return(list(
     "unscaled_eif_vars" = unscaled_eif_vars,
     "tem_vip_fit" = tem_vip_fit,
+    "ace_estimate" = ace_estimate,
     "prop_valid_data" = nrow(valid_data) / nrow(data)
   ))
 }
