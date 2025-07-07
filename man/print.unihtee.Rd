@@ -7,7 +7,7 @@
 \method{print}{unihtee}(x, ...)
 }
 \arguments{
-\item{x}{A \code{unihtee} object.}
+\item{x}{A \code{unihtee} object output by \code{\link{unihtee}()}}
 
 \item{...}{Ignored.}
 }

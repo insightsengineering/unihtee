@@ -4,11 +4,12 @@
 \alias{plot.unihtee}
 \title{Plot a \code{unihtee} Object}
 \usage{
-\method{plot}{unihtee}(unihtee_output, modifier_name, print_interpretation = TRUE)
+\method{plot}{unihtee}(x, ..., modifier_name, print_interpretation = TRUE)
 }
 \arguments{
-\item{unihtee_output}{A \code{unihtee} class object output by
-\code{\link{unihtee}()}.}
+\item{x}{A \code{unihtee} class object output by \code{\link{unihtee}()}.}
+
+\item{...}{Ignored.}
 
 \item{print_interpretation}{A \cpde{flag} indicating whether to print the
 interpretation of the TEM-VIP inference plot. Defaults to \code{TRUE}.}

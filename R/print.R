@@ -1,6 +1,6 @@
 #' Print a \code{unihtee} Object
 #'
-#' @param x A \code{unihtee} object.
+#' @param x A \code{unihtee} object output by \code{\link{unihtee}()}
 #' @param ... Ignored.
 #'
 #' @exportS3Method unihtee::print

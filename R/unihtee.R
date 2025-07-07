@@ -437,7 +437,7 @@ unihtee <- function(
   )
 
   # create a unihtee object
-  class(results_ls) <- "unihtee"
+  class(results_ls) <- c("unihtee", class(results_ls))
 
   return(results_ls)
 }

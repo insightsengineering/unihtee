@@ -4,8 +4,8 @@
 #'   simple linear regression line for the specified \code{modifier} parameter
 #'   estimated by \code{\link{unihtee}()}.
 #'
-#' @param unihtee_output A \code{unihtee} class object output by
-#'   \code{\link{unihtee}()}.
+#' @param x A \code{unihtee} class object output by \code{\link{unihtee}()}.
+#' @param ... Ignored.
 #' @param modifier A \code{character} specifying the treatment effect modifier
 #'   variable importance parameter estimate to plot.
 #' @param print_interpretation A \cpde{flag} indicating whether to print the
@@ -18,23 +18,24 @@
 #'
 #' @exportS3Method unihtee::plot
 plot.unihtee <- function(
-  unihtee_output,
+  x,
+  ...,
   modifier_name,
   print_interpretation = TRUE
 ) {
 
   # extract the ACE estimate
-  ace_estimate <- unihtee_output$ace_estimate
+  ace_estimate <- x$ace_estimate
 
   # extract the TEM-VIP inference
-  temvip_inference <- unihtee_output$temvip_inference_tbl[
+  temvip_inference <- x$temvip_inference_tbl[
     modifier == modifier_name, ]
   temvip_est <- temvip_inference$estimate
   temvip_ci_lower <- temvip_inference$ci_lower
   temvip_ci_upper <- temvip_inference$ci_upper
 
   # extract the modifier values from the data
-  modifier_vals <- unihtee_output$data[[modifier_name]]
+  modifier_vals <- x$data[[modifier_name]]
 
   # compute the mean modifier value
   modifier_mean <- mean(modifier_vals)
