@@ -1,26 +1,26 @@
 #' Plot Treatment Effect Modifier Variable Importance Parameter Estimate
 #'
 #' @description \code{plot.unihtee()} produces a plot depicting the estimated
-#' simple linear regression line for the specified \code{modifier} parameter
-#' estimated by \code{\link{unihtee}()}.
+#'   simple linear regression line for the specified \code{modifier} parameter
+#'   estimated by \code{\link{unihtee}()}.
 #'
 #' @param unihtee_output A \code{unihtee} class object output by
 #'   \code{\link{unihtee}()}.
-#' @param data A \code{data.table} containing the data used to produce the
-#'   \code{unihtee_output} object.
 #' @param modifier A \code{character} specifying the treatment effect modifier
-#' variable importance parameter estimate to plot.
+#'   variable importance parameter estimate to plot.
+#' @param print_interpretation A \cpde{flag} indicating whether to print the
+#'   interpretation of the TEM-VIP inference plot. Defaults to \code{TRUE}.
 #'
-#' @importFrom ggplot2 ggplot aes
+#' @importFrom ggplot2 ggplot aes geom_point geom_line geom_hline
+#'   scale_linetype_manual labs xlab ylab ggtitle theme_bw theme
 #'
 #' @returns A \code{\link[ggplot2]{ggplot2}} object.
 #' @export
-plot <- function(unihtee_output, data, modifier_name) {
-  UseMethod("plot")
-}
-
-#' @export
-plot.unihtee <- function(unihtee_output, data, modifier_name) {
+plot_temvip <- function(
+  unihtee_output,
+  modifier_name,
+  print_interpretation = TRUE
+) {
 
   # extract the ACE estimate
   ace_estimate <- unihtee_output$ace_estimate
@@ -33,7 +33,7 @@ plot.unihtee <- function(unihtee_output, data, modifier_name) {
   temvip_ci_upper <- temvip_inference$ci_upper
 
   # extract the modifier values from the data
-  modifier_vals <- data[[modifier_name]]
+  modifier_vals <- unihtee_output$data[[modifier_name]]
 
   # compute the mean modifier value
   modifier_mean <- mean(modifier_vals)
@@ -41,35 +41,66 @@ plot.unihtee <- function(unihtee_output, data, modifier_name) {
   # create the data.frame for plotting
   plotting_tbl <- data.frame(
     x = modifier_vals,
-    y = ace_estimate + temvip_est * (modifier_vals - modifier_mean)
+    y = ace_estimate + temvip_est * (modifier_vals - modifier_mean),
+    ace_estimate = ace_estimate
   )
 
-  # prepare inference summary
-  summary_title <- paste0(
-    "TEM-VIP (Slope) Estimate (95% CI): ",
-    format(round(temvip_est, 3), digits = 3, nsmall = 3),
+  # prepare TEM-VIP estimate and nominal 95% CI summary for the plot title
+  n_dig <- 3
+  plot_title <- paste0(
+    modifier_name, " TEM-VIP Inference [Estimate (Nominal 95% CI)]: ",
+    format(round(temvip_est, n_dig), digits = n_dig, nsmall = n_dig),
     " (",
-    format(round(temvip_ci_lower, 3), digits = 3, nsmall = 3),
+    format(round(temvip_ci_lower, n_dig), digits = n_dig, nsmall = n_dig),
     "; ",
-    format(round(temvip_ci_upper, 3), digits = 3, nsmall = 3),
+    format(round(temvip_ci_upper, n_dig), digits = n_dig, nsmall = n_dig),
     ")"
   )
 
   # check if the modifier is binary
   if (identical(sort(unique(modifier_vals)), c(0, 1))) {
 
-    # plot the estimated slimple linear regression line
+    # print interpretation
+    if (print_interpretation) {
+      cat(
+        paste(
+          "The TEM-VIP estimate corresponds to the vertical distance between",
+          "both points."
+        )
+      )
+    }
+
+    # plot the estimated intercepts for each subgroupt
     ggplot2::ggplot(
       plotting_tbl,
-      ggplot2::aes(x = x, y = y)
+      ggplot2::aes(x = factor(x, levels = c(0, 1)), y = y)
     ) +
       ggplot2::geom_point() +
+      ggplot2::geom_hline(
+        ggplot2::aes(
+          yintercept = ace_estimate,
+          linetype = "Average Causal Effect Estimate"
+        ),
+        colour = "red"
+      ) +
+      ggplot2::scale_linetype_manual(values = 2) +
+      ggplot2::labs(linetype = NULL) +
       ggplot2::xlab(modifier_name) +
       ggplot2::ylab("Conditional Average Causal Effect") +
-      ggplot2::ggtitle(summary_title) +
-      ggplot2::theme_bw()
+      ggplot2::ggtitle(plot_title) +
+      ggplot2::theme_bw() +
+      ggplot2::theme(legend.position="bottom")
 
   } else {
+
+    # print interpretation
+    if (print_interpretation) {
+      cat(
+        paste(
+          "The TEM-VIP estimate corresponds to the slope of the black line."
+        )
+      )
+    }
 
     # plot the estimated slimple linear regression line
     ggplot2::ggplot(
@@ -77,10 +108,20 @@ plot.unihtee <- function(unihtee_output, data, modifier_name) {
       ggplot2::aes(x = x, y = y)
     ) +
       ggplot2::geom_line() +
+      ggplot2::geom_hline(
+        ggplot2::aes(
+          yintercept = ace_estimate,
+          linetype = "Average Causal Effect Estimate"
+        ),
+        colour = "red"
+      ) +
+      ggplot2::scale_linetype_manual(values = 2) +
+      ggplot2::labs(linetype = NULL) +
       ggplot2::xlab(modifier_name) +
       ggplot2::ylab("Conditional Average Causal Effect") +
-      ggplot2::ggtitle(summary_title) +
-      ggplot2::theme_bw()
+      ggplot2::ggtitle(plot_title) +
+      ggplot2::theme_bw() +
+      ggplot2::theme(legend.position="bottom")
   }
 
 }

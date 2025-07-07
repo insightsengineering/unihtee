@@ -15,7 +15,8 @@ Imports:
     data.table,
     sl3,
     origami,
-    assertthat
+    assertthat,
+    ggplot2
 Suggests:
     here,
     dplyr,
