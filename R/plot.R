@@ -1,4 +1,4 @@
-#' Plot Treatment Effect Modifier Variable Importance Parameter Estimate
+#' Plot a \code{unihtee} Object
 #'
 #' @description \code{plot.unihtee()} produces a plot depicting the estimated
 #'   simple linear regression line for the specified \code{modifier} parameter
@@ -15,8 +15,9 @@
 #'   scale_linetype_manual labs xlab ylab ggtitle theme_bw theme
 #'
 #' @returns A \code{\link[ggplot2]{ggplot2}} object.
-#' @export
-plot_temvip <- function(
+#'
+#' @exportS3Method unihtee::plot
+plot.unihtee <- function(
   unihtee_output,
   modifier_name,
   print_interpretation = TRUE

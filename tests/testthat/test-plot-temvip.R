@@ -30,7 +30,7 @@ test_that("plot_temvip() returns ggplots", {
   )
 
   # plot the TEM-VIP estimate for w_3 and w_4
-  expect_no_error(plot_temvip(unihtee_output, modifier_name = "w_3", FALSE))
-  expect_no_error(plot_temvip(unihtee_output, modifier_name = "w_4", FALSE))
+  expect_no_error(plot(unihtee_output, modifier_name = "w_3", FALSE))
+  expect_no_error(plot(unihtee_output, modifier_name = "w_4", FALSE))
 
 })

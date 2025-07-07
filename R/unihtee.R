@@ -1,4 +1,5 @@
 utils::globalVariables(c("..to_keep", ".SD", ".I", "p_value"))
+
 #' @title Univariate Heterogeneous Treatment Effect Modifier Estimator
 #'
 #' @description \code{unihtee()} estimates treatment effect modifier variable
@@ -80,24 +81,26 @@ utils::globalVariables(c("..to_keep", ".SD", ".I", "p_value"))
 #' @importFrom data.table as.data.table .I .SD rbindlist
 #'
 #' @export
-unihtee <- function(data,
-                    confounders,
-                    modifiers,
-                    exposure,
-                    outcome,
-                    censoring = NULL,
-                    time_cutoff = NULL,
-                    outcome_type = c("continuous", "binary", "time-to-event"),
-                    effect = c("absolute", "relative"),
-                    estimator = c("tmle", "onestep"),
-                    cross_fit = FALSE,
-                    cross_fit_folds = 5,
-                    cond_outcome_estimator = sl3::Lrnr_glm_fast$new(),
-                    prop_score_estimator = sl3::Lrnr_glm_fast$new(),
-                    prop_score_values = NULL,
-                    failure_hazard_estimator = sl3::Lrnr_xgboost$new(),
-                    censoring_hazard_estimator = sl3::Lrnr_xgboost$new(),
-                    parallel = FALSE) {
+unihtee <- function(
+  data,
+  confounders,
+  modifiers,
+  exposure,
+  outcome,
+  censoring = NULL,
+  time_cutoff = NULL,
+  outcome_type = c("continuous", "binary", "time-to-event"),
+  effect = c("absolute", "relative"),
+  estimator = c("tmle", "onestep"),
+  cross_fit = FALSE,
+  cross_fit_folds = 5,
+  cond_outcome_estimator = sl3::Lrnr_glm_fast$new(),
+  prop_score_estimator = sl3::Lrnr_glm_fast$new(),
+  prop_score_values = NULL,
+  failure_hazard_estimator = sl3::Lrnr_xgboost$new(),
+  censoring_hazard_estimator = sl3::Lrnr_xgboost$new(),
+  parallel = FALSE
+) {
 
   ## specify the TEM VIP type
   param_effect <- match.arg(effect)
@@ -434,7 +437,7 @@ unihtee <- function(data,
   )
 
   # create a unihtee object
-  class(results_ls) <- c("unihtee", class(results_ls))
+  class(results_ls) <- "unihtee"
 
   return(results_ls)
 }

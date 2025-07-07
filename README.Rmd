@@ -93,7 +93,7 @@ unihtee_output <- unihtee(
   estimator = "tmle"
 )
 
-# plot table of estimated TEM-VIPs
+# print table of estimated TEM-VIPs
 unihtee_output$temvip_inference_tbl
 ```
 
