@@ -33,22 +33,21 @@ library(unihtee)
 # Background
 
 Treatment effect modifiers (TEMs) are responsible for the disparate effects of a
-treatment on a population. They are confounders --- meaning they influence both
-the likelihood of receiving treatment and the outcome --- that modify the effect
-of treatment on the outcome. In precision medicine, these effect modifiers
-delineate patient subgroups which experience differing benefit from a given
-medical intervention. In public health, they are used to determine the effect of
-policy decisions on sub-populations. Identifying TEMs, if any exist, is required
-for a comprehensive understanding of an intervention's effect on a population.
+treatment on a population. They modify the effect of treatment on the outcome.
+In precision medicine, these effect modifiers delineate patient subgroups which
+experience differing benefit from a given medical intervention. In public
+health, they are used to determine the effect of policy decisions on
+sub-populations. Identifying TEMs, if any exist, is required for a comprehensive
+understanding of an intervention's effect on a population.
 
 Traditional parametric modeling techniques, like generalized linear models
-(GLMs), define TEMs as the confounders with non-zero confounder-treatment
+(GLMs), define TEMs as the pre-treatment covariates with non-zero treatment
 interaction terms. In settings characterized by time-to-event outcomes, the Cox
 proportional hazards model can similarly be used. Inference about TEMs is
 therefore possible under stringent conditions about the data-generating process.
-When these (semi)parametric methods' assumptions, like linearity of the
-confounder-outcome relationship in a linear model or proportional hazards in a
-Cox model, are violated, however, their results are invalid.
+When these (semi-) parametric methods' assumptions, like linearity of the
+covariate-outcome relationship in a linear model or proportional hazards in a
+Cox model, are violated, however, their inference are invalid.
 
 More flexible approaches instead focus on estimating the conditional average
 treatment effect (CATE) using interpretable modeling techniques, like the LASSO
@@ -56,49 +55,52 @@ treatment effect (CATE) using interpretable modeling techniques, like the LASSO
 @bahamyirou2022] or Random Forests [@breiman2001; @wager2018; @cui2022]. Again,
 however, these methods require restrictive assumptions about the data-generating
 process, like sparsity of treatment effect modification [@zhao2006],
-approximately uncorrelated confounders [@zhao2006; @esl2009] and sample sizes
-that are much larger than the number of confounders [@zhao2006], to reliably
+approximately uncorrelated covariates [@zhao2006; @esl2009], and sample sizes
+that are much larger than the number of potential TEMs [@zhao2006], to reliably
 recover TEMs.
 
-Instead of identifying TEMs indirectly by modeling the
-confounder-treatment-outcome relationship, recent work has developed frameworks
-tailored to the task [@williamson2022framework; @boileau2022; @hines2022TEVIP;
-@boileau2023]. Relying on TEM variable importance parameters (TEM-VIP), it is
-possible to assess confounders' influence on the treatment effect in
-nonparametric, algorithm-agnostic fashion that largely avoids the pitfalls of
+Instead of identifying TEMs indirectly by parametric modeling, recent work has
+developed frameworks tailored to the task [@williamson2022framework;
+@boileau2022; @hines2022TEVIP;
+@boileau2023]. Relying on TEM variable importance parameters (TEM-VIPs), it is
+possible to assess pre-treatment covariates' influence on the treatment effect
+in nonparametric, algorithm-agnostic fashion that largely avoids the pitfalls of
 parametric and CATE-based methodologies. These TEM-VIPs are defined within
 nonparametric statistical models that may be augmented with causal
-interpretations, permitting formal inference about TEMs.
+interpretations, permitting formal causal inference about TEMs.
 
 The `unihtee` R package implements the recent proposals of @boileau2022 and
 @boileau2023. This TEM-VIP framework relies on parameters assess the marginal
-effect of each confounder on treatment effect heterogeneity, however treatment
-effect is defined. Nonparametric estimators are provided in these works, and
-their asymptotic properties established. In particular, these estimators are
-shown to be asymptotically linear under minimal assumptions about the
-data-generating process, and to recover treatment effect modifiers more readily
-than competing methods. These TEM-VIPs and estimators are introduced alongside
-worked examples in the following section.
+effect of each pre-treatment covariate on treatment effect heterogeneity,
+however treatment effect is defined. Nonparametric estimators are provided in
+these works, and their asymptotic properties established. In particular, these
+estimators are shown to be asymptotically linear under minimal assumptions about
+the data-generating process, and to recover treatment effect modifiers more
+readily than competing methods. These TEM-VIPs and estimators are introduced
+alongside worked examples in the following section.
 
 # `unihtee` in Action
 
 The `unihtee` R package performs inference about TEM-VIPs in data-generating
 processes with a binary exposure variable and either continuous, binary, or
 right-censored time-to-event outcomes. No restriction is placed on the
-confounding variables, though ordinal confounders should be formatted as factors
-using `ordered()`, and categorical confounders should be one-hot encoded.
+pre-treatment covariates variables, though ordinal variables should be
+formatted as factors using `ordered()`, and categorical variables should be
+one-hot encoded.
 
 ## Working with Continuous Outcomes
 
 Let there be $n$ independent and identically distributed (i.i.d.) random vectors
 ${X_i}_{i=1}^n$ such that $X_i = (W_i, A_i, Y^{(0)}, Y_i^{(1)}) \sim P_{X,0} \in
 \mathcal{M}_X$. Dropping the index where possible for notational convenience for
-the remainder of the tutorial, $W$ is defined as the set of $p$ confounders, $A$
-as the binary treatment indicator, and $Y^{(0)}, Y_i^{(1)}$ the continuous
-potential outcomes [@rubin1974] produced under control and treatment conditions,
-respectively. Further, $\mathcal{M}_X$ is the full-data nonparametric model of
-all possible data-generating processes, and contains the true but unknown
-full-data data-generating process $P_{X,0}$.
+the remainder of the tutorial, $W$ is defined as the set of $p$ pre-treatment
+covariates, $A$ as the binary treatment indicator, and $Y^{(0)}, Y_i^{(1)}$ the
+continuous potential outcomes [@rubin1974] produced under control and treatment
+conditions, respectively. Further, $\mathcal{M}_X$ is the full-data
+nonparametric model of all possible data-generating processes, and contains the
+true but unknown full-data data-generating process $P_{X,0}$. We note that $W$
+contains both the confounders treatment-outcome confounders and the potential
+TEMs, possibly overlapping sets of variables.
 
 Now, $P_{X,0}$ is generally unknown because its random vectors are unobservable:
 only one potential outcome is ever measurable in practice. Still, $P_{X,0}$
@@ -118,7 +120,7 @@ data-generating process:
 ```{r cont-dgp}
 cont_outcome_dgp <- function(n_obs) {
 
-  # confounders
+  # pre-treatment covariates
   w_1 <- rnorm(n = n_obs)
   w_2 <- rnorm(n = n_obs)
   w_3 <- rnorm(n = n_obs)
@@ -151,32 +153,32 @@ cont_outcome_dgp <- function(n_obs) {
 
 It's clear from the definition of the potential outcomes that `w_2` and `w_3`
 are treatment effect modifiers: they interact with the treatment indicator `a`.
-A TEM-VIP for quantifying the strength of the treatment effect modification is
-outlined next.
+Note too that `w_1` and `w_2` are confounders. A TEM-VIP for quantifying the
+strength of the treatment effect modification of `w_1` through `w_5` is outlined
+next.
 
 ### Absolute TEM-VIP
 
 Indexing $W$ by $j=1,\ldots,p$, and assuming without
 loss of generality that
 $\mathbb{E}_{P_{X,0}}[W_j] = 0, \mathbb{E}_{P_{X,0}}[W_j^2] > 0$, we can define
-our first TEM-VIP for the $j^\text{th}$ confounder as follows:
+our first TEM-VIP for the $j^\text{th}$ pre-treatment covariate as follows:
 
 $$
 \Psi^F_j(P_{X,0}) =
-\frac{\mathbb{E}_{P_{X,0}}[(Y^{(1)}-Y^{(0)})W_j]}{\mathbb{E}_{P_{X,0}}[W_j^2]}
-=\frac{\mathbb{E}_{P_{X,0}}[(\mathbb{E}_{P_{X,0}}[Y^{(1)}|W]-
-  \mathbb{E}_{P_{X,0}}[Y^{(0)}|W])W_j]}
-  {\mathbb{E}_{P_{X,0}}[W_j^2]} \;.
+\frac{\text{Cov}_{P_{X,0}}[(Y^{(1)}-Y^{(0)}), W_j]}{\mathbb{V}_{P_{X,0}}[W_j]}
+\;.
 $$
 
-This parameter is called the absolute TEM-VIP. Assuming the expectation of
-$\mathbb{E}_{P_{X,0}}[Y^{(1)}|W]- \mathbb{E}_{P_{X,0}}[Y^{(0)}|W]$ conditional
+This parameter is called the *absolute TEM-VIP*. Assuming the expectation of
+$\mathbb{E}_{P_{X,0}}[Y^{(1)}|W] - \mathbb{E}_{P_{X,0}}[Y^{(0)}|W]$ conditional
 on $W_j$ is linear in $W_j$, $\Psi^F_j(P_{X,0})$ is the simple linear regression
 coefficient produced by regressing the difference in expected potential outcomes
-against confounder $W_j$. Even when this relationship is nonlinear, as is almost
-surely the case in most applications, $\Psi^F_j(P_{X,0})$ corresponds to the
-correlation between the difference in potential outcomes and the $j^\text{th}$
-confounder, re-normalized to be on the same scale as the potential outcomes.
+against $W_j - \mathbb{E}_{P_{X,0}}[W_j]$. Even when this relationship is
+nonlinear, as is almost surely the case in most applications,
+$\Psi^F_j(P_{X,0})$ corresponds to the correlation between the difference in
+potential outcomes and the $j^\text{th}$ covariate, re-normalized to be on the
+same scale as the potential outcomes.
 
 Of course, as stated earlier, we don't generally have access to the full-data
 random vectors required to perform inference about the above parameter. Luckily,
@@ -186,22 +188,22 @@ under the identification conditions outlined in @boileau2022 and @boileau2023
 
 $$
 \Psi_j(P_0)
-=\frac{\mathbb{E}_{P_0}[(\mathbb{E}_{P_{0}}[Y|A=1,W]-
-  \mathbb{E}_{P_0}[Y|A=0,W])W_j]}{\mathbb{E}_{P_0}[W_j^2]} 
+=\frac{\text{Cov}_{P_0}[\mathbb{E}_{P_{0}}[Y|A=1,W]-
+  \mathbb{E}_{P_0}[Y|A=0,W], W_j]}{\mathbb{V}_{P_0}[W_j]} 
 = \Psi^F_j(P_{X,0})\;.
 $$
 
 @boileau2022 and @boileau2023 derive two nonparametric estimators of this
-parameter: the one-step and targeted maximum likelihood (TML) estimators. Both
-require the estimation of two nuisance parameters: the propensity score and the
-expected outcome conditioned on the treatment and confounders. These estimators
-are double robust: only one nuisance parameter is required to be consistently
-estimated to ensure that the one-step and TML estimators are consistent. If both
-nuisance parameters converge to their true values at a fast enough rate, then
-the one-step and TML estimators are asymptotically normal. This permits
-hypothesis testing about $\Psi_j(P_0)$ using Wald-type confidence intervals.
-Further details on these estimators and their asymptotic properties are provided
-in @boileau2022 and @boileau2023.
+  parameter: the one-step and targeted maximum likelihood (TML) estimators. Both
+  require the estimation of two nuisance parameters: the propensity score and
+  the expected outcome conditioned on the treatment and pre-treatment
+  covariates. These estimators are doubly robust: only one nuisance parameter is
+  required to be consistently estimated to ensure that the one-step and TML
+  estimators are consistent. If both nuisance parameters converge to their true
+  values at a fast enough rate, then the one-step and TML estimators are
+  asymptotically normal. This permits hypothesis testing about $\Psi_j(P_0)$
+  using Wald-type confidence intervals. Further details on these estimators and
+  their asymptotic properties are provided in @boileau2022 and @boileau2023.
 
 Having defined the parameter and briefly discussed the estimators, we apply
 `unicate()` to recover the treatment effect modifiers, as defined by the
@@ -224,9 +226,13 @@ unihtee(
   outcome_type = "continuous",
   effect = "absolute",
   estimator = "onestep",
-  cond_outcome_estimator = sl3::Lrnr_glmnet$new(
-    family = "gaussian",
-    formula = "~ a * w_1 + a * w_2 + a * w_3 + a * w_4 + a * w_5"
+  cond_outcome_estimator = sl3::make_learner(
+    sl3::Pipeline,
+    sl3::Lrnr_define_interactions$new(
+      list(c("w_1", "a"), c("w_2", "a"), c("w_3", "a"), c("w_4", "a"),
+           c("w_5", "a"))
+    ),
+    sl3::Lrnr_glmnet$new()
   ),
   prop_score_estimator = sl3::Lrnr_glmnet$new(family = "binomial")
 )
@@ -241,9 +247,13 @@ unihtee(
   outcome_type = "continuous",
   effect = "absolute",
   estimator = "tmle",
-  cond_outcome_estimator = sl3::Lrnr_glmnet$new(
-    family = "gaussian",
-    formula = "~ a * w_1 + a * w_2 + a * w_3 + a * w_4 + a * w_5"
+  cond_outcome_estimator = sl3::make_learner(
+    sl3::Pipeline,
+    sl3::Lrnr_define_interactions$new(
+      list(c("w_1", "a"), c("w_2", "a"), c("w_3", "a"), c("w_4", "a"),
+           c("w_5", "a"))
+    ),
+    sl3::Lrnr_glmnet$new()
   ),
   prop_score_estimator = sl3::Lrnr_glmnet$new(family = "binomial")
 )
@@ -256,10 +266,10 @@ estimators correctly identify the TEM-VIP of `w_2` and `w_3` as being non-zero
 based on the false discovery rate adjusted p-values. Each estimator's point
 estimates are also close to their true parameter values; for every unit increase
 in `w_2`, the one-step and TML estimators suggest that the average treatment
-effect increases by $\approx 0.88$ and $\approx 0.86$ units, respectively.
+effect increases by $\approx 0.85$ and $\approx 0.82$ units, respectively.
 Similarly for `w_3`, the one-step and TML estimators indicate that a unit
-increase in this confounder leads to an increase of $\approx 2.04$ and $\approx
-1.98$ in the average treatment effect, respectively.
+increase in this covariate leads to an increase of $\approx 1.95$ and $\approx
+1.91$ in the average treatment effect, respectively.
 
 
 ## Working with Binary Outcomes
@@ -269,7 +279,7 @@ data-generating processes are identical to those of the continuous outcome
 setting, save that the outcome is binary. That means the absolute TEM-VIP can be
 used as is with binary-outcome data --- the only practical difference is the
 choice of estimator used for the expected outcome conditional on the treatment
-and confounders. With that said, a relative TEM-VIP is generally more sensitive
+and covariates. With that said, a relative TEM-VIP is generally more sensitive
 and informative in these scenarios. We propose such a parameter in the following
 section.
 
@@ -279,7 +289,7 @@ effect modifiers:
 ```{r binary-dgp}
 bin_outcome_dgp <- function(n_obs) {
 
-  # confounders
+  # pre-treatment covariates
   w_1 <- rpois(n = n_obs, lambda = 3)
   w_2 <- rnorm(n = n_obs)
   w_3 <- rbinom(n = n_obs, size = 1, prob = 0.5)
@@ -314,22 +324,21 @@ treatment variable, `a`.
 
 ### Relative TEM-VIP
 
-Again assuming that the confounders are centered at zero with non-zero variance,
-the relative TEM-VIP for the $j^\text{th}$ confounder is
+The relative TEM-VIP for the $j^\text{th}$ pre-treatment covariate is
 $$
 \Gamma^F_j(P_{X,0})
-=\frac{\mathbb{E}_{P_{X,0}}[(\log\mathbb{E}_{P_{X,0}}[Y^{(1)}|W]-
-  \log\mathbb{E}_{P_{X,0}}[Y^{(0)}|W])W_j]}
-  {\mathbb{E}_{P_{X,0}}[W_j^2]} \;.
+=\frac{\text{Cov}_{P_{X,0}}[\log\mathbb{E}_{P_{X,0}}[Y^{(1)}|W]-
+  \log\mathbb{E}_{P_{X,0}}[Y^{(0)}|W], W_j]}
+  {\mathbb{V}_{P_{X,0}}[W_j]} \;.
 $$
 
 Assuming that the expectation of the log ratio of the expected conditional
 potential outcomes conditional on $W_j$ is linear in $W_j$,
 $\Gamma^F_j(P_{X,0})$ is the simple linear regression coefficient obtained by
-regressing the log ratio of the expected conditional potential outcomes on
-$W_j$. As with $\Psi^F_j(P_{X,0})$, this parameter can be interpreted as
-standardized correlation coefficient of the log ratio of expected potential
-outcomes and the $j^\text{th}$ confounder.
+regressing the log ratio of the expected conditional potential outcomes on $W_j
+- \mathbbf{E}_{P_{X,0}}[W_j]$. As with $\Psi^F_j(P_{X,0})$, this parameter can
+be interpreted as standardized correlation coefficient of the log ratio of
+expected potential outcomes and the $j^\text{th}$ pre-treatment covariate.
 
 We highlight that this TEM-VIP isn't restricted to data-generating processes
 with binary outcomes; it may also be used when the outcome is non-negative,
@@ -342,19 +351,19 @@ an equivalent parameter can be estimated from the observed-data:
 
 $$
 \Gamma_j(P_0)
-=\frac{\mathbb{E}_{P_0}[(\log\mathbb{E}_{P_{0}}[Y|A=1,W]-
-  \log\mathbb{E}_{P_0}[Y|A=0,W])W_j]}{\mathbb{E}_{P_0}[W_j^2]} 
+=\frac{\text{Cov}_{P_0}[\log\mathbb{E}_{P_{0}}[Y|A=1,W]-
+  \log\mathbb{E}_{P_0}[Y|A=0,W], W_j]}{\mathbb{V}_{P_0}[W_j]} 
 = \Gamma^F_j(P_{X,0})\;.
 $$
 
 Nonparametric one-step and TML estimators of this parameter are derived by
 @boileau2023 and implemented in the `unicate` package. Just like $\Psi_j(P_0)$,
 inference about this parameter depends on the estimation of the propensity score
-and the expected outcome conditional on treatment indicator and confounders.
+and the expected outcome conditional on treatment indicator and covariates.
 These estimators are consistent if both nuisance parameters are consistently
 estimated, and are asymptotically normal if both converge to their true values
 at rate of $n^{-1/4}$. The latter permits hypothesis testing based on the
-Gaussian. Additional details are provided by @boileau2023.
+Wald-type confidence intervals. Additional details are provided by @boileau2023.
 
 We now apply these estimators to a random sample generated by
 `bin_outcome_dgp()`. The nuisance parameters are estimated using Random Forests
@@ -363,7 +372,7 @@ estimators are fit using cross-fitting [@zheng2011cross; @cherno2017].
 
 ```{r relative-tem-vip}
 # simulate a random sample
-sample_df <- bin_outcome_dgp(n_obs = 500)
+sample_df <- bin_outcome_dgp(n_obs = 1000)
 
 # one-step estimator
 unihtee(
@@ -400,9 +409,9 @@ Both estimators correctly identify `w_2` and `w_3` as treatment effect
 modifiers, as defined by the relative TEM-VIP. The one-step estimator's results
 suggest that for every unit increase in `w_2` and `w_3`, the log ratio of the
 conditional expected potential outcomes is expected to decrease by $\approx
-1.06$ and $\approx 3.00$ units, respectively. For the TML estimator, the log
+0.97$ and $\approx 3.15$ units, respectively. For the TML estimator, the log
 ration of the conditional expected outcomes is expected to decrease by $\approx
-1.39$ and $\approx 3.52$ for every unit increase in `w_2` and `w_3`,
+0.90$ and $\approx 3.77$ for every unit increase in `w_2` and `w_3`,
 respectively.
 
 ## Working with Time-to-Event Outcomes
@@ -434,7 +443,7 @@ counterpart is defined analogously as $S_0(t|A,W) = P_{P_0}[T > t |A, W]$.
 
 Finally, we define a time-to-event data-generating process with nine equidistant
 time points and three potential confounders, `w_1`, `w_2`, and `w_3`. Of these
-confounders, only `w_1` is a treatment effect modifier. Note that `unihtee()`
+covariates, only `w_1` is a treatment effect modifier. Note that `unihtee()`
 requires a "wide" data format when working time-to-event outcome data. That is,
 each observation is represented by a single row in the data. An example is
 provided following this code chunk.
@@ -490,7 +499,7 @@ censor_time_sim <- function(n_obs, a, w_1, w_2, w_3) {
 # time-to-event outcome data-generating process
 tte_outcome_dgp <- function(n_obs) {
 
-  # confounders
+  # pre-treatment covariates
   w_1 <- rnorm(n = n_obs)
   w_2 <- rnorm(n = n_obs)
   w_3 <- rnorm(n = n_obs)
@@ -555,30 +564,28 @@ tte_outcome_dgp(10)
 
 ### Absolute TEM-VIP
 
-@boileau2023 Propose an absolute TEM-VIP based on the restricted mean survival
-time at some pre-specified time $t$. Again assuming without loss of generality
-that the $\mathbb{E}_{P_{X,0}}[W_j] = 0$ and that the confounders have variance
-bounded away from zero, this TEM-VIP is defined as
+@boileau2023 Propose an absolute TEM-VIP based on the difference of restricted
+  mean survival times at some pre-specified time $t$. This TEM-VIP is defined as
 $$
-\Psi_j^F(P_{X,0};t) = \frac{\mathbb{E}_{P_{X,0}}\left[W_j
-  \int_0^t \{ S_{P_{X,0}}(u|1, W) - S_{P_{X,0}}(u|0, W) \} du \right]}
-  {\mathbb{E}_{P_{X,0}}[W_j^2]} \; .
+\Psi_j^F(P_{X,0};t) = \frac{\text{Cov}_{P_{X,0}}\left[
+  \int_0^t \{ S_{P_{X,0}}(u|1, W) - S_{P_{X,0}}(u|0, W) \} du, W_j \right]}
+  {\mathbb{V}_{P_{X,0}}[W_j]} \; .
 $$
 
 "$\Psi$" is re-used to highlight that this is an absolute TEM-VIP. As in the
 continuous outcome scenario, this parameter captures the correlation between the
 conditional difference in the restricted mean survival time and the
-$j^\text{th}$ confounder, re-normalized to be on the same scale as the outcome.
-Put another way, this parameter identifies confounders driving the largest
+$j^\text{th}$ covariate, re-normalized to be on the same scale as the outcome.
+Put another way, this parameter identifies TEMs driving the largest
 difference in truncated survival times across treatment conditions.
 
 As before, this full-data parameter is equal to the following observed-data
 parameter under the assumptions of (1) no unmeasured confounding, (2) censoring
 mechanism positivity, and (3) treatment assignment positivity:
 $$
-\Psi_j(P_0;t) = \frac{\mathbb{E}_{P_0}\left[W_j
-  \int_0^t \{ S_0(u|1, W) - S_0(u|0, W) \} du \right]}
-  {\mathbb{E}_{P_0}[W_j^2]} \; .
+\Psi_j(P_0;t) = \frac{\text{Cov}_{P_0}\left[
+  \int_0^t \{ S_0(u|1, W) - S_0(u|0, W) \} du, W_j \right]}
+  {\mathbb{V}_{P_0}[W_j]} \; .
 $$
 
 As in the continuous and binary outcome scenarios, @boileau2023 derived two
@@ -590,8 +597,8 @@ function or the conditional censoring hazard function and the propensity score
 are consistently estimated, then these nonparametric estimators are consistent.
 Further, if all of these nuisance parameters are converge to their true values
 at a rate of $n^{-1/4}$, then these estimators are asymptotically normally
-distributed. This permits Gaussian-based hypothesis testing through the use of
-Wald-type confidence intervals. See @boileau2023 for more details.
+distributed. This permits hypothesis testing through the use of Wald-type
+confidence intervals. See @boileau2023 for more details.
 
 We now apply these estimators to a random sample from the data-generating
 process defined above, choosing as target parameter $\Psi(P_0; 8)$. LASSO
@@ -639,20 +646,20 @@ unihtee(
 ```
 
 These results suggest every unit increase in `w_1` results in an increase of
-$\approx 1.66$ --- according to the one-step estimator --- or $\approx 1.25$ ---
+$\approx 2.40$ --- according to the one-step estimator --- or $\approx 1.95$ ---
 according to the TML estimator --- time units for the difference in mean
 survival times, truncated at time eight.
 
 ### Relative TEM-VIP
 
 We next consider a relative TEM-VIP for data with right-censored time-to-event
-outcomes. Again assuming that the potential treatment effect modifiers are
-centered and have variance bounded away from zero, we define this parameter as
-follows for the $j^\text{th}$ confounder:
+outcomes. We define this parameter as follows for the $j^\text{th}$
+pre-treatment covariate:
+
 $$
-\Gamma_j^F(P_{X,0};t) = \frac{\mathbb{E}_{P_{X,0}}\left[W_j
-  (\log S_{P_{X,0}}(t|1, W) - \log S_{P_{X,0}}(t|0, W))\right]}
-  {\mathbb{E}_{P_{X,0}}[W_j^2]} \; .
+\Gamma_j^F(P_{X,0};t) = \frac{\text{Cov}_{P_{X,0}}\left[
+  \log S_{P_{X,0}}(t|1, W) - \log S_{P_{X,0}}(t|0, W), W_j\right]}
+  {\mathbb{V}_{P_{X,0}}[W_j]} \; .
 $$
 
 For some pre-specified time point $t$, this TEM-VIP represents the standardized
@@ -661,9 +668,9 @@ under each treatment condition. As with "$\Psi$", we re-use "$\Gamma$" to
 highlight that this is a relative effect parameter. Its observed-data
 counterpart is given by
 $$
-\Gamma_j^F(P_0;t) = \frac{\mathbb{E}_{P_0}\left[W_j
-  (\log S_0(t|1, W) - \log S_0(t|0, W))\right]}
-  {\mathbb{E}_{P_0}[W_j^2]} \; ,
+\Gamma_j^F(P_0;t) = \frac{\text{Cov}_{P_0}\left[
+  \log S_0(t|1, W) - \log S_0(t|0, W), W_j\right]}
+  {\mathbb{V}_{P_0}[W_j]} \; ,
 $$
 again assuming that there is no unmeasured confounding and that there are no
 positivity violations of the censoring or treatment assignment mechanisms.
@@ -682,7 +689,7 @@ strategy employed in prior absolute TEM-VIP example.
 
 ```{r tte-relative-tem-vip}
 # simulate a random sample
-sample_df <- tte_outcome_dgp(n_obs = 1000)
+sample_df <- tte_outcome_dgp(n_obs = 2000)
 
 # one-step estimator
 unihtee(
@@ -721,12 +728,12 @@ unihtee(
 )
 ```
 
-Again, both the one-step and TML estimators successfully discern the treatment
-effect modifier from the other potential confounders when using a false
-discovery rate cutoff of $5\%$. These results indicate that a unit increase in
-`w_1` results in an increase of the log ratio of conditional survivals equal to
-either $\approx 3.29$ or $\approx 3.28$, depending on whether one uses the
-one-step estimator or the TML estimator.
+Again, both the one-step and TML estimators successfully discern the TEM from
+the other potential TEMs when using a false discovery rate cutoff of $5\%$.
+These results indicate that a unit increase in `w_1` results in an increase of
+the log ratio of conditional survivals equal to either $\approx 3.13$ or
+$\approx 3.10$, depending on whether one uses the one-step estimator or the TML
+estimator.
 
 
 # Additional Features and Notes
@@ -754,10 +761,11 @@ Additional details and discussions are provided in @boileau2022 and
 
 Cross-fitting, popularized by @zheng2011cross and @cherno2017, uses
 cross-validation to fit the nuisance parameters and estimate the target
-parameter. Doing so relaxes the entropy constraints required for asymptotic
-normality of the one-step and TML estimators implemented in the `unihtee`
-package. This technique is also known to improve these estimators finite-sample
-properties, such as reducing their false discovery rate (see, for example,
+parameter. Doing so relaxes an assumption required for asymptotic normality of
+the one-step and TML estimators implemented in the `unihtee` package
+[@boileau2023]. This technique is also known to improve these estimators
+finite-sample properties, such as reducing their false discovery rate (see, for
+example,
 @hejazi2022).
 
 Users may employ the cross-fitted version of any estimator implemented in
@@ -765,8 +773,7 @@ Users may employ the cross-fitted version of any estimator implemented in
 cross-validation is currently supported. The number of folds defaults to five,
 though this can be modified using the `cross_fit_folds` argument. Examples are
 provided in the binary outcome and time-to-event outcome relative TEM-VIP
-sections of this vignette, as well as in the subsection on Super Learners that
-follows.
+sections above, as well as in the subsection on Super Learners that follows.
 
 ## `sl3` Integration: Using Super Learners
 
@@ -794,9 +801,9 @@ We revisit our continuous outcome example, this time using Super Learners to
 estimate the propensity score and the conditional expected outcomes. Both Super
 Learners are composed of penalized GLMs, multivariate adaptive regression
 splines [@friedman1991], and Random Forests. The propensity score's Super
-Learner uses the log loss to form the convex combination of individual learning
-algorithms, while the conditional expected outcomes' uses the squared error
-loss. Additionally, we employ 2-fold cross-fitting.
+Learner uses the negative log likelihood loss to form the convex combination of
+individual learning algorithms, while the conditional expected outcomes' uses
+the squared error loss.
 
 ```{r absolute-tem-vip-w-sl}
 # simulate a random sample
@@ -812,44 +819,43 @@ sl_bin <- Lrnr_sl$new(
     Lrnr_ranger$new()
   ),
   metalearner = make_learner(
-    Lrnr_solnp, metalearner_logistic_binomial,
-    loss_squared_error
+    Lrnr_solnp, metalearner_logistic_binomial, loss_loglik_binomial
   )
 )
 
 # define the Super Learner for the conditional expected outcomes
 sl_cont <- Lrnr_sl$new(
   learners = list(
-    Lrnr_glmnet$new(
-      family = "gaussian",
-      formula = "~ a * w_1 + a * w_2 + a * w_3 + a * w_4 + a * w_5"
+    sl3::make_learner(
+      sl3::Pipeline,
+      sl3::Lrnr_define_interactions$new(
+        list(c("w_1", "a"), c("w_2", "a"), c("w_3", "a"), c("w_4", "a"),
+             c("w_5", "a"))
+      ),
+      sl3::Lrnr_glmnet$new(alpha = 1)
     ),
-    Lrnr_glmnet$new(
-      family = "gaussian",
-      alpha = 0,
-      formula = "~ a * w_1 + a * w_2 + a * w_3 + a * w_4 + a * w_5"
+    sl3::make_learner(
+      sl3::Pipeline,
+      sl3::Lrnr_define_interactions$new(
+        list(c("w_1", "a"), c("w_2", "a"), c("w_3", "a"), c("w_4", "a"),
+             c("w_5", "a"))
+      ),
+      sl3::Lrnr_glmnet$new(alpha = 0.5)
     ),
-    Lrnr_glmnet$new(
-      family = "gaussian",
-      alpha = 0.5,
-      formula = "~ a * w_1 + a * w_2 + a * w_3 + a * w_4 + a * w_5"
+    sl3::make_learner(
+      sl3::Pipeline,
+      sl3::Lrnr_define_interactions$new(
+        list(c("w_1", "a"), c("w_2", "a"), c("w_3", "a"), c("w_4", "a"),
+             c("w_5", "a"))
+      ),
+      sl3::Lrnr_glmnet$new(alpha = 0)
     ),
-    Lrnr_earth$new(
-      glm = list(family = "gaussian"),
-      degree = 1
-    ),
-    Lrnr_earth$new(
-      glm = list(family = "gaussian"),
-      degree = 2
-    ),
-    Lrnr_earth$new(
-      glm = list(family = "gaussian"),
-      formula = "~ a * w_1 + a * w_2 + a * w_3 + a * w_4 + a * w_5"
-    ),
+    Lrnr_earth$new(degree = 1),
+    Lrnr_earth$new(glm = list(family = "gaussian"), degree = 2),
     Lrnr_ranger$new()
   ),
   metalearner = make_learner(
-    Lrnr_solnp, metalearner_linear, sl3::loss_squared_error
+    Lrnr_solnp, metalearner_linear, loss_squared_error
   )
 )
 
@@ -864,9 +870,7 @@ unihtee(
   effect = "absolute",
   estimator = "onestep",
   cond_outcome_estimator = sl_cont,
-  prop_score_estimator = sl_bin,
-  cross_fit = TRUE,
-  cross_fit_folds = 2
+  prop_score_estimator = sl_bin
 )
 
 # TML estimator
@@ -880,14 +884,13 @@ unihtee(
   effect = "absolute",
   estimator = "tmle",
   cond_outcome_estimator = sl_cont,
-  prop_score_estimator = sl_bin,
-  cross_fit = TRUE,
-  cross_fit_folds = 2
+  prop_score_estimator = sl_bin
 )
 ```
 
 Though this procedure is more robust, the resulting estimates and hypothesis
-tests are to those of the previous continuous outcome, absolute TEM-VIP example.
+tests are similar to those of the previous continuous outcome, absolute TEM-VIP
+example.
 
 
 # Session information
