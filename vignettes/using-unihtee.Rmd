@@ -159,10 +159,8 @@ next.
 
 ### Absolute TEM-VIP
 
-Indexing $W$ by $j=1,\ldots,p$, and assuming without
-loss of generality that
-$\mathbb{E}_{P_{X,0}}[W_j] = 0, \mathbb{E}_{P_{X,0}}[W_j^2] > 0$, we can define
-our first TEM-VIP for the $j^\text{th}$ pre-treatment covariate as follows:
+Indexing $W$ by $j=1,\ldots,p$, we can define our first TEM-VIP for the
+$j^\text{th}$ pre-treatment covariate as follows:
 
 $$
 \Psi^F_j(P_{X,0}) =
