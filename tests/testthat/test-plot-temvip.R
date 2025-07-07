@@ -33,5 +33,4 @@ test_that("plot_temvip() returns ggplots", {
   expect_no_error(plot_temvip(unihtee_output, modifier_name = "w_3", FALSE))
   expect_no_error(plot_temvip(unihtee_output, modifier_name = "w_4", FALSE))
 
-
 })
