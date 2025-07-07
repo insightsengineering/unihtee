@@ -40,7 +40,7 @@ health, they are used to determine the effect of policy decisions on
 sub-populations. Identifying TEMs, if any exist, is required for a comprehensive
 understanding of an intervention's effect on a population.
 
-Traditional parametric modeling techniques, like generalized linear models
+Traditional parametric modelling techniques, like generalized linear models
 (GLMs), define TEMs as the pre-treatment covariates with non-zero treatment
 interaction terms. In settings characterized by time-to-event outcomes, the Cox
 proportional hazards model can similarly be used. Inference about TEMs is
@@ -50,7 +50,7 @@ covariate-outcome relationship in a linear model or proportional hazards in a
 Cox model, are violated, however, their inference are invalid.
 
 More flexible approaches instead focus on estimating the conditional average
-treatment effect (CATE) using interpretable modeling techniques, like the LASSO
+treatment effect (CATE) using interpretable modelling techniques, like the LASSO
 [@tibshirani1996; @tian2014; @chen2017; @zhao2018; @semenova2021;
 @bahamyirou2022] or Random Forests [@breiman2001; @wager2018; @cui2022]. Again,
 however, these methods require restrictive assumptions about the data-generating
@@ -59,7 +59,7 @@ approximately uncorrelated covariates [@zhao2006; @esl2009], and sample sizes
 that are much larger than the number of potential TEMs [@zhao2006], to reliably
 recover TEMs.
 
-Instead of identifying TEMs indirectly by parametric modeling, recent work has
+Instead of identifying TEMs indirectly by parametric modelling, recent work has
 developed frameworks tailored to the task [@williamson2022framework;
 @boileau2022; @hines2022TEVIP;
 @boileau2023]. Relying on TEM variable importance parameters (TEM-VIPs), it is
@@ -891,6 +891,93 @@ unihtee(
 Though this procedure is more robust, the resulting estimates and hypothesis
 tests are similar to those of the previous continuous outcome, absolute TEM-VIP
 example.
+
+# Visualizing TEM-VIP Estimates
+
+The `unihtee` package provides functionality for visualizing pre-treatment
+covariates' TEM-VIP estimates. The resulting plots can help with the
+interpretation of the TEM-VIP parameter.
+
+Consider the following data-generating process:
+
+```{r cont-dgp-with-binary-covariates}
+cont_outcome_dgp_2 <- function(n_obs) {
+
+  # pre-treatment covariates
+  w_1 <- rnorm(n = n_obs)
+  w_2 <- ifelse(rnorm(n = n_obs) < 0, 0, 1)
+  w_3 <- rnorm(n = n_obs)
+  w_4 <- rnorm(n = n_obs)
+  w_5 <- ifelse(rnorm(n = n_obs) < 1, 0, 1)
+
+  # treatment
+  prop_score <- plogis(w_1 + w_2)
+  a <- rbinom(n_obs, 1, prob = prop_score)
+
+  # potential outcomes
+  y_1 <- rnorm(n = n_obs, mean = w_1 + 2 * w_2 + 2 * w_3 + 0.5 * a, sd = 0.1)
+  y_0 <- rnorm(n = n_obs, mean = w_1 + w_2, sd = 0.1)
+
+  # outcome
+  y <- a * y_1 + (1 - a) * y_0
+
+  # assemble the observations in a tibble
+  tibble(
+    w_1 = w_1,
+    w_2 = w_2,
+    w_3 = w_3,
+    w_4 = w_4,
+    w_5 = w_5,
+    a = a,
+    y = y
+  )
+}
+```
+
+This data-generating process is similar to the previously introduced
+data-generating process for continuous outcomes, though it contains two binary
+pre-treatment covariates `w_2` and `w_5` in addition to the continuous
+pre-treatment covariates `w_1`, `w_3`, and `w_4`.
+
+We can visualize the TEM-VIP estimate of, for example, `w_3` as follows:
+```{r plot-cont-tem-vip-estimate}
+# simulate a random sample from above data-generating process
+sample_df <- cont_outcome_dgp_2(n_obs = 500)
+
+# TML estimator
+unihtee_output <- unihtee(
+  data = sample_df,
+  confounders = c("w_1", "w_2", "w_3", "w_4", "w_5"),
+  modifiers =  c("w_1", "w_2", "w_3", "w_4", "w_5"),
+  exposure = "a",
+  outcome = "y",
+  outcome_type = "continuous",
+  effect = "absolute",
+  estimator = "tmle",
+  cond_outcome_estimator = sl_cont,
+  prop_score_estimator = sl_bin
+)
+
+# visualize w_3's TEM-VIP estimate
+plot(unihtee_output, modifier_name = "w_3", print_interpretation = FALSE)
+```
+
+The resulting plot is constructed by plotting the simple linear regression of
+the conditional average causal effect --- in this scenario, the conditional
+average treatment effect --- regressed on `w_3`. As previously stated, the
+TEM-VIP for `w_3` corresponds to the slope of this black line. The average
+treatment effect estimate is given by the dotted red line.
+
+The visualization for binary pre-treatment covariates is different. Consider
+the plot of `w_2`'s TEM-VIP estimate:
+```{r plot-bin-tem-vip-estimate}
+# visualize w_2's TEM-VIP estimate
+plot(unihtee_output, modifier_name = "w_2", print_interpretation = FALSE)
+```
+
+Here, the `w_2`'s TEM-VIP estimate corresponds to the vertical distance between
+the two black points in the above plot. Again, the average treatment effect
+estimate is given by the dotted red line.
 
 
 # Session information
