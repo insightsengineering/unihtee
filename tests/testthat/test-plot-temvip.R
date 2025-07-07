@@ -29,8 +29,6 @@ test_that("plot_temvip() returns ggplots", {
     estimator = "tmle"
   )
 
-  unihtee_output$temvip_inference_tbl
-
   # plot the TEM-VIP estimate for w_3 and w_4
   expect_no_error(plot_temvip(unihtee_output, modifier_name = "w_3", FALSE))
   expect_no_error(plot_temvip(unihtee_output, modifier_name = "w_4", FALSE))
