@@ -4,18 +4,20 @@
 \alias{plot.unihtee}
 \title{Plot a \code{unihtee} Object}
 \usage{
-\method{plot}{unihtee}(x, ..., modifier_name, print_interpretation = TRUE)
+\method{plot}{unihtee}(x, y, ..., modifier_name, print_interpretation = TRUE)
 }
 \arguments{
 \item{x}{A \code{unihtee} class object output by \code{\link{unihtee}()}.}
 
+\item{y}{Ignored.}
+
 \item{...}{Ignored.}
 
-\item{print_interpretation}{A \cpde{flag} indicating whether to print the
-interpretation of the TEM-VIP inference plot. Defaults to \code{TRUE}.}
+\item{modifier_name}{A \code{character} specifying the treatment effect
+modifier variable importance parameter estimate to plot.}
 
-\item{modifier}{A \code{character} specifying the treatment effect modifier
-variable importance parameter estimate to plot.}
+\item{print_interpretation}{A \code{flag} indicating whether to print the
+interpretation of the TEM-VIP inference plot. Defaults to \code{TRUE}.}
 }
 \value{
 A \code{\link[ggplot2]{ggplot2}} object.

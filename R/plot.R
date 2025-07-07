@@ -5,10 +5,11 @@
 #'   estimated by \code{\link{unihtee}()}.
 #'
 #' @param x A \code{unihtee} class object output by \code{\link{unihtee}()}.
+#' @param y Ignored.
 #' @param ... Ignored.
-#' @param modifier A \code{character} specifying the treatment effect modifier
-#'   variable importance parameter estimate to plot.
-#' @param print_interpretation A \cpde{flag} indicating whether to print the
+#' @param modifier_name A \code{character} specifying the treatment effect
+#'   modifier variable importance parameter estimate to plot.
+#' @param print_interpretation A \code{flag} indicating whether to print the
 #'   interpretation of the TEM-VIP inference plot. Defaults to \code{TRUE}.
 #'
 #' @importFrom ggplot2 ggplot aes geom_point geom_line geom_hline
@@ -19,6 +20,7 @@
 #' @exportS3Method unihtee::plot
 plot.unihtee <- function(
   x,
+  y,
   ...,
   modifier_name,
   print_interpretation = TRUE
