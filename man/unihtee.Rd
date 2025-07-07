@@ -107,10 +107,14 @@ A list containing:
 \itemize{
 \item \code{temvip_inference_tbl}: A \code{data.table} containing the effect
 estimates and (adjusted) p-values of the \code{modifiers}. The suspected
-treatment effect modifiers ordered according to ascending p-values
+treatment effect modifiers ordered according to ascending p-values.
 \item \code{ace_estimate}: A \code{numeric} providing the estimate of the
-average causal effect associated with the speficied effect and outcome
-types
+average causal effect associated with the specified effect and outcome
+types.
+\item \code{data}: The \code{data.table} containing the observed data used to
+estimate the TEM-VIPs, containing only the confounders, modifiers,
+exposure, outcome, censoring (if provided), and propensity score
+(if provided) variables.
 }
 }
 \description{

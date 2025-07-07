@@ -68,10 +68,14 @@ utils::globalVariables(c("..to_keep", ".SD", ".I", "p_value"))
 #' @return A list containing:
 #'  * \code{temvip_inference_tbl}: A \code{data.table} containing the effect
 #'    estimates and (adjusted) p-values of the \code{modifiers}. The suspected
-#'    treatment effect modifiers ordered according to ascending p-values
+#'    treatment effect modifiers ordered according to ascending p-values.
 #'  * \code{ace_estimate}: A \code{numeric} providing the estimate of the
 #'    average causal effect associated with the specified effect and outcome
-#'    types
+#'    types.
+#'  * \code{data}: The \code{data.table} containing the observed data used to
+#'    estimate the TEM-VIPs, containing only the confounders, modifiers,
+#'    exposure, outcome, censoring (if provided), and propensity score
+#'    (if provided) variables.
 #'
 #' @importFrom data.table as.data.table .I .SD rbindlist
 #'
@@ -110,6 +114,9 @@ unihtee <- function(data,
     confounders, modifiers, exposure, outcome, prop_score_values, censoring
   ))
   data <- data[, ..to_keep]
+
+  ## make a copy to return later
+  data_copy <- data.table::copy(data)
 
   ## get the number of observations
   n_obs <- nrow(data)
@@ -418,10 +425,12 @@ unihtee <- function(data,
   ## organize table in decreasing order of p-value
   test_dt <- test_dt[order(p_value), ]
 
-  # return the TEM-VIP inference table and the average causal effect estimate
+  # return the TEM-VIP inference table, the average causal effect estimate, and
+  # data
   results_ls <- list(
     temvip_inference_tbl = test_dt,
-    ace_estimate = ace_estimate
+    ace_estimate = ace_estimate,
+    data = data_copy
   )
 
   # create a unihtee object
