@@ -19,10 +19,11 @@ developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.re
 `unihtee` provides tools for uncovering treatment effect modifiers in
 high-dimensional data. Treatment effect modification is defined using
 variable importance parameters based on absolute and relative effects.
-Inference is performed about these variable importance measures using
-nonparametric estimators. Users may use one-step or targeted maximum
-likelihood estimators. Under general conditions, these estimators are
-unbiased and efficient.
+These parameters are called treatment effect modifier variable
+importance parameters (TEM-VIPs). Inference about TEM-VIPs is performed
+using causal machine learning estimators. Under general conditions,
+these estimators are unbiased and asymptotically linear, permitting
+straightforward hypothesis testing about TEM-VIPs.
 
 Additional details about this methodology are provided in Boileau et al.
 (2022), Boileau et al. (2025), and in the package’s
@@ -41,20 +42,20 @@ remotes::install_github("insightsengineering/unihtee")
 
 ## Usage
 
-`unihtee()` is the only user-facing function. It can be used to perform
-inference about the treatment effect modification variable importance
-parameters. These parameters are defined for data-generating processes
+`unihtee()` performs inference about potential effect modifiers’
+TEM-VIPs. These parameters are defined for data-generating processes
 with continuous, binary and time-to-event outcomes with binary exposure
-variables. Variable importance parameters based on absolute and relative
-effects are available. Details are provided in the vignette.
+variables. Absolute- and relative-scale TEM-VIPs are available. Details
+are provided in the vignette.
 
 ## Example
 
 We simulate some observational study data that contains ten
 pre-treatment covariates, of which are two treatment effect modifiers.
-We then perform inference about the absolute treatment effect modifier
-variable importance parameter, which is inspired by the average
-treatment effect.
+We then perform inference about the absolute TEM-VIPs. Pre-treatment
+covariates with TEM-VIPs that are significantly different from zero
+suggest that these covariates modify the effect of treatment with
+respect to the average treatment effect.
 
 ``` r
 library(unihtee)
@@ -73,7 +74,7 @@ a <- rbinom(n = n_obs, size = 1, prob = plogis(w[, 1] + w[, 2]))
 y <- rnorm(n = n_obs, mean = w[, 1] + w[, 2] + a * w[, 3] - a * w[, 4])
 dt <- as.data.table(cbind(w, a, y))
 
-# targeted maximum likelihood estimates and testing procedure
+# estimate pre-treatment covariates' absolute TEM-VIPs
 unihtee(
   data = dt,
   confounders = confounder_names,
@@ -81,8 +82,7 @@ unihtee(
   exposure = "a",
   outcome = "y",
   outcome_type = "continuous",
-  effect = "absolute",
-  estimator = "tmle"
+  effect = "absolute"
 )
 #>     modifier     estimate        se           z      p_value    ci_lower
 #>       <fctr>        <num>     <num>       <num>        <num>       <num>
