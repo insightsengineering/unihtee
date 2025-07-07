@@ -74,7 +74,7 @@ y <- rnorm(n = n_obs, mean = w[, 1] + w[, 2] + a * w[, 3] - a * w[, 4])
 dt <- as.data.table(cbind(w, a, y))
 
 # targeted maximum likelihood estimates and testing procedure
-unihtee_output <- unihtee(
+unihtee(
   data = dt,
   confounders = confounder_names,
   modifiers = confounder_names,
@@ -84,9 +84,6 @@ unihtee_output <- unihtee(
   effect = "absolute",
   estimator = "tmle"
 )
-
-# plot table of estimated TEM-VIPs
-unihtee_output$temvip_inference_tbl
 #>     modifier     estimate        se           z      p_value    ci_lower
 #>       <fctr>        <num>     <num>       <num>        <num>       <num>
 #>  1:      w_3  1.044592804 0.1599527  6.53063474 6.549161e-11  0.73108547
