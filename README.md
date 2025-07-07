@@ -24,8 +24,8 @@ nonparametric estimators. Users may use one-step or targeted maximum
 likelihood estimators. Under general conditions, these estimators are
 unbiased and efficient.
 
-Additional details about this methodology is provided in Boileau et al.
-(2022) and in the package’s
+Additional details about this methodology are provided in Boileau et al.
+(2022), Boileau et al. (2025), and in the package’s
 [vignette](https://insightsengineering.github.io/unihtee/main/articles/using-unihtee.html).
 
 ## Installation
@@ -64,7 +64,7 @@ library(sl3)
 
 set.seed(510)
 
-## create the dataset
+# create the dataset
 n_obs <- 500
 w <- mvrnorm(n = n_obs, mu = rep(0, 10), Sigma = diag(10))
 confounder_names <- paste0("w_", seq_len(10))
@@ -73,7 +73,7 @@ a <- rbinom(n = n_obs, size = 1, prob = plogis(w[, 1] + w[, 2]))
 y <- rnorm(n = n_obs, mean = w[, 1] + w[, 2] + a * w[, 3] - a * w[, 4])
 dt <- as.data.table(cbind(w, a, y))
 
-## targeted maximum likelihood estimates and testing procedure
+# targeted maximum likelihood estimates and testing procedure
 unihtee(
   data = dt,
   confounders = confounder_names,
@@ -169,6 +169,16 @@ files for details.
 
 <div id="refs" class="references csl-bib-body hanging-indent"
 entry-spacing="0">
+
+<div id="ref-boileau2023" class="csl-entry">
+
+Boileau, Philippe, Ning Leng, Nima S Hejazi, Mark van der Laan, and
+Sandrine Dudoit. 2025. “A Nonparametric Framework for Treatment Effect
+Modifier Discovery in High Dimensions.” *Journal of the Royal
+Statistical Society Series B: Statistical Methodology*.
+<https://doi.org/10.1093/jrsssb/qkae084>.
+
+</div>
 
 <div id="ref-boileau2022" class="csl-entry">
 

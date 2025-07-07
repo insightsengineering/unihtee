@@ -103,9 +103,19 @@ cross-validation routines should be used when \code{cross_fit = TRUE}. The
 used. Defaults to \code{FALSE}.}
 }
 \value{
-A \code{data.table} containing the effect estimates and (adjusted)
-p-values of the \code{modifiers}. The suspected treatment effect modifiers
-ordered according to ascending p-values.
+A list containing:
+\itemize{
+\item \code{temvip_inference_tbl}: A \code{data.table} containing the effect
+estimates and (adjusted) p-values of the \code{modifiers}. The suspected
+treatment effect modifiers ordered according to ascending p-values.
+\item \code{ace_estimate}: A \code{numeric} providing the estimate of the
+average causal effect associated with the specified effect and outcome
+types.
+\item \code{data}: The \code{data.table} containing the observed data used to
+estimate the TEM-VIPs, containing only the confounders, modifiers,
+exposure, outcome, censoring (if provided), and propensity score
+(if provided) variables.
+}
 }
 \description{
 \code{unihtee()} estimates treatment effect modifier variable

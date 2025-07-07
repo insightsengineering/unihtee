@@ -1,4 +1,5 @@
 utils::globalVariables(c("..to_keep", ".SD", ".I", "p_value"))
+
 #' @title Univariate Heterogeneous Treatment Effect Modifier Estimator
 #'
 #' @description \code{unihtee()} estimates treatment effect modifier variable
@@ -65,31 +66,41 @@ utils::globalVariables(c("..to_keep", ".SD", ".I", "p_value"))
 #'   used. Defaults to \code{FALSE}.
 #'
 #'
-#' @return A \code{data.table} containing the effect estimates and (adjusted)
-#'   p-values of the \code{modifiers}. The suspected treatment effect modifiers
-#'   ordered according to ascending p-values.
+#' @return A list containing:
+#'  * \code{temvip_inference_tbl}: A \code{data.table} containing the effect
+#'    estimates and (adjusted) p-values of the \code{modifiers}. The suspected
+#'    treatment effect modifiers ordered according to ascending p-values.
+#'  * \code{ace_estimate}: A \code{numeric} providing the estimate of the
+#'    average causal effect associated with the specified effect and outcome
+#'    types.
+#'  * \code{data}: The \code{data.table} containing the observed data used to
+#'    estimate the TEM-VIPs, containing only the confounders, modifiers,
+#'    exposure, outcome, censoring (if provided), and propensity score
+#'    (if provided) variables.
 #'
 #' @importFrom data.table as.data.table .I .SD rbindlist
 #'
 #' @export
-unihtee <- function(data,
-                    confounders,
-                    modifiers,
-                    exposure,
-                    outcome,
-                    censoring = NULL,
-                    time_cutoff = NULL,
-                    outcome_type = c("continuous", "binary", "time-to-event"),
-                    effect = c("absolute", "relative"),
-                    estimator = c("tmle", "onestep"),
-                    cross_fit = FALSE,
-                    cross_fit_folds = 5,
-                    cond_outcome_estimator = sl3::Lrnr_glm_fast$new(),
-                    prop_score_estimator = sl3::Lrnr_glm_fast$new(),
-                    prop_score_values = NULL,
-                    failure_hazard_estimator = sl3::Lrnr_xgboost$new(),
-                    censoring_hazard_estimator = sl3::Lrnr_xgboost$new(),
-                    parallel = FALSE) {
+unihtee <- function(
+  data,
+  confounders,
+  modifiers,
+  exposure,
+  outcome,
+  censoring = NULL,
+  time_cutoff = NULL,
+  outcome_type = c("continuous", "binary", "time-to-event"),
+  effect = c("absolute", "relative"),
+  estimator = c("tmle", "onestep"),
+  cross_fit = FALSE,
+  cross_fit_folds = 5,
+  cond_outcome_estimator = sl3::Lrnr_glm_fast$new(),
+  prop_score_estimator = sl3::Lrnr_glm_fast$new(),
+  prop_score_values = NULL,
+  failure_hazard_estimator = sl3::Lrnr_xgboost$new(),
+  censoring_hazard_estimator = sl3::Lrnr_xgboost$new(),
+  parallel = FALSE
+) {
 
   ## specify the TEM VIP type
   param_effect <- match.arg(effect)
@@ -106,6 +117,9 @@ unihtee <- function(data,
     confounders, modifiers, exposure, outcome, prop_score_values, censoring
   ))
   data <- data[, ..to_keep]
+
+  ## make a copy to return later
+  data_copy <- data.table::copy(data)
 
   ## get the number of observations
   n_obs <- nrow(data)
@@ -381,13 +395,20 @@ unihtee <- function(data,
       use_future = parallel
     )
 
-    ## combine the estimates
+    ## combine the TEM-VIP estimates
     weighted_estimates <- lapply(
       seq_len(cross_fit_folds),
       function(idx) results$tem_vip_fit[[idx]] * results$prop_valid_data[[idx]]
     )
     weighted_estimates_dt <- data.table::rbindlist(weighted_estimates)
     tem_vip_fit <- weighted_estimates_dt[, lapply(.SD, sum)]
+
+    ## combine the ACE estimates
+    weighted_ace_estimates <- sapply(
+      seq_len(cross_fit_folds),
+      function(idx) results$ace_estimate[[idx]] * results$prop_valid_data[[idx]]
+    )
+    ace_estimate <- sum(weighted_ace_estimates)
   }
 
   ## compute the confidence intervals and rescale everything
@@ -407,7 +428,18 @@ unihtee <- function(data,
   ## organize table in decreasing order of p-value
   test_dt <- test_dt[order(p_value), ]
 
-  return(test_dt)
+  # return the TEM-VIP inference table, the average causal effect estimate, and
+  # data
+  results_ls <- list(
+    temvip_inference_tbl = test_dt,
+    ace_estimate = ace_estimate,
+    data = data_copy
+  )
+
+  # create a unihtee object
+  class(results_ls) <- c("unihtee", class(results_ls))
+
+  return(results_ls)
 }
 
 
@@ -467,8 +499,8 @@ unihtee <- function(data,
 #'
 #' @return A \code{list} object containing the validation dataset's uncentered
 #'   efficient influence function estimates, the treatment effect modification
-#'   variable importance parameter estimates and the proportion of observations
-#'   in the validation data.
+#'   variable importance parameter estimates, the average causal effect
+#'   estimate, and the proportion of observations in the validation data.
 #'
 #' @importFrom data.table as.data.table .I .SD
 #' @importFrom origami training validation
@@ -714,6 +746,7 @@ cross_fit_fold <- function(fold,
   return(list(
     "unscaled_eif_vars" = unscaled_eif_vars,
     "tem_vip_fit" = tem_vip_fit,
+    "ace_estimate" = ace_estimate,
     "prop_valid_data" = nrow(valid_data) / nrow(data)
   ))
 }
