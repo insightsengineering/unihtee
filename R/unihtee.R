@@ -734,6 +734,7 @@ cross_fit_fold <- function(fold,
       outcome = outcome,
       effect = effect,
       prop_score_fit = prop_score_fit,
+      prop_score_values = prop_score_values,
       cond_outcome_fit = cond_outcome_fit,
       failure_hazard_fit = failure_hazard_fit,
       censoring_hazard_fit = censoring_hazard_fit
